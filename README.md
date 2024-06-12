@@ -28,7 +28,8 @@ python .\server.py
 5. To start up the react frontend, open a separate shell and run
 
 ```bash
-cd client
+cd client (Ensure you are at the project root directory)
+npm i (To install the node dependencies)
 npm run start
 ```
 
