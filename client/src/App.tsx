@@ -3,15 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 import instance from './axios.instance'
-import axios from 'axios'
-
 
 
 function App() {
   const [text, setText] = useState<string>("")
 
   useEffect(() => {
-    instance.get('/').then(res => {
+    instance.get('/').then((res: any) => {
       setText(res.data)
     })
   }, [])
