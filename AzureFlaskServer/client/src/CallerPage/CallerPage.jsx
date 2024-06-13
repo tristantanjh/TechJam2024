@@ -6,6 +6,7 @@ import { ResultReason } from "microsoft-cognitiveservices-speech-sdk";
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 import "./CallerPage.css";
 import { useEffect } from "react";
+import { useRef } from "react";
 
 export default function CallerPage() {
   const [displayText, setDisplayText] = useState(
@@ -14,8 +15,9 @@ export default function CallerPage() {
 
   const [transcribedList, setTranscribedList] = useState([]);
   const [conversationTranscriber, setConversationTranscriber] = useState(null);
+  const initialised = useRef(0);
 
-  const MountTranscriber = async () => {
+  const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
     const speechConfig = speechsdk.SpeechConfig.fromAuthorizationToken(
       tokenObj.authToken,
@@ -24,12 +26,14 @@ export default function CallerPage() {
     speechConfig.speechRecognitionLanguage = "en-US";
 
     const audioConfig = speechsdk.AudioConfig.fromDefaultMicrophoneInput();
-    const conversationTranscriber = new speechsdk.ConversationTranscriber(
+    const transcriber = new speechsdk.ConversationTranscriber(
       speechConfig,
       audioConfig
     );
-    setConversationTranscriber(conversationTranscriber);
+    setConversationTranscriber(transcriber);
+  };
 
+  const MountTranscriber = () => {
     conversationTranscriber.sessionStarted = function (s, e) {
       console.log("SessionStarted event");
       console.log("SessionId:" + e.sessionId);
@@ -63,17 +67,30 @@ export default function CallerPage() {
     setDisplayText("TRANSCRIBER MOUNTED...");
   };
 
-  const StartTranscription = () => {
+  useEffect(() => {
+    if (initialised.current < 2) {
+      initialised.current = initialised.current + 1;
+      console.log("Initialising transcriber...");
+    } else {
+      console.log("Transcriber updated...");
+      MountTranscriber();
+      console.log(conversationTranscriber);
+
+      // Start conversation transcription
+      conversationTranscriber.startTranscribingAsync(
+        function () {},
+        function (err) {
+          console.trace("err - starting transcription: " + err);
+        }
+      );
+    }
+  }, [conversationTranscriber]);
+
+  const StartTranscription = async () => {
+    await InitialiseTranscriber();
+
     setDisplayText("speak into your microphone...");
     setTranscribedList([]);
-
-    // Start conversation transcription
-    conversationTranscriber.startTranscribingAsync(
-      function () {},
-      function (err) {
-        console.trace("err - starting transcription: " + err);
-      }
-    );
   };
 
   const StopTranscription = () => {
@@ -98,15 +115,6 @@ export default function CallerPage() {
       <h1 className="display-4 mb-3">Speech sample app</h1>
 
       <div className="row main-container">
-        <div className="col-6">
-          <button
-            className="fas fa-microphone fa-lg mr-2"
-            onClick={() => MountTranscriber()}
-          >
-            Mount
-          </button>
-          Mount transcriber
-        </div>
         <div className="col-6">
           <button
             className="fas fa-microphone fa-lg mr-2"
