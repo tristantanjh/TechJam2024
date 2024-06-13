@@ -1,0 +1,52 @@
+.main-container {
+  margin-top: 100px;
+}
+
+.fa-microphone {
+  color: #14a76c;
+}
+
+.fa-microphone:hover {
+  color: #0c6e47;
+}
+
+.fa-volume-up {
+  color: gold;
+}
+
+.fa-volume-up:hover {
+  color: darkgoldenrod;
+}
+
+.fa-volume-mute {
+  color: white;
+}
+
+.fa-volume-mute:hover {
+  color: beige;
+}
+
+.fa-file-audio {
+  color: #ff652f;
+}
+
+.fa-file-audio:hover {
+  color: #d44916;
+}
+
+.output-display {
+  background-color: #383b4b;
+  min-height: 700px;
+  height: fit-content;
+  color: white;
+}
+
+.fas,
+.fa {
+  cursor: pointer;
+}
+
+.background {
+  background-color: #272727;
+  color: #747474;
+}

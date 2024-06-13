@@ -12,7 +12,7 @@ export default function CallPage() {
   const localAudioRef = useRef(null);
   const remoteAudioRef = useRef(null);
 
-  const socket = socketio("http://localhost:9000", {
+  const socket = socketio("https://192.168.1.5:9000", {
     autoConnect: false,
   });
 
@@ -27,13 +27,18 @@ export default function CallPage() {
   };
 
   const startConnection = () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error("getUserMedia is not supported on this browser");
+      // Handle the error gracefully, maybe display a message to the user
+      return;
+    }
     navigator.mediaDevices
       .getUserMedia({
         audio: true,
       })
       .then((stream) => {
         console.log("Local Stream found");
-        localAudioRef.current.srcObject = stream;
+        // localAudioRef.current.srcObject = stream;
         socket.connect();
         socket.emit("join", { username: localUsername, room: roomName });
       })
@@ -83,7 +88,7 @@ export default function CallPage() {
       });
       pc.onicecandidate = onIceCandidate;
       pc.ontrack = onTrack;
-      const localStream = localVideoRef.current.srcObject;
+      const localStream = localAudioRef.current.srcObject;
       for (const track of localStream.getTracks()) {
         pc.addTrack(track, localStream);
       }
@@ -151,8 +156,8 @@ export default function CallPage() {
       <label>{"Room Id: " + roomName}</label>
       <video autoPlay muted playsInline ref={localVideoRef} />
       <video autoPlay muted playsInline ref={remoteVideoRef} />
-      <audio autoPlay playsInline ref={localAudioRef} />
-      <audio autoPlay playsInline ref={remoteAudioRef} />
+      {/* <audio autoPlay playsInline ref={localAudioRef} /> */}
+      <audio autoPlay ref={remoteAudioRef} />
     </div>
   );
 }
