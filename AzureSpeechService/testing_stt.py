@@ -41,6 +41,9 @@ def recognize_from_file():
     def on_spacebar():
         print("Spacebar pressed. Stopping transcription...")
         transcribing_stop.set()
+        # Stop the transcription
+        conversation_transcriber.stop_transcribing_async()
+        keyboard.unhook_all_hotkeys()
 
     # Connect callbacks to the events fired by the conversation transcriber
     conversation_transcriber.transcribed.connect(conversation_transcriber_transcribed_cb)
@@ -61,12 +64,7 @@ def recognize_from_file():
     while not transcribing_stop.is_set():
         time.sleep(0.5)
 
-    # Stop the transcription
-    conversation_transcriber.stop_transcribing_async()
-    keyboard.unhook_all_hotkeys()
-
 # Main
-
 try:
     recognize_from_file()
 except Exception as err:
