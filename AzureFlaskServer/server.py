@@ -11,26 +11,17 @@ CORS(app, support_credentials=True)
 app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-@socketio.on('join')
-def join(message):
-    username = message['username']
-    room = message['room']
-    join_room(room)
-    print('RoomEvent: {} has joined the room {}\n'.format(username, room))
-    emit('ready', {username: username}, to=room, skip_sid=request.sid)
-    
-@socketio.on('data')
-def transfer_data(message):
-    username = message['username']
-    room = message['room']
-    data = message['data']
-    print('DataEvent: {} has sent the data:\n {}\n'.format(username, data))
-    emit('data', data, to=room, skip_sid=request.sid)
+@socketio.on('connect')
+def handle_connect():
+    print(request.sid)
+    print('Client connected')
+    emit('connected', {'data': f'{request.sid} is connected'})
 
-@socketio.on_error_default
-def default_error_handler(e):
-    print("Error: {}".format(e))
-    socketio.stop()
+@socketio.on('data')
+def handle_message(data):
+    """event listener when client types a message"""
+    print("data from the front end: ",data)
+    # emit("data",{'data':data,'id':request.sid},broadcast=True)
 
 @app.route("/api/get-token", methods=["GET"])
 def get_token():
