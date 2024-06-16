@@ -7,6 +7,7 @@ import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 import "./CallerPage.css";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { io } from "socket.io-client";
 
 export default function CallerPage() {
   const [displayText, setDisplayText] = useState(
@@ -15,7 +16,11 @@ export default function CallerPage() {
 
   const [transcribedList, setTranscribedList] = useState([]);
   const [conversationTranscriber, setConversationTranscriber] = useState(null);
-  const initialised = useRef(0);
+  const initialised = useRef(0); // useEffect check
+  const socketInitialised = useRef(false); // useEffect check
+  const [socketInstance, setSocketInstance] = useState(null);
+  const messageInitialised = useRef(false); // useEffect check
+  const sessionId = useRef(null);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -33,10 +38,12 @@ export default function CallerPage() {
     setConversationTranscriber(transcriber);
   };
 
+  // Mount the transcriber
   const MountTranscriber = () => {
     conversationTranscriber.sessionStarted = function (s, e) {
       console.log("SessionStarted event");
       console.log("SessionId:" + e.sessionId);
+      sessionId.current = e.sessionId;
     };
     conversationTranscriber.sessionStopped = function (s, e) {
       console.log("SessionStopped event");
@@ -48,6 +55,7 @@ export default function CallerPage() {
       console.log(e.errorDetails);
       conversationTranscriber.stopTranscribingAsync();
     };
+    // Action when a text is transcribed
     conversationTranscriber.transcribed = function (s, e) {
       console.log(
         "TRANSCRIBED: Text=" +
@@ -67,6 +75,24 @@ export default function CallerPage() {
     setDisplayText("TRANSCRIBER MOUNTED...");
   };
 
+  // Send data to server everytime transcribedList is updated
+  useEffect(() => {
+    if (!messageInitialised.current) {
+      messageInitialised.current = true;
+      console.log("Initialising message event useEffect...");
+    } else {
+      if (socketInstance) {
+        const data = {
+          sessionId: sessionId.current,
+          transcribedList: transcribedList,
+        };
+
+        socketInstance.emit("data", data);
+      }
+    }
+  }, [transcribedList]);
+
+  // start transcription on button click
   useEffect(() => {
     if (initialised.current < 2) {
       initialised.current = initialised.current + 1;
@@ -86,6 +112,27 @@ export default function CallerPage() {
     }
   }, [conversationTranscriber]);
 
+  // Initialise the socket on page load
+  useEffect(() => {
+    if (!socketInitialised.current) {
+      const socket = io("http://localhost:9000/", {
+        transports: ["websocket"],
+        cors: {
+          origin: "http://localhost:3000",
+        },
+      });
+
+      setSocketInstance(socket);
+
+      socket.on("connect", (data) => {
+        console.log("Connected to server, Data: ", data);
+      });
+
+      socketInitialised.current = true;
+    }
+  }, []);
+
+  // Button click event to start transcription
   const StartTranscription = async () => {
     await InitialiseTranscriber();
 
@@ -93,6 +140,7 @@ export default function CallerPage() {
     setTranscribedList([]);
   };
 
+  // Button click event to stop transcription
   const StopTranscription = () => {
     console.log("Stopping transcription...");
 
