@@ -57,7 +57,9 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Answer yes or no with a 20% chance
+                    Is the following text a question?
+
+                    Text: {text}
                     """
                 )
             ]
@@ -74,13 +76,12 @@ class Chains:
             [
                 SystemMessagePromptTemplate.from_template(
                     """
-                    You are a master at identifying a entity in a text and elaborate on it. You can do this! 🚀
-                    Only return the elaboration.
+                    You are a master at answering questions. Please elaborate on the entity in the following text.
                     """
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Identify the entity in the following text and elaborate on it.
+                    Answer the following question:
 
                     Text: {text}
                     """
