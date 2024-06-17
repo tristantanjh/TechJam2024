@@ -72,13 +72,8 @@ def scrape_category_page(tt_base_url, url):
     sidebar = bsobj.find("div", {"class": "category_tree_wrapper"})
     print(sidebar)
     if sidebar:
-        ul = sidebar.find("ul", {"class": "category_tree_menu"})
+        ul = sidebar.find("h3")
         print(ul)
-        if ul:
-            active_links = ul.findAll("a", href=True)
-            for link in active_links:
-                page_url = tt_base_url + link['href']
-                scrape_article_page(page_url)
 
 def scrape_article_page(url):
     """
