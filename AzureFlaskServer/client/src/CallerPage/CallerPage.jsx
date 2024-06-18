@@ -21,6 +21,7 @@ export default function CallerPage() {
   const [socketInstance, setSocketInstance] = useState(null);
   const messageInitialised = useRef(false); // useEffect check
   const sessionId = useRef(null);
+  const [aiMessages, setAiMessages] = useState([]);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -128,6 +129,13 @@ export default function CallerPage() {
         console.log("Connected to server, Data: ", data);
       });
 
+      socket.on("ai-response", (data) => {
+        console.log("AI Response: ", data);
+        if (data["aiMessage"]) {
+          setAiMessages((prevList) => [...prevList, data["aiMessage"]]);
+        }
+      });
+
       socketInitialised.current = true;
     }
   }, []);
@@ -160,12 +168,12 @@ export default function CallerPage() {
 
   return (
     <Container className="app-container">
-      <h1 className="display-4 mb-3">Speech sample app</h1>
+      <h1 className="display-4 mb-2">Speech sample app</h1>
 
       <div className="row main-container">
         <div className="col-6">
           <button
-            className="fas fa-microphone fa-lg mr-2"
+            className="fas fa-lg mr-2"
             onClick={() => StartTranscription()}
           >
             Start
@@ -174,20 +182,29 @@ export default function CallerPage() {
         </div>
         <div className="col-6">
           <button
-            className="fas fa-microphone fa-lg mr-2"
+            className="fas fa-lg mr-2"
             onClick={() => StopTranscription()}
           >
             Stop
           </button>
           Stop the transcription.
         </div>
-        <div className="col-6 output-display rounded">
-          <code>{displayText}</code>
-          {transcribedList.map((item, idx) => (
-            <p key={idx}>
-              Speaker {item.speakerId}: {item.text}
-            </p>
-          ))}
+        <div className="output-wrapper">
+          <div className="output-display rounded">
+            <code>{displayText}</code>
+            {transcribedList.map((item, idx) => (
+              <p key={idx}>
+                Speaker {item.speakerId}: {item.text}
+              </p>
+            ))}
+          </div>
+
+          <div className="llm-output-wrapper">
+            <code>======LLM Output======</code>
+            {aiMessages.map((item, idx) => (
+              <p key={idx}>{item}</p>
+            ))}
+          </div>
         </div>
       </div>
     </Container>

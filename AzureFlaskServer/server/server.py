@@ -1,15 +1,19 @@
 from flask import Flask, request, jsonify, abort
-from flask_socketio import SocketIO, emit, join_room
+from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import requests
+
+from utils import MessageStore, GPTInstance
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
+message_store = MessageStore()
+gpt_instance = GPTInstance(debug=True)
 
 @socketio.on('connect')
 def handle_connect():
@@ -21,7 +25,34 @@ def handle_connect():
 def handle_message(data):
     """event listener when client types a message"""
     print("data from the front end: ",data)
-    # emit("data",{'data':data,'id':request.sid},broadcast=True)
+    sessionId = data['sessionId']
+    new_message = ""
+    if data['transcribedList'] and 'text' in data['transcribedList'][-1]:
+        new_message = data['transcribedList'][-1]['text']
+
+    # add the message to the message store
+    message_store.add_message(data)
+
+    # process the message with llm
+    ai_response = gpt_instance.process_message(new_message)
+    if ai_response != "":
+        # add the ai response to the message store
+        message_store.add_ai_message({
+            'sessionId': sessionId,
+            'aiMessage': ai_response
+        })
+
+        # emit the ai response to the client
+        emit('ai-response', {
+            'aiMessage': ai_response
+        })
+
+
+@app.route("/api/get-messages", methods=["GET"])
+def get_messages():
+    sessionId = request.form.get('sessionId') # must be x-www-form-urlencoded
+    messages = message_store.get_messages(sessionId)
+    return jsonify(messages)
 
 @app.route("/api/get-token", methods=["GET"])
 def get_token():
