@@ -31,30 +31,31 @@ def process_and_store_text(clean_text, llm_transformer, graph):
     graph_documents = llm_transformer.convert_to_graph_documents(documents)
     graph.add_graph_documents(graph_documents, baseEntityLabel=True, include_source=True)
     
-# def scrape_all_categories():
-#     # all help center categories - use when scraping all categories after upgrading to a paid plan
-#     tt_urls = ["https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com/help/category?id=4vtMvaC8OcjlLiL20rm434", 
-#                "https://ads.tiktok.com/help/category?id=79iQ84FDPgWbtbDy1zeRmg", "https://ads.tiktok.com/help/category?id=4lc0aCQeinkF936Ulb3Tiw", 
-#                "https://ads.tiktok.com/help/category?id=72Zi2CfIYTaDuOwzHsFf5f", "https://ads.tiktok.com/help/category?id=6dGs4bNMAZSdPr4pQ0KFuX"]
+def scrape_all_categories(graph_db, llm_transformer):
+    tt_urls = ["https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com/help/category?id=4vtMvaC8OcjlLiL20rm434", 
+               "https://ads.tiktok.com/help/category?id=79iQ84FDPgWbtbDy1zeRmg", "https://ads.tiktok.com/help/category?id=4lc0aCQeinkF936Ulb3Tiw", 
+               "https://ads.tiktok.com/help/category?id=72Zi2CfIYTaDuOwzHsFf5f", "https://ads.tiktok.com/help/category?id=6dGs4bNMAZSdPr4pQ0KFuX"]
     
-#     tt_base_url = 'https://ads.tiktok.com'
+    tt_base_url = 'https://ads.tiktok.com'
     
-#     for tt_url in tt_urls:
-#         scrape_category(tt_url, tt_base_url)
+    for tt_url in tt_urls:
+        scrape_category(tt_url, tt_base_url, graph_db, llm_transformer)
     
 def scrape_category(tt_url, tt_base_url, graph_db, llm_transformer):
     """
-    Scrape Tiktok Business Center Getting Started Page
+    Scrape Tiktok Category Page
     """   
     # Set up Selenium WebDriver
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
     driver = webdriver.Chrome(options=chrome_options)
+    
+    driver.get(tt_url)
+    time.sleep(3)  # Wait for JavaScript to load the content
 
-    html = requests.get(tt_url)
-
-    # Initialise bs object
-    bsobj = soup(html.content,'lxml')
+    # Get the page source and parse it with BeautifulSoup
+    page_source = driver.page_source
+    bsobj = soup(page_source, 'lxml')
 
     links = bsobj.findAll("a", {"class": "category_card_catalog_item"})
     
@@ -63,10 +64,6 @@ def scrape_category(tt_url, tt_base_url, graph_db, llm_transformer):
     for url in urls:
         print("Scraping category page:", url)
         scrape_category_page(tt_base_url, url, driver, graph_db, llm_transformer)
-    
-    # later when calling process_and_store_text, try initializing the graph and llm_transformer in the function
-    # can try putting this function in the scrape_article_page function?
-    # process_and_store_text(clean_text, llm_transformer, graph)
     
 def scrape_category_page(tt_base_url, url, driver, graph_db, llm_transformer):
     """
@@ -99,22 +96,22 @@ def scrape_article_page(url, graph_db, llm_transformer):
 
     title = bsobj.find("div", {"class": "article_wrapper_slug_title"})
     content = bsobj.find("div", {"class": "article_wrapper_slug_content"})
-
+    
     if title and content:
         print("Title:", title.text.strip())
         print("Content:", content.text.strip())
-        # print("-" * 80)
+        print("-" * 80)
         text_content = title.text.strip() + '\n' + content.text.strip()
         print("Sending content into Neo4J database")
         process_and_store_text(text_content, llm_transformer, graph_db)
 
-################################ SCRAPE GETTING STARTED PAGE ONLY (FOR TESTING) ################################
-# scrape_category("https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com")
+################################ SCRAPE ALL PAGES ################################
 
 if __name__ == "__main__":
     graph_db = initialize_graph_connection()
-    llm_transfomer = initialize_llm_transformer()
-    scrape_category("https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com", graph_db, llm_transfomer)
+    llm_transformer = initialize_llm_transformer()
+    scrape_all_categories(graph_db, llm_transformer)
+    # scrape_article_page("https://ads.tiktok.com/help/article/video-shopping-ads-tiktok-shop?lang=en", graph_db, llm_transformer)
 
 
 
