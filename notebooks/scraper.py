@@ -33,14 +33,18 @@ def process_and_store_text(clean_text, llm_transformer, graph):
     
 # def scrape_all_categories():
 #     # all help center categories - use when scraping all categories after upgrading to a paid plan
-#     tt_urls = ["https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com/help/category?id=4vtMvaC8OcjlLiL20rm434", 
-#                "https://ads.tiktok.com/help/category?id=79iQ84FDPgWbtbDy1zeRmg", "https://ads.tiktok.com/help/category?id=4lc0aCQeinkF936Ulb3Tiw", 
-#                "https://ads.tiktok.com/help/category?id=72Zi2CfIYTaDuOwzHsFf5f", "https://ads.tiktok.com/help/category?id=6dGs4bNMAZSdPr4pQ0KFuX"]
+    # tt_urls = ["https://ads.tiktok.com/help/category?id=5pc1e9Q09towekjAqXm8b1", "https://ads.tiktok.com/help/category?id=4vtMvaC8OcjlLiL20rm434", 
+    #            "https://ads.tiktok.com/help/category?id=79iQ84FDPgWbtbDy1zeRmg", "https://ads.tiktok.com/help/category?id=4lc0aCQeinkF936Ulb3Tiw", 
+    #            "https://ads.tiktok.com/help/category?id=72Zi2CfIYTaDuOwzHsFf5f", "https://ads.tiktok.com/help/category?id=6dGs4bNMAZSdPr4pQ0KFuX"]
+
+    tt_urls = ["https://ads.tiktok.com/help/category?id=4vtMvaC8OcjlLiL20rm434", 
+               "https://ads.tiktok.com/help/category?id=79iQ84FDPgWbtbDy1zeRmg", "https://ads.tiktok.com/help/category?id=4lc0aCQeinkF936Ulb3Tiw", 
+               "https://ads.tiktok.com/help/category?id=72Zi2CfIYTaDuOwzHsFf5f", "https://ads.tiktok.com/help/category?id=6dGs4bNMAZSdPr4pQ0KFuX"]
     
-#     tt_base_url = 'https://ads.tiktok.com'
+    tt_base_url = 'https://ads.tiktok.com'
     
-#     for tt_url in tt_urls:
-#         scrape_category(tt_url, tt_base_url)
+    for tt_url in tt_urls:
+        scrape_category(tt_url, tt_base_url)
     
 def scrape_category(tt_url, tt_base_url, graph_db, llm_transformer):
     """
