@@ -8,6 +8,7 @@ from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
+from langchain_core.runnables import RunnableParallel
 from dotenv import load_dotenv
 import os
 
@@ -39,6 +40,14 @@ class MessageStore:
 class Chains:
     def __init__(self, llm):
         self.llm = llm
+        self.graph_db = Neo4jGraph()
+        self.vector_index = Neo4jVector.from_existing_graph(
+            OpenAIEmbeddings(),
+            search_type="hybrid",
+            node_label="Document",
+            text_node_properties=["text"],
+            embedding_node_property="embedding"
+        )
 
     def BooleanOutputParser(self, ai_message: AIMessage) -> bool:
       """
@@ -124,15 +133,15 @@ class Chains:
         chain = prompt | self.llm.with_structured_output(Entities)
         return chain
 
-    def structured_retriever(self, entities, graph_db):
+    def structured_retriever(self, entities):
         result = ""
-        graph_db.query(
+        self.graph_db.query(
         "CREATE FULLTEXT INDEX entity IF NOT EXISTS FOR (e:__Entity__) ON EACH [e.id]")
 
         for entity in entities.names:
-            response = graph_db.query(
+            response = self.graph_db.query(
                 """
-                CALL db.index.fulltext.queryNodes('entity', $query, {limit: 2})
+                CALL db.index.fulltext.queryNodes('entity', $query, {limit: 5})
                 YIELD node, score
                 CALL {
                 WITH node
@@ -149,7 +158,58 @@ class Chains:
             )
             result += "\n".join([el['output'] for el in response])
         return result
+    
+    def get_context(self, message: str) -> str:
+        entity_chain = self.get_entity_chain()
+        entities = entity_chain.invoke({"text": message})
+        print(f"Extracted entities {entities}")
+        structured_data = self.structured_retriever(entities)
+        print("Structured Data: " + structured_data)
+        unstructured_data = [el.page_content for el in self.vector_index.similarity_search(message)]
+        final_data = f"""Structured data:
+            {structured_data}
+            Unstructured data:
+            {"#Document ". join(unstructured_data)}
+        """
+        return final_data
+    
+    def get_response_chain(self) -> str:
+        template = """Answer the question based only on the following context:
+        {context}
 
+        Question: {question}
+
+        Provide a comprehensive response that includes the following:
+        1. Identify the key points or events related to the question.
+        2. Elaborate on each point by providing relevant details, such as dates, locations, and key individuals or groups involved.
+        3. If there are dates to be included in your answer, convert any timestamps to actual date formats (YYYY-MM-DD) before including them in the answer.
+        4. Discuss the background information, motives, or reasons behind the events, if available.
+        5. Use natural language and aim for a well-structured, coherent response that flows logically from one point to another.
+        6. If there is insufficient information to provide a complete answer, acknowledge the limitations and request the user to upload a PDF document of an article regarding the topic. Inform them that with the additional information from the PDF, you will be able to provide a more comprehensive answer. 
+
+        Do not mention "structured data", "provided context", "context" in your answer. Replace those terms with "my dataset".
+        Give your answer in prose, and avoid bullet points or lists in your response. The answer should be detailed and in paragraph form, providing a comprehensive explanation of the topic based on the context provided.
+
+        Answer:"""
+
+
+        prompt = ChatPromptTemplate.from_template(template)
+
+
+        chain = (
+            RunnableParallel(
+                {
+                    "context": lambda x: self.get_context(x["question"]),
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | StrOutputParser()
+        )
+
+        return chain
+    
 def generate_full_text_query(input: str) -> str:
     """
     Generate a full-text search query for a given input string.
@@ -173,16 +233,9 @@ class GPTInstance:
     def __init__(self, debug=False) -> None:
         self.llm = ChatOpenAI()
         self.chains = Chains(self.llm)
-        print(os.environ["NEO4J_PASSWORD"])
-        self.graph_db = Neo4jGraph()
-        self.vector_index = Neo4jVector.from_existing_graph(
-            OpenAIEmbeddings(),
-            search_type="hybrid",
-            node_label="Document",
-            text_node_properties=["text"],
-            embedding_node_property="embedding"
-        )
         self.debug = debug
+
+    
 
     def process_message(self, message: str) -> str:
         """
@@ -190,7 +243,7 @@ class GPTInstance:
         """
         initial_check_chain = self.chains.get_initial_check_chain()
         elaboration_chain = self.chains.get_elaboration_chain()
-        entity_chain = self.chains.get_entity_chain()
+        response_chain = self.chains.get_response_chain()
         
         print("Messages: " + message)
         initial_check_result = initial_check_chain.invoke({"text": message})
@@ -198,19 +251,9 @@ class GPTInstance:
         print("Initial check result: ", initial_check_result) # for debug
 
         if initial_check_result:
-
-            entities = entity_chain.invoke({"text": message})
-            print(f"Extracted entities {entities}")
-            structured_data = self.chains.structured_retriever(entities, self.graph_db)
-            print("Structured Data: " + structured_data)
-            unstructured_data = [el.page_content for el in self.vector_index.similarity_search(message)]
-            final_data = f"""Structured data:
-                {structured_data}
-                Unstructured data:
-                {"#Document ". join(unstructured_data)}
-            """
-            return final_data
-            # return message
+            response = response_chain.invoke({"question": message})
+            return response
+            # return messag e
             # elaboration_result = elaboration_chain.invoke({"text": message})
 
             # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
