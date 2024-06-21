@@ -93,6 +93,10 @@ def bad_request(error):
         "message": error.description
     }), 500
 
+@app.route("/test")
+def hello():
+    return 'hello'
+
 if __name__ == '__main__':
     port = 9000
     print('Server is running on http://localhost:{}/'.format(port))
