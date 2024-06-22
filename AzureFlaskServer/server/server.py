@@ -34,7 +34,9 @@ def handle_message(data):
     message_store.add_message(data)
 
     # process the message with llm
-    ai_response = gpt_instance.process_message(new_message)
+    checklist = gpt_instance.process_message(new_message)
+    # one is chosen and passed in
+    ai_response = gpt_instance.elaborate_on_chosen_point(checklist)
     if ai_response != "":
         # add the ai response to the message store
         message_store.add_ai_message({
