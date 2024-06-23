@@ -194,7 +194,7 @@ class Chains:
         entities = entity_chain.invoke({"text": message})
         print(f"Extracted entities {entities}")
         structured_data = self.structured_retriever(entities)
-        print("Structured Data: " + structured_data)
+        # print("Structured Data: " + structured_data)
         unstructured_data = [el.page_content for el in self.vector_index.similarity_search(message)]
         final_data = f"""Structured data:
             {structured_data}
@@ -272,6 +272,7 @@ class GPTInstance:
         if initial_check_result:
             response = response_chain.invoke({"question": message})
             # response = ''response.split('-')
+            print(response)
             return response
             # return messag e
             # elaboration_result = elaboration_chain.invoke({"text": message})
@@ -288,7 +289,7 @@ class GPTInstance:
         """
         elaboration_chain = self.chains.get_elaboration_chain()
         elaboration_result = elaboration_chain.invoke({"text": message})
-        if self.debug: print("Elaboration result: ", elaboration_result)
+        # if self.debug: print("Elaboration result: ", elaboration_result)
         return elaboration_result
 
     def get_checklist(self, message: str) -> str:
@@ -297,7 +298,7 @@ class GPTInstance:
         """
         follow_up_chain = self.chains.get_follow_up_questions_chain()
         follow_up_result = follow_up_chain.invoke({"text": message})
-        if self.debug: print("Follow up result: ", follow_up_result)
+        # if self.debug: print("Follow up result: ", follow_up_result)
         return follow_up_result
 
         
