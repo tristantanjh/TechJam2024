@@ -71,7 +71,7 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Is the following text a business-related query?
+                    Is the following text a business-related question?
 
                     Text: {text}
                     """
@@ -178,18 +178,7 @@ class Chains:
         {context}
 
         Question: {question}
-
-        Provide a comprehensive response that includes the following:
-        1. Identify the key points or events related to the question.
-        2. Elaborate on each point by providing relevant details, such as dates, locations, and key individuals or groups involved.
-        3. If there are dates to be included in your answer, convert any timestamps to actual date formats (YYYY-MM-DD) before including them in the answer.
-        4. Discuss the background information, motives, or reasons behind the events, if available.
-        5. Use natural language and aim for a well-structured, coherent response that flows logically from one point to another.
-        6. If there is insufficient information to provide a complete answer, acknowledge the limitations and request the user to upload a PDF document of an article regarding the topic. Inform them that with the additional information from the PDF, you will be able to provide a more comprehensive answer. 
-
-        Do not mention "structured data", "provided context", "context" in your answer. Replace those terms with "my dataset".
-        Give your answer in prose, and avoid bullet points or lists in your response. The answer should be detailed and in paragraph form, providing a comprehensive explanation of the topic based on the context provided.
-
+        Use natural language and answer it concisely in point form
         Answer:"""
 
 
@@ -252,6 +241,7 @@ class GPTInstance:
 
         if initial_check_result:
             response = response_chain.invoke({"question": message})
+            # response = ''response.split('-')
             return response
             # return messag e
             # elaboration_result = elaboration_chain.invoke({"text": message})
