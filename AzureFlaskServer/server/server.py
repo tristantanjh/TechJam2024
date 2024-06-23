@@ -7,6 +7,8 @@ import requests
 
 from utils import MessageStore, GPTInstance
 
+from jira_integration.extract import extract_for_jira
+
 load_dotenv()
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -47,6 +49,12 @@ def handle_message(data):
             'aiMessage': ai_response
         })
 
+@socketio.on('extract')
+def handle_extraction(data):
+    """event listener when client ends transcription"""
+    print("data from the front end AFTER TRANSCRIPTION: ",data)
+    print(data['sessionId'])
+    extract_for_jira(data)
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
