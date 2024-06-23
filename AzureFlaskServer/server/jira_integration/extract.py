@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import List
 
+from jiraIssue import create_issue
+
 load_dotenv()
 llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
@@ -135,4 +137,6 @@ class ActionItem(BaseModel):
 # summary_chain = summary_prompt | llm
 structured_llm = llm.with_structured_output(ActionItem)
 for task in ans:
-    print(structured_llm.invoke(task))
+    extracted = structured_llm.invoke(task)
+    output = create_issue(extracted.summary, extracted.description)
+    print(output)

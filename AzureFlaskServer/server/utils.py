@@ -82,6 +82,7 @@ class Chains:
         chain = prompt | self.llm | StrOutputParser() | self.BooleanOutputParser
         return chain
     
+    # elaborate on the chosen point from the checklist 
     def get_elaboration_chain(self):
         """
         Returns the elaboration chain
@@ -103,6 +104,35 @@ class Chains:
             ]
         )
 
+        chain = prompt | self.llm | StrOutputParser()
+        return chain
+       
+    def get_follow_up_questions_chain(self):
+        """
+        Constructs a chain for generating a collaborative and iterative set of questions involving multiple expert perspectives.
+        This method simulates a brainstorming session among three experts who each contribute to building a list of questions.
+        The questions are aimed at being actionable for customer service assistants and informative for customers querying a database or SOP.
+        """
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    """
+                    Imagine three different customer service experts are collaborating to respond to this customer inquiry via a logical yet exploratory approach. 
+                    Each expert will first write down one follow-up question they think the customer service assistant should ask to gather more detailed information,
+                    and one question they believe the customer might want to ask the database or SOP for more details.
+                    They will then share these questions with the group. After sharing, each expert will consider the other experts' input and suggest another round of questions.
+                    If any expert realizes an inconsistency or error in their suggestions, they will revise or withdraw their questions.
+                    The goal is to develop a comprehensive list of only 4 questions that are both actionable by the customer service assistant and beneficial for the customer's own inquiry.
+                    Out of all the questions generated, the customer service assistant will select the most relevant and actionable question to either ask the customer or gather more information from the database or SOP.
+                    """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                    """
+                    Customer Inquiry: {text}
+                    """
+                )
+            ]
+        )
         chain = prompt | self.llm | StrOutputParser()
         return chain
 
@@ -217,7 +247,6 @@ def generate_full_text_query(input: str) -> str:
     return full_text_query.strip()
 
 
-
 class GPTInstance:
     def __init__(self, debug=False) -> None:
         self.llm = ChatOpenAI()
@@ -230,6 +259,7 @@ class GPTInstance:
         """
         Process the message
         """
+        # possible improvement: refine the message if the raw transcribed message is poor 
         initial_check_chain = self.chains.get_initial_check_chain()
         elaboration_chain = self.chains.get_elaboration_chain()
         response_chain = self.chains.get_response_chain()
@@ -251,7 +281,26 @@ class GPTInstance:
             # return elaboration_result
         else:
             return ""
+    
+    def elaborate_on_chosen_point(self, message: str) -> str:
+        """
+        Elaborate on the chosen point from the checklist
+        """
+        elaboration_chain = self.chains.get_elaboration_chain()
+        elaboration_result = elaboration_chain.invoke({"text": message})
+        if self.debug: print("Elaboration result: ", elaboration_result)
+        return elaboration_result
 
+    def get_checklist(self, message: str) -> str:
+        """
+        Generate follow up questions
+        """
+        follow_up_chain = self.chains.get_follow_up_questions_chain()
+        follow_up_result = follow_up_chain.invoke({"text": message})
+        if self.debug: print("Follow up result: ", follow_up_result)
+        return follow_up_result
+
+        
 class Entities(BaseModel):
     """
     Identifying information about entities
