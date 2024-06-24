@@ -17,8 +17,7 @@ gpt_instance = GPTInstance(debug=True)
 
 @socketio.on('connect')
 def handle_connect():
-    print(request.sid)
-    print('Client connected')
+    print(f'Client connected. Client ID: {request.sid}')
     emit('connected', {'data': f'{request.sid} is connected'})
 
 @socketio.on('data')
@@ -58,6 +57,7 @@ def get_messages():
 def get_token():
     speechKey = os.environ.get('SPEECH_KEY')
     speechRegion = os.environ.get('SPEECH_REGION')
+    print(speechKey, speechRegion)
 
     if (speechKey == '' or speechRegion == ''):
         abort(400, description="You forgot to add your speech key or region to the .env file.")
