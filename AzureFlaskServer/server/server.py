@@ -31,12 +31,14 @@ def handle_message(data):
         new_message = data['transcribedList'][-1]['text']
 
     # add the message to the message store
-    message_store.add_message(data)
+    
 
     # process the message with llm
-    checklist = gpt_instance.process_message(new_message)
+    # checklist = gpt_instance.process_message(new_message)
+    ai_response = gpt_instance.process_message(new_message, message_store, sessionId)
     # one is chosen and passed in
-    ai_response = gpt_instance.elaborate_on_chosen_point(checklist)
+    # ai_response = gpt_instance.elaborate_on_chosen_point(checklist)
+    message_store.add_message(data)
     if ai_response != "":
         # add the ai response to the message store
         message_store.add_ai_message({

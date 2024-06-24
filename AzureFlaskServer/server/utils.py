@@ -82,6 +82,31 @@ class Chains:
         chain = prompt | self.llm | StrOutputParser() | self.BooleanOutputParser
         return chain
     
+    def get_history_check_chain(self):
+        """
+        Returns the hisotry check chain
+        """
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    """
+                    You can only answer questions with a yes or no
+                    """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                    """
+                    Is the following question similar to any of the previous questions?
+
+                    Previous questions: {history}
+                    Question: {text}
+                    """
+                )
+            ]
+        )
+
+        chain = prompt | self.llm | StrOutputParser() | self.BooleanOutputParser
+        return chain
+    
     # elaborate on the chosen point from the checklist 
     def get_elaboration_chain(self):
         """
@@ -255,12 +280,13 @@ class GPTInstance:
 
     
 
-    def process_message(self, message: str) -> str:
+    def process_message(self, message: str, message_store: MessageStore, sessionId) -> str:
         """
         Process the message
         """
         # possible improvement: refine the message if the raw transcribed message is poor 
         initial_check_chain = self.chains.get_initial_check_chain()
+        history_check_chain = self.chains.get_history_check_chain()
         elaboration_chain = self.chains.get_elaboration_chain()
         response_chain = self.chains.get_response_chain()
         
@@ -270,16 +296,18 @@ class GPTInstance:
         print("Initial check result: ", initial_check_result) # for debug
 
         if initial_check_result:
-            response = response_chain.invoke({"question": message})
-            # response = ''response.split('-')
-            print(response)
-            return response
-            # return messag e
-            # elaboration_result = elaboration_chain.invoke({"text": message})
+            history_check_result = history_check_chain.invoke({"text": message, "history": str(self.queries)})
+            print("History check result: " + history_check_result)
+            if history_check_result:
+                response = response_chain.invoke({"question": message})
+                print("Response: " + response)
+                return response
+                # return messag e
+                # elaboration_result = elaboration_chain.invoke({"text": message})
 
-            # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
+                # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
 
-            # return elaboration_result
+                # return elaboration_result
         else:
             return ""
     
@@ -298,7 +326,7 @@ class GPTInstance:
         """
         follow_up_chain = self.chains.get_follow_up_questions_chain()
         follow_up_result = follow_up_chain.invoke({"text": message})
-        # if self.debug: print("Follow up result: ", follow_up_result)
+        if self.debug: print("Follow up result: ", follow_up_result)
         return follow_up_result
 
         
