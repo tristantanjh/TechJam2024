@@ -52,9 +52,3 @@ def create_issue(summary, description):
     )
     
     return json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": "))
-
-# Demo usage:
-summary = "Test issue from API"
-description = "Scrum master tao"
-result = create_issue(summary, description)
-print(result)

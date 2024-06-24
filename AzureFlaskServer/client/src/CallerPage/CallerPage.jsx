@@ -8,6 +8,7 @@ import "./CallerPage.css";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
+import AiMessage from "./components/AiMessage";
 
 export default function CallerPage() {
   const [displayText, setDisplayText] = useState(
@@ -22,6 +23,7 @@ export default function CallerPage() {
   const messageInitialised = useRef(false); // useEffect check
   const sessionId = useRef(null);
   const [aiMessages, setAiMessages] = useState([]);
+  const [isTranscripting, setIsTranscripting] = useState(true);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -89,6 +91,7 @@ export default function CallerPage() {
         };
 
         socketInstance.emit("data", data);
+        !isTranscripting && socketInstance.emit("extract", data);
       }
     }
   }, [transcribedList]);
@@ -146,6 +149,7 @@ export default function CallerPage() {
 
     setDisplayText("speak into your microphone...");
     setTranscribedList([]);
+    setIsTranscripting(true);
   };
 
   // Button click event to stop transcription
@@ -163,6 +167,7 @@ export default function CallerPage() {
           speakerId: "SYSTEM",
         },
       ]);
+      setIsTranscripting(false);
     }, 2000);
   };
 
@@ -201,9 +206,8 @@ export default function CallerPage() {
 
           <div className="llm-output-wrapper">
             <code>======LLM Output======</code>
-            {aiMessages.map((item, idx) => (
-              <p key={idx}>{item}</p>
-            ))}
+            {aiMessages.map((item, idx) => <AiMessage key={idx} points={item.split('-').slice(1)}/>)}
+            
           </div>
         </div>
       </div>
