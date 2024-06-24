@@ -58,13 +58,15 @@ export const AzureProvider = ({ children }) => {
           " Speaker ID=" +
           e.result.speakerId
       );
-      setTranscribedList((prevList) => [
-        ...prevList,
-        {
-          text: e.result.text,
-          speakerId: e.result.speakerId,
-        },
-      ]);
+      if (e.result.text) {
+        setTranscribedList((prevList) => [
+          ...prevList,
+          {
+            text: e.result.text,
+            speakerId: e.result.speakerId,
+          },
+        ]);
+      }
     };
   };
 
@@ -90,7 +92,7 @@ export const AzureProvider = ({ children }) => {
       setTranscribedList((prevList) => [
         ...prevList,
         {
-          text: "END OF TRANSCRIPTION",
+          text: "END OF TRANSCRIPTION SESSION " + sessionId.current,
           speakerId: "SYSTEM",
         },
       ]);

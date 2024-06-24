@@ -67,10 +67,12 @@ export default function CallerPageNew() {
 
   const handleStart = async () => {
     await StartTranscription();
+    setDisplayText("speak into the mic...");
   };
 
   const handleStop = async () => {
     await StopTranscription();
+    setDisplayText("MOUNT THE TRANSCRIBER FIRST...");
   };
 
   return (
