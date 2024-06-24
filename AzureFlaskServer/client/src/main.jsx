@@ -10,6 +10,8 @@ import CallerPage from "./CallerPage/CallerPage";
 import WebsocketPage from "./websocketPage/websocketPage";
 import CallerPageNew from "./CallerPageNew/CallerPageNew";
 import DefaultLayout from "./layouts/DefaultLayout";
+import MainPage from "./MainPage/MainPage";
+import "./index.css";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +34,11 @@ const router = createBrowserRouter([
         element: <CallerPageNew />,
       },
     ],
+  },
+  {
+    path: "/main",
+    element: <MainPage />,
+    errorElement: <ErrorPage />,
   },
 ]);
 
