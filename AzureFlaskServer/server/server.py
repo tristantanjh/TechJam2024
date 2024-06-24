@@ -7,6 +7,8 @@ import requests
 
 from utils import MessageStore, GPTInstance
 
+from jira_integration.extract import extract_for_jira
+
 load_dotenv()
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -17,8 +19,7 @@ gpt_instance = GPTInstance(debug=True)
 
 @socketio.on('connect')
 def handle_connect():
-    print(request.sid)
-    print('Client connected')
+    print(f'Client connected. Client ID: {request.sid}')
     emit('connected', {'data': f'{request.sid} is connected'})
 
 @socketio.on('data')
@@ -49,6 +50,12 @@ def handle_message(data):
             'aiMessage': ai_response
         })
 
+@socketio.on('extract')
+def handle_extraction(data):
+    """event listener when client ends transcription"""
+    print("data from the front end AFTER TRANSCRIPTION: ",data)
+    print(data['sessionId'])
+    extract_for_jira(data)
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
@@ -60,6 +67,7 @@ def get_messages():
 def get_token():
     speechKey = os.environ.get('SPEECH_KEY')
     speechRegion = os.environ.get('SPEECH_REGION')
+    print(speechKey, speechRegion)
 
     if (speechKey == '' or speechRegion == ''):
         abort(400, description="You forgot to add your speech key or region to the .env file.")

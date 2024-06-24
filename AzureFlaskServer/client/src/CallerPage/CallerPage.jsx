@@ -23,6 +23,7 @@ export default function CallerPage() {
   const messageInitialised = useRef(false); // useEffect check
   const sessionId = useRef(null);
   const [aiMessages, setAiMessages] = useState([]);
+  const [isTranscripting, setIsTranscripting] = useState(true);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -90,6 +91,7 @@ export default function CallerPage() {
         };
 
         socketInstance.emit("data", data);
+        !isTranscripting && socketInstance.emit("extract", data);
       }
     }
   }, [transcribedList]);
@@ -147,6 +149,7 @@ export default function CallerPage() {
 
     setDisplayText("speak into your microphone...");
     setTranscribedList([]);
+    setIsTranscripting(true);
   };
 
   // Button click event to stop transcription
@@ -164,6 +167,7 @@ export default function CallerPage() {
           speakerId: "SYSTEM",
         },
       ]);
+      setIsTranscripting(false);
     }, 2000);
   };
 
