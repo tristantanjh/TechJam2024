@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
 import { useTranscriber } from "../hooks/useTranscriber";
+import AiMessage from "../CallerPage/components/AiMessage";
 
 export default function CallerPageNew() {
   const [displayText, setDisplayText] = useState(
@@ -105,7 +106,7 @@ export default function CallerPageNew() {
           <div className="llm-output-wrapper">
             <code>======LLM Output======</code>
             {aiMessages.map((item, idx) => (
-              <p key={idx}>{item}</p>
+              <AiMessage key={idx} points={item.split('-').slice(1)}/>
             ))}
           </div>
         </div>

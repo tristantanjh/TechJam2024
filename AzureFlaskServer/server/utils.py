@@ -20,22 +20,26 @@ class MessageStore:
         self.ai_messages = {}
 
     def add_message(self, data):
-        self.messages[data['sessionId']] = data['transcribedList']
+        if data['sessionId'] in self.messages:
+            self.messages[data['sessionId']].append(data['transcribedList'][-1]['text'])
+        else:
+            self.messages[data['sessionId']] = [data['transcribedList'][-1]['text']]
 
     def get_messages(self, sessionId):
-        return self.messages[sessionId]
+        return self.messages.get(sessionId, [])
 
     def clear_messages(self):
         self.messages = []
+        self.ai_messages = []
 
     def add_ai_message(self, data):
-        if data['sessionId'] in self.messages:
-            self.messages[data['sessionId']].append(data['aiMessage'])
+        if data['sessionId'] in self.ai_messages:
+            self.ai_messages[data['sessionId']].append(data['aiMessage'])
         else:
-            self.messages[data['sessionId']] = [data['aiMessage']]
+            self.ai_messages[data['sessionId']] = [data['aiMessage']]
     
     def get_ai_messages(self, sessionId):
-        return self.messages[sessionId]
+        return self.ai_messages.get(sessionId, [])
 
 class Chains:
     def __init__(self, llm):
@@ -84,7 +88,7 @@ class Chains:
     
     def get_history_check_chain(self):
         """
-        Returns the hisotry check chain
+        Returns the history check chain
         """
         prompt = ChatPromptTemplate.from_messages(
             [
@@ -95,10 +99,11 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Is the following question similar to any of the previous questions?
+                    Answer yes if the current question similar to any of the previous questions in meaning. If there are no previous questions, answer "no"
 
                     Previous questions: {history}
-                    Question: {text}
+                    Current questions: {text}
+
                     """
                 )
             ]
@@ -296,11 +301,14 @@ class GPTInstance:
         print("Initial check result: ", initial_check_result) # for debug
 
         if initial_check_result:
-            history_check_result = history_check_chain.invoke({"text": message, "history": str(self.queries)})
-            print("History check result: " + history_check_result)
-            if history_check_result:
-                response = response_chain.invoke({"question": message})
-                print("Response: " + response)
+            
+            
+            response = response_chain.invoke({"question": message})
+            print("Response: " + response)
+            print("History: " + str(message_store.get_messages(sessionId)))
+            history_check_result = history_check_chain.invoke({"text": response, "history": message_store.get_messages(sessionId)})
+            print("History check result: " + str(history_check_result))
+            if not history_check_result:
                 return response
                 # return messag e
                 # elaboration_result = elaboration_chain.invoke({"text": message})
