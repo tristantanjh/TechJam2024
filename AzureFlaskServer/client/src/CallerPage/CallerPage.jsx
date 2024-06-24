@@ -22,6 +22,7 @@ export default function CallerPage() {
   const messageInitialised = useRef(false); // useEffect check
   const sessionId = useRef(null);
   const [aiMessages, setAiMessages] = useState([]);
+  // const [checkListItems, setCheckListItems] = useState([]);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -139,6 +140,13 @@ export default function CallerPage() {
       socketInitialised.current = true;
     }
   }, []);
+
+  // Button click event to handle question click, send back to server for new chain
+  // const handleQuestionClick = (question) => {
+  //   if (socketInstance) {
+  //     socketInstance.emit("select-question", { selectedQuestion: question });
+  //   }
+  // };
 
   // Button click event to start transcription
   const StartTranscription = async () => {

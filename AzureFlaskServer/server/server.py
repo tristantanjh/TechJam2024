@@ -33,10 +33,13 @@ def handle_message(data):
     # add the message to the message store
     message_store.add_message(data)
 
+    # get chat history
+    chat_history = message_store.get_messages(sessionId)
+    print("Chat History:", chat_history)
+
     # process the message with llm
-    checklist = gpt_instance.process_message(new_message)
-    # one is chosen and passed in
-    ai_response = gpt_instance.elaborate_on_chosen_point(checklist)
+    ai_response = gpt_instance.process_message(new_message)
+   
     if ai_response != "":
         # add the ai response to the message store
         message_store.add_ai_message({
@@ -44,10 +47,31 @@ def handle_message(data):
             'aiMessage': ai_response
         })
 
-        # emit the ai response to the client
+       # emit the ai response to the client
         emit('ai-response', {
             'aiMessage': ai_response
         })
+
+# in case needed in the future
+# @socketio.on('selected-question')
+# def handle_follow_up_selection(data):
+#     sessionId = data['sessionId']
+#     selected_question = data['selectedQuestion']
+#     print("selected question: ", selected_question)
+
+#     # process the selected question with response chain
+#     response = gpt_instance.process_message(selected_question)
+#     if response != "":
+#         # add the ai response to the message store
+#         message_store.add_ai_message({
+#             'sessionId': sessionId,
+#             'aiMessage': response
+#         })
+
+#         # emit the ai response to the client
+#         emit('ai-response', {
+#             'aiMessage': response
+#         })
 
 
 @app.route("/api/get-messages", methods=["GET"])
@@ -60,6 +84,7 @@ def get_messages():
 def get_token():
     speechKey = os.environ.get('SPEECH_KEY')
     speechRegion = os.environ.get('SPEECH_REGION')
+    print(speechKey, speechRegion)
 
     if (speechKey == '' or speechRegion == ''):
         abort(400, description="You forgot to add your speech key or region to the .env file.")
