@@ -310,6 +310,8 @@ class GPTInstance:
             print("History check result: " + str(history_check_result))
             if not history_check_result:
                 return response
+            else:
+                return ''
                 # return messag e
                 # elaboration_result = elaboration_chain.invoke({"text": message})
 
