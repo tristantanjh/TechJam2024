@@ -1,0 +1,37 @@
+.output-display {
+  background-color: #383b4b;
+  min-height: 700px;
+  height: fit-content;
+  max-height: 50vh;
+  color: white;
+  width: 50%;
+  overflow-y: auto;
+}
+
+.llm-output-wrapper {
+  min-width: 50%;
+  max-width: 50%;
+  min-height: 700px;
+  height: fit-content;
+  max-height: 50vh;
+  overflow-y: auto;
+  background-color: #747474;
+  color: white;
+}
+
+.output-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.fas,
+.fa {
+  cursor: pointer;
+}
+
+.background {
+  background-color: #272727;
+  color: #747474;
+}
