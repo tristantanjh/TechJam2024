@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -24,6 +23,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+node_modules/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
