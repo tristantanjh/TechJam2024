@@ -11,6 +11,7 @@ from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
 from langchain_core.runnables import RunnableParallel
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -19,11 +20,11 @@ class MessageStore:
         self.messages = {}
         self.ai_messages = {}
 
-    def add_message(self, data):
-        if data['sessionId'] in self.messages:
-            self.messages[data['sessionId']].append(data['transcribedList'][-1]['text'])
-        else:
-            self.messages[data['sessionId']] = [data['transcribedList'][-1]['text']]
+    def add_message(self, formatted_message):
+        sessionId = formatted_message['sessionId']
+        if sessionId not in self.messages:
+            self.messages[sessionId] = []
+        self.messages[sessionId].append(formatted_message['text'])
 
     def get_messages(self, sessionId):
         return self.messages.get(sessionId, [])
@@ -62,6 +63,24 @@ class Chains:
       else:
           return False
     
+    def safeListOutputParser(self, ai_message):
+        """
+        Parses the AI message assuming it is a JSON string representation of a list and converts it into an actual list.
+        The input ai_message is expected to be a string in JSON format.
+        """
+        # Assuming the text content is directly accessible as a string, adjust according to your AIMessage structure
+        try:
+            # Extracting text content from AIMessage, adjust the attribute access as necessary
+            message_text = ai_message.content
+            questions_list = json.loads(message_text)
+            if isinstance(questions_list, list):
+                return message_text  # Return the JSON string if the output is a list
+            else:
+                return json.dumps([])  # Return an empty list if the output is not a list
+        except json.JSONDecodeError:
+            return json.dumps([])  # Return an empty list if there is a decoding error
+
+
     def get_initial_check_chain(self):
         """
         Returns the initial check chain
@@ -138,34 +157,40 @@ class Chains:
         return chain
        
     def get_follow_up_questions_chain(self):
-        """
-        Constructs a chain for generating a collaborative and iterative set of questions involving multiple expert perspectives.
-        This method simulates a brainstorming session among three experts who each contribute to building a list of questions.
-        The questions are aimed at being actionable for customer service assistants and informative for customers querying a database or SOP.
-        """
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                SystemMessagePromptTemplate.from_template(
-                    """
-                    Imagine three different customer service experts are collaborating to respond to this customer inquiry via a logical yet exploratory approach. 
-                    Each expert will first write down one follow-up question they think the customer service assistant should ask to gather more detailed information,
-                    and one question they believe the customer might want to ask the database or SOP for more details.
-                    They will then share these questions with the group. After sharing, each expert will consider the other experts' input and suggest another round of questions.
-                    If any expert realizes an inconsistency or error in their suggestions, they will revise or withdraw their questions.
-                    The goal is to develop a comprehensive list of only 4 questions that are both actionable by the customer service assistant and beneficial for the customer's own inquiry.
-                    Out of all the questions generated, the customer service assistant will select the most relevant and actionable question to either ask the customer or gather more information from the database or SOP.
-                    """
-                ),
-                HumanMessagePromptTemplate.from_template(
-                    """
-                    Customer Inquiry: {text}
-                    """
-                )
-            ]
-        )
-        chain = prompt | self.llm | StrOutputParser()
-        return chain
+        template = """
+        You are given a full chat history of an ongoing conversation between a customer and a customer service assistant and the latest user question which might reference context in the chat history. 
+        {chat_history}
 
+        Question: {question}
+        Imagine a panel of three customer service experts reviewing the chat history. Each expert is tasked with identifying key points and concerns raised throughout the dialogue and formulating 2 follow-up questions that could further clarify or resolve the customer's issues.
+        The experts collaborate to:
+        1. Analyze the chat history comprehensively to understand the customer's needs and the context of their inquiries.
+        2. Individually propose questions based on their expertise that address specific aspects or issues mentioned in the chat, ensuring that the questions are directly relevant to the customer's context and concerns.
+        3. Discuss their proposed follow-up questions collectively and decide on the 3 most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
+        These questions should reflect a thorough understanding of the entire conversation and focus on moving towards a resolution.
+        The final 3 questions should be specific, actionable, and tailored to the customer's unique situation and goals.
+        You always return the list of 3 questions in a JSON array. Each question should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
+        Example format:
+        ["What steps have you already taken to resolve the issue, and what were the outcomes of those actions?", "Could you provide any screenshots or error logs that occurred when the problem happened? This information can help us diagnose the issue more accurately.",
+        "Have you tried any troubleshooting steps, such as restarting your device or clearing your browser cache?"]
+        """
+        
+        prompt = ChatPromptTemplate.from_template(template)
+
+        chain = (
+            RunnableParallel(
+                {
+                    "chat_history": lambda x: x["chat_history"],
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | self.safeListOutputParser
+        )
+
+        return chain
+    
     def get_entity_chain(self):
         """
         Returns the entity chain
@@ -283,8 +308,6 @@ class GPTInstance:
         self.chains = Chains(self.llm)
         self.debug = debug
 
-    
-
     def process_message(self, message: str, message_store: MessageStore, sessionId) -> str:
         """
         Process the message
@@ -330,16 +353,19 @@ class GPTInstance:
         # if self.debug: print("Elaboration result: ", elaboration_result)
         return elaboration_result
 
-    def get_checklist(self, message: str) -> str:
+    def get_follow_up_questions(self, chat_history: List[str], question: str):
         """
         Generate follow up questions
         """
         follow_up_chain = self.chains.get_follow_up_questions_chain()
-        follow_up_result = follow_up_chain.invoke({"text": message})
+        follow_up_result = follow_up_chain.invoke({
+        "chat_history": chat_history,
+        "question": question
+        })
         if self.debug: print("Follow up result: ", follow_up_result)
         return follow_up_result
 
-        
+
 class Entities(BaseModel):
     """
     Identifying information about entities

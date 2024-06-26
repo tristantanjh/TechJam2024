@@ -6,12 +6,11 @@ from typing import List
 
 from jira_integration.jiraIssue import create_issue
 
-def extract_for_jira(conversation):
+def extract_action_item(conversation):
     load_dotenv()
 
     concatenated_text = ' '.join(item['text'] for item in conversation['transcribedList'] if item.get('text'))
 
-    print('concatenated_text: ' + concatenated_text)
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
     class Entities(BaseModel):
@@ -41,16 +40,22 @@ def extract_for_jira(conversation):
     entity_chain = prompt | llm.with_structured_output(Entities)
 
     ans = entity_chain.invoke({"question": concatenated_text}).names
-    print(ans)
 
     class ActionItem(BaseModel):
         summary: str = Field(description="The summary of the action item")
         description: str = Field(description="A full description of the action item")
 
     structured_llm = llm.with_structured_output(ActionItem)
+    extracted = []
     for task in ans:
-        extracted = structured_llm.invoke(task)
-        output = create_issue(extracted.summary, extracted.description)
+        extracted.append(structured_llm.invoke(task))
+
+    return extracted
+        
+
+def create_action_item(action_items):
+    for item in action_items:
+        output = create_issue(item['summary'], item['description'])
         print(output)
 
     # sample = """
