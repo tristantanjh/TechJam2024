@@ -7,7 +7,7 @@ import requests
 
 from utils import MessageStore, GPTInstance
 
-from jira_integration.extract import extract_for_jira
+from jira_integration.extract import extract_action_item, create_action_item
 
 load_dotenv()
 app = Flask(__name__)
@@ -55,9 +55,21 @@ def handle_message(data):
 @socketio.on('extract')
 def handle_extraction(data):
     """event listener when client ends transcription"""
-    print("data from the front end AFTER TRANSCRIPTION: ",data)
-    print(data['sessionId'])
-    extract_for_jira(data)
+    extracted = extract_action_item(data)
+
+    json_extracted = []
+    for item in extracted:
+        json_extracted.append({
+            "summary": item.summary,
+            "description": item.description
+        })
+
+    emit('action-item-check', json_extracted)
+
+@socketio.on('create-action-item')
+def handle_create_action_item(data):
+    """event listener when client confirms action item"""
+    create_action_item(data)
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():

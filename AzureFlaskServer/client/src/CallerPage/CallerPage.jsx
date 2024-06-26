@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { act, useState } from "react";
 import { Container } from "reactstrap";
 import { getTokenOrRefresh } from "../utils/utils";
 
@@ -9,6 +9,18 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
 import AiMessage from "./components/AiMessage";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function CallerPage() {
   const [displayText, setDisplayText] = useState(
@@ -24,6 +36,7 @@ export default function CallerPage() {
   const sessionId = useRef(null);
   const [aiMessages, setAiMessages] = useState([]);
   const [isTranscripting, setIsTranscripting] = useState(true);
+  const [actionItems, setActionItems] = useState([]);
 
   const InitialiseTranscriber = async () => {
     const tokenObj = await getTokenOrRefresh();
@@ -139,6 +152,11 @@ export default function CallerPage() {
         }
       });
 
+      socket.on("action-item-check", (data) => {
+        console.log("FRONTEND action-item-check: ", data);
+        setActionItems(data);
+      });
+
       socketInitialised.current = true;
     }
   }, []);
@@ -171,10 +189,16 @@ export default function CallerPage() {
     }, 2000);
   };
 
+  // Button click event to confirm action item and start jira workflow
+  const ConfirmActionItems = () => {
+    console.log("Creating Jira Action Items...");
+    socketInstance.emit("create-action-item", actionItems);
+    setActionItems([]);
+  };
+
   return (
     <Container className="app-container">
       <h1 className="display-4 mb-2">Speech sample app</h1>
-
       <div className="row main-container">
         <div className="col-6">
           <button
@@ -206,11 +230,32 @@ export default function CallerPage() {
 
           <div className="llm-output-wrapper">
             <code>======LLM Output======</code>
-            {aiMessages.map((item, idx) => <AiMessage key={idx} points={item.split('-').slice(1)}/>)}
-            
+            {aiMessages.map((item, idx) => (
+              <AiMessage key={idx} points={item.split("-").slice(1)} />
+            ))}
           </div>
         </div>
       </div>
+      {actionItems.length != 0 && (
+        <Dialog defaultOpen={true}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Jira Action Item</DialogTitle>
+              <DialogDescription>
+                {actionItems.map((item, index) => (
+                  <span key={index}>
+                    <h3>{item.summary}</h3>
+                    <p>{item.description}</p>
+                  </span>
+                ))}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => ConfirmActionItems()}>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </Container>
   );
 }
