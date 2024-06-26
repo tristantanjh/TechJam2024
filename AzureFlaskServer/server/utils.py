@@ -27,19 +27,20 @@ class MessageStore:
         self.messages[sessionId].append(formatted_message['text'])
 
     def get_messages(self, sessionId):
-        return self.messages[sessionId]
+        return self.messages.get(sessionId, [])
 
     def clear_messages(self):
         self.messages = []
+        self.ai_messages = []
 
     def add_ai_message(self, data):
-        if data['sessionId'] in self.messages:
-            self.messages[data['sessionId']].append(data['aiMessage'])
+        if data['sessionId'] in self.ai_messages:
+            self.ai_messages[data['sessionId']].append(data['aiMessage'])
         else:
-            self.messages[data['sessionId']] = [data['aiMessage']]
+            self.ai_messages[data['sessionId']] = [data['aiMessage']]
     
     def get_ai_messages(self, sessionId):
-        return self.messages[sessionId]
+        return self.ai_messages.get(sessionId, [])
 
 class Chains:
     def __init__(self, llm):
@@ -93,9 +94,35 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Is the following text a business-related query?
+                    Is the following text a business-related question?
 
                     Text: {text}
+                    """
+                )
+            ]
+        )
+
+        chain = prompt | self.llm | StrOutputParser() | self.BooleanOutputParser
+        return chain
+    
+    def get_history_check_chain(self):
+        """
+        Returns the history check chain
+        """
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    """
+                    You can only answer questions with a yes or no
+                    """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                    """
+                    Answer yes if the current question similar to any of the previous questions in meaning. If there are no previous questions, answer "no"
+
+                    Previous questions: {history}
+                    Current questions: {text}
+
                     """
                 )
             ]
@@ -221,7 +248,7 @@ class Chains:
         entities = entity_chain.invoke({"text": message})
         print(f"Extracted entities {entities}")
         structured_data = self.structured_retriever(entities)
-        print("Structured Data: " + structured_data)
+        # print("Structured Data: " + structured_data)
         unstructured_data = [el.page_content for el in self.vector_index.similarity_search(message)]
         final_data = f"""Structured data:
             {structured_data}
@@ -235,18 +262,7 @@ class Chains:
         {context}
 
         Question: {question}
-
-        Provide a comprehensive response that includes the following:
-        1. Identify the key points or events related to the question.
-        2. Elaborate on each point by providing relevant details, such as dates, locations, and key individuals or groups involved.
-        3. If there are dates to be included in your answer, convert any timestamps to actual date formats (YYYY-MM-DD) before including them in the answer.
-        4. Discuss the background information, motives, or reasons behind the events, if available.
-        5. Use natural language and aim for a well-structured, coherent response that flows logically from one point to another.
-        6. If there is insufficient information to provide a complete answer, acknowledge the limitations and request the user to upload a PDF document of an article regarding the topic. Inform them that with the additional information from the PDF, you will be able to provide a more comprehensive answer. 
-
-        Do not mention "structured data", "provided context", "context" in your answer. Replace those terms with "my dataset".
-        Give your answer in prose, and avoid bullet points or lists in your response. The answer should be detailed and in paragraph form, providing a comprehensive explanation of the topic based on the context provided.
-
+        Use natural language and answer it concisely in point form
         Answer:"""
 
 
@@ -291,13 +307,14 @@ class GPTInstance:
         self.chains = Chains(self.llm)
         self.debug = debug
 
-    def process_message(self, message: str) -> str:
+    def process_message(self, message: str, message_store: MessageStore, sessionId) -> str:
         """
         Process the message
         """
         # possible improvement: refine the message if the raw transcribed message is poor 
         initial_check_chain = self.chains.get_initial_check_chain()
-        # elaboration_chain = self.chains.get_elaboration_chain()
+        history_check_chain = self.chains.get_history_check_chain()
+        elaboration_chain = self.chains.get_elaboration_chain()
         response_chain = self.chains.get_response_chain()
         
         print("Messages: " + message)
@@ -306,14 +323,23 @@ class GPTInstance:
         print("Initial check result: ", initial_check_result) # for debug
 
         if initial_check_result:
+            
+            
             response = response_chain.invoke({"question": message})
-            return response
-            # return message
-            # elaboration_result = elaboration_chain.invoke({"text": message})
+            print("Response: " + response)
+            print("History: " + str(message_store.get_messages(sessionId)))
+            history_check_result = history_check_chain.invoke({"text": response, "history": message_store.get_messages(sessionId)})
+            print("History check result: " + str(history_check_result))
+            if not history_check_result:
+                return response
+            else:
+                return ''
+                # return messag e
+                # elaboration_result = elaboration_chain.invoke({"text": message})
 
-            # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
+                # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
 
-            # return elaboration_result
+                # return elaboration_result
         else:
             return ""
     
@@ -323,7 +349,7 @@ class GPTInstance:
         """
         elaboration_chain = self.chains.get_elaboration_chain()
         elaboration_result = elaboration_chain.invoke({"text": message})
-        if self.debug: print("Elaboration result: ", elaboration_result)
+        # if self.debug: print("Elaboration result: ", elaboration_result)
         return elaboration_result
 
     def get_follow_up_questions(self, chat_history: List[str], question: str) -> str:

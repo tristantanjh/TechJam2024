@@ -8,6 +8,10 @@ import ReactDOM from "react-dom/client";
 import ErrorPage from "./ErrorPage/ErrorPage";
 import CallerPage from "./CallerPage/CallerPage";
 import WebsocketPage from "./websocketPage/websocketPage";
+import CallerPageNew from "./CallerPageNew/CallerPageNew";
+import DefaultLayout from "./layouts/DefaultLayout";
+import MainPage from "./MainPage/MainPage";
+import "./index.css";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +22,22 @@ const router = createBrowserRouter([
   {
     path: "/websocket",
     element: <WebsocketPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/new",
+    element: <DefaultLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <CallerPageNew />,
+      },
+    ],
+  },
+  {
+    path: "/main",
+    element: <MainPage />,
     errorElement: <ErrorPage />,
   },
 ]);

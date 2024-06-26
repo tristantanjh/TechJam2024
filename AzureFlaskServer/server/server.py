@@ -7,6 +7,8 @@ import requests
 
 from utils import MessageStore, GPTInstance
 
+from jira_integration.extract import extract_for_jira
+
 load_dotenv()
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -17,8 +19,7 @@ gpt_instance = GPTInstance(debug=True)
 
 @socketio.on('connect')
 def handle_connect():
-    print(request.sid)
-    print('Client connected')
+    print(f'Client connected. Client ID: {request.sid}')
     emit('connected', {'data': f'{request.sid} is connected'})
 
 @socketio.on('data')
@@ -65,6 +66,33 @@ def handle_message(data):
                     'aiMessage': ai_response
                 })
 
+# in case needed in the future
+# @socketio.on('selected-question')
+# def handle_follow_up_selection(data):
+#     sessionId = data['sessionId']
+#     selected_question = data['selectedQuestion']
+#     print("selected question: ", selected_question)
+
+#     # process the selected question with response chain
+#     response = gpt_instance.process_message(selected_question)
+#     if response != "":
+#         # add the ai response to the message store
+#         message_store.add_ai_message({
+#             'sessionId': sessionId,
+#             'aiMessage': response
+#         })
+
+#         # emit the ai response to the client
+#         emit('ai-response', {
+#             'aiMessage': response
+#         })
+
+@socketio.on('extract')
+def handle_extraction(data):
+    """event listener when client ends transcription"""
+    print("data from the front end AFTER TRANSCRIPTION: ",data)
+    print(data['sessionId'])
+    extract_for_jira(data)
 # in case needed in the future
 # @socketio.on('selected-question')
 # def handle_follow_up_selection(data):
