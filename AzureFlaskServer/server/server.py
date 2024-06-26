@@ -27,30 +27,57 @@ def handle_message(data):
     """event listener when client types a message"""
     print("data from the front end: ",data)
     sessionId = data['sessionId']
-    new_message = ""
     if data['transcribedList'] and 'text' in data['transcribedList'][-1]:
-        new_message = data['transcribedList'][-1]['text']
+        new_message = data['transcribedList'][-1]
 
-    # add the message to the message store
-    
+        if new_message['text'].strip() != "" and new_message['speakerId'] != 'Unknown':
+            # Format the new message
+            formatted_message = {
+                'sessionId': sessionId,
+                'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
+            }
 
-    # process the message with llm
-    # checklist = gpt_instance.process_message(new_message)
-    ai_response = gpt_instance.process_message(new_message, message_store, sessionId)
-    # one is chosen and passed in
-    # ai_response = gpt_instance.elaborate_on_chosen_point(checklist)
-    message_store.add_message(data)
-    if ai_response != "":
-        # add the ai response to the message store
-        message_store.add_ai_message({
-            'sessionId': sessionId,
-            'aiMessage': ai_response
-        })
+            # Retrieve the updated chat history
+            # chat_history = message_store.get_messages(sessionId)
+            # print("Chat History:", chat_history)
+            # ai_response = gpt_instance.get_follow_up_questions(chat_history, new_message['text'])
+            # message_store.add_message(formatted_message)
+            
+            ai_response = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
+            message_store.add_message(formatted_message)
 
-        # emit the ai response to the client
-        emit('ai-response', {
-            'aiMessage': ai_response
-        })
+            if ai_response != "":
+                # Store and possibly broadcast the AI's response
+                message_store.add_ai_message({
+                    'sessionId': sessionId,
+                    'aiMessage': ai_response
+                })
+
+                # Emit the AI response to the client
+                emit('ai-response', {
+                    'aiMessage': ai_response
+                })
+
+# in case needed in the future
+# @socketio.on('selected-question')
+# def handle_follow_up_selection(data):
+#     sessionId = data['sessionId']
+#     selected_question = data['selectedQuestion']
+#     print("selected question: ", selected_question)
+
+#     # process the selected question with response chain
+#     response = gpt_instance.process_message(selected_question)
+#     if response != "":
+#         # add the ai response to the message store
+#         message_store.add_ai_message({
+#             'sessionId': sessionId,
+#             'aiMessage': response
+#         })
+
+#         # emit the ai response to the client
+#         emit('ai-response', {
+#             'aiMessage': response
+#         })
 
 @socketio.on('extract')
 def handle_extraction(data):
@@ -70,6 +97,28 @@ def handle_extraction(data):
 def handle_create_action_item(data):
     """event listener when client confirms action item"""
     create_action_item(data)
+
+# in case needed in the future
+# @socketio.on('selected-question')
+# def handle_follow_up_selection(data):
+#     sessionId = data['sessionId']
+#     selected_question = data['selectedQuestion']
+#     print("selected question: ", selected_question)
+
+#     # process the selected question with response chain
+#     response = gpt_instance.process_message(selected_question)
+#     if response != "":
+#         # add the ai response to the message store
+#         message_store.add_ai_message({
+#             'sessionId': sessionId,
+#             'aiMessage': response
+#         })
+
+#         # emit the ai response to the client
+#         emit('ai-response', {
+#             'aiMessage': response
+#         })
+
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():

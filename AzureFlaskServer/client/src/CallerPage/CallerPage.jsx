@@ -161,6 +161,13 @@ export default function CallerPage() {
     }
   }, []);
 
+  // Button click event to handle question click, send back to server for new chain
+  // const handleQuestionClick = (question) => {
+  //   if (socketInstance) {
+  //     socketInstance.emit("select-question", { selectedQuestion: question });
+  //   }
+  // };
+
   // Button click event to start transcription
   const StartTranscription = async () => {
     await InitialiseTranscriber();
