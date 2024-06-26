@@ -6,19 +6,15 @@ import {
 } from "react-router-dom";
 import ReactDOM from "react-dom/client";
 import ErrorPage from "./Pages/ErrorPage/ErrorPage";
-import CallerPage from "./CallerPage/CallerPage";
 import WebsocketPage from "./Pages/websocketPage/websocketPage";
 import CallerPageNew from "./Pages/CallerPageNew/CallerPageNew";
 import DefaultLayout from "./layouts/DefaultLayout";
-import MainPage from "./Pages/MainPage/MainPage";
+import AppLayout from "./layouts/AppLayout";
+import TranscriberPage from "./Pages/TranscriberPage/TranscriberPage";
 import "./index.css";
+import DashboardPage from "./Pages/DashboardPage/DashboardPage";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <CallerPage />,
-    errorElement: <ErrorPage />,
-  },
   {
     path: "/websocket",
     element: <WebsocketPage />,
@@ -36,9 +32,19 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/main",
-    element: <MainPage />,
+    path: "/app",
+    element: <AppLayout />,
     errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      {
+        path: "transcriber",
+        element: <TranscriberPage />,
+      },
+    ],
   },
 ]);
 

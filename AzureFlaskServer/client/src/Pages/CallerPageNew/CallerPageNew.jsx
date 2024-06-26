@@ -4,8 +4,8 @@ import "./CallerPageNew.css";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
-import { useTranscriber } from "../../hooks/useTranscriber";
-import AiMessage from "../../CallerPage/components/AiMessage";
+import { useTranscriber } from "@/hooks/useTranscriber";
+import AiMessage from "@/Pages/CallerPage/components/AiMessage";
 
 export default function CallerPageNew() {
   const [displayText, setDisplayText] = useState(
