@@ -143,6 +143,13 @@ export default function CallerPage() {
     }
   }, []);
 
+  // Button click event to handle question click, send back to server for new chain
+  // const handleQuestionClick = (question) => {
+  //   if (socketInstance) {
+  //     socketInstance.emit("select-question", { selectedQuestion: question });
+  //   }
+  // };
+
   // Button click event to start transcription
   const StartTranscription = async () => {
     await InitialiseTranscriber();
@@ -206,8 +213,9 @@ export default function CallerPage() {
 
           <div className="llm-output-wrapper">
             <code>======LLM Output======</code>
-            {aiMessages.map((item, idx) => <AiMessage key={idx} points={item.split('-').slice(1)}/>)}
-            
+            {aiMessages.map((item, idx) => (
+              <AiMessage key={idx} points={item.split("-").slice(1)} />
+            ))}
           </div>
         </div>
       </div>
