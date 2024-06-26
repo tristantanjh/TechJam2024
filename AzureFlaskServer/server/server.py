@@ -26,31 +26,44 @@ def handle_message(data):
     """event listener when client types a message"""
     print("data from the front end: ",data)
     sessionId = data['sessionId']
-    new_message = ""
     if data['transcribedList'] and 'text' in data['transcribedList'][-1]:
-        new_message = data['transcribedList'][-1]['text']
+        new_message = data['transcribedList'][-1]
 
-    # add the message to the message store
-    message_store.add_message(data)
+        if new_message['text'].strip() != "" and new_message['speakerId'] != 'Unknown':
+            # Format the new message
+            formatted_message = {
+                'sessionId': sessionId,
+                'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
+            }
 
-    # get chat history
-    chat_history = message_store.get_messages(sessionId)
-    print("Chat History:", chat_history)
+            # Check for duplicates
+            if len(data['transcribedList']) >= 2:
+                previous_message = data['transcribedList'][-2]
+                previous_formatted_message = f"{previous_message['speakerId']}: {previous_message['text'].strip()}"
+                if formatted_message['text'] != previous_formatted_message:
+                    message_store.add_message(formatted_message)
+            else:
+                # If there's not enough history to check for duplicates, just add the message
+                message_store.add_message(formatted_message)
 
-    # process the message with llm
-    ai_response = gpt_instance.process_message(new_message)
-   
-    if ai_response != "":
-        # add the ai response to the message store
-        message_store.add_ai_message({
-            'sessionId': sessionId,
-            'aiMessage': ai_response
-        })
+            # Retrieve the updated chat history
+            chat_history = message_store.get_messages(sessionId)
+            print("Chat History:", chat_history)
 
-       # emit the ai response to the client
-        emit('ai-response', {
-            'aiMessage': ai_response
-        })
+            # Process the latest message with the language model
+            # ai_response = gpt_instance.process_message(new_message['text'])
+            ai_response = gpt_instance.get_follow_up_questions(chat_history, new_message['text'])
+            if ai_response != "":
+                # Store and possibly broadcast the AI's response
+                message_store.add_ai_message({
+                    'sessionId': sessionId,
+                    'aiMessage': ai_response
+                })
+
+                # Emit the AI response to the client
+                emit('ai-response', {
+                    'aiMessage': ai_response
+                })
 
 # in case needed in the future
 # @socketio.on('selected-question')

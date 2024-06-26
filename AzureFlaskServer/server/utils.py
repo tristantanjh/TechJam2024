@@ -20,10 +20,11 @@ class MessageStore:
         self.messages = {}
         self.ai_messages = {}
 
-    def add_message(self, data):
-        if data['transcribedList']['text'] == '' or data['transcribedList']['speakerId'] == 'Unknown':
-            return 
-        self.messages[data['sessionId']] = data['transcribedList']
+    def add_message(self, formatted_message):
+        sessionId = formatted_message['sessionId']
+        if sessionId not in self.messages:
+            self.messages[sessionId] = []
+        self.messages[sessionId].append(formatted_message['text'])
 
     def get_messages(self, sessionId):
         return self.messages[sessionId]
@@ -129,37 +130,39 @@ class Chains:
         return chain
        
     def get_follow_up_questions_chain(self):
-        """
-        Constructs a chain for generating a collaborative and iterative set of questions involving multiple expert perspectives.
-        This method simulates a brainstorming session among three experts who each contribute to building a list of questions.
-        The questions are aimed at being actionable for customer service assistants and informative for customers querying a database or SOP.
-        """
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                SystemMessagePromptTemplate.from_template(
-                    """
-                    Imagine a panel of three customer service experts reviewing the full transcript of an ongoing conversation between a customer and a customer service assistant. Each expert is tasked with identifying key points and concerns raised throughout the dialogue and formulating 2 follow-up questions that could further clarify or resolve the customer's issues.
-                    The experts collaborate to:
-                    1. Analyze the chat history comprehensively to understand the customer's needs and the context of their inquiries.
-                    2. Individually propose questions based on their expertise that address specific aspects or issues mentioned in the chat.
-                    3. Discuss their proposed follow-up questions collectively and decide on the three most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
-                    These questions should reflect a thorough understanding of the entire conversation and focus on moving towards a resolution.
-                    Provide the final list of three questions, formatted as a list of strings. Each string should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
-                    Example format:
-                    ["What steps have you already taken to resolve the issue, and what were the outcomes of those actions?", "Could you provide any screenshots or error logs that occurred when the problem happened? This information can help us diagnose the issue more accurately.",
-                    "Have you tried any troubleshooting steps, such as restarting your device or clearing your browser cache?"]
-                    """
-                ),
-                HumanMessagePromptTemplate.from_template(
-                    """
-                    Customer Inquiry: {text}
-                    """
-                )
-            ]
-        )
-        chain = prompt | self.llm | self.safeListOutputParser
-        return chain
+        template = """
+        You are given a full chat history of an ongoing conversation between a customer and a customer service assistant and the latest user question which might reference context in the chat history. 
+        {chat_history}
 
+        Question: {question}
+        Imagine a panel of three customer service experts reviewing the chat history. Each expert is tasked with identifying key points and concerns raised throughout the dialogue and formulating 2 follow-up questions that could further clarify or resolve the customer's issues.
+        The experts collaborate to:
+        1. Analyze the chat history comprehensively to understand the customer's needs and the context of their inquiries.
+        2. Individually propose questions based on their expertise that address specific aspects or issues mentioned in the chat.
+        3. Discuss their proposed follow-up questions collectively and decide on the three most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
+        These questions should reflect a thorough understanding of the entire conversation and focus on moving towards a resolution.
+        Provide the final list of three questions, formatted as a list of strings. Each string should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
+        Example format:
+        ["What steps have you already taken to resolve the issue, and what were the outcomes of those actions?", "Could you provide any screenshots or error logs that occurred when the problem happened? This information can help us diagnose the issue more accurately.",
+        "Have you tried any troubleshooting steps, such as restarting your device or clearing your browser cache?"]
+        """
+
+        prompt = ChatPromptTemplate.from_template(template)
+
+        chain = (
+            RunnableParallel(
+                {
+                    "chat_history": lambda x: x["chat_history"],
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | self.safeListOutputParser
+        )
+
+        return chain
+    
     def get_entity_chain(self):
         """
         Returns the entity chain
@@ -323,12 +326,15 @@ class GPTInstance:
         if self.debug: print("Elaboration result: ", elaboration_result)
         return elaboration_result
 
-    def get_follow_up_questions(self, message: str) -> str:
+    def get_follow_up_questions(self, chat_history: List[str], question: str) -> str:
         """
         Generate follow up questions
         """
         follow_up_chain = self.chains.get_follow_up_questions_chain()
-        follow_up_result = follow_up_chain.invoke({"text": message})
+        follow_up_result = follow_up_chain.invoke({
+        "chat_history": chat_history,
+        "question": question
+        })
         if self.debug: print("Follow up result: ", follow_up_result)
         return follow_up_result
 
