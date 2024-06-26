@@ -37,23 +37,15 @@ def handle_message(data):
                 'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
             }
 
-            # Check for duplicates
-            if len(data['transcribedList']) >= 2:
-                previous_message = data['transcribedList'][-2]
-                previous_formatted_message = f"{previous_message['speakerId']}: {previous_message['text'].strip()}"
-                if formatted_message['text'] != previous_formatted_message:
-                    message_store.add_message(formatted_message)
-            else:
-                # If there's not enough history to check for duplicates, just add the message
-                message_store.add_message(formatted_message)
-
             # Retrieve the updated chat history
-            chat_history = message_store.get_messages(sessionId)
-            print("Chat History:", chat_history)
+            # chat_history = message_store.get_messages(sessionId)
+            # print("Chat History:", chat_history)
+            # ai_response = gpt_instance.get_follow_up_questions(chat_history, new_message['text'])
+            # message_store.add_message(formatted_message)
+            
+            ai_response = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
+            message_store.add_message(formatted_message)
 
-            # Process the latest message with the language model
-            # ai_response = gpt_instance.process_message(new_message['text'])
-            ai_response = gpt_instance.get_follow_up_questions(chat_history, new_message['text'])
             if ai_response != "":
                 # Store and possibly broadcast the AI's response
                 message_store.add_ai_message({
@@ -93,6 +85,7 @@ def handle_extraction(data):
     print("data from the front end AFTER TRANSCRIPTION: ",data)
     print(data['sessionId'])
     extract_for_jira(data)
+
 # in case needed in the future
 # @socketio.on('selected-question')
 # def handle_follow_up_selection(data):

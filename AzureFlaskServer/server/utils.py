@@ -74,11 +74,11 @@ class Chains:
             message_text = ai_message.content
             questions_list = json.loads(message_text)
             if isinstance(questions_list, list):
-                return questions_list
+                return message_text  # Return the JSON string if the output is a list
             else:
-                return []  # Return an empty list if the output is not a list
+                return json.dumps([])  # Return an empty list if the output is not a list
         except json.JSONDecodeError:
-            return []  # Return an empty list if there is a decoding error
+            return json.dumps([])  # Return an empty list if there is a decoding error
 
 
     def get_initial_check_chain(self):
@@ -165,15 +165,16 @@ class Chains:
         Imagine a panel of three customer service experts reviewing the chat history. Each expert is tasked with identifying key points and concerns raised throughout the dialogue and formulating 2 follow-up questions that could further clarify or resolve the customer's issues.
         The experts collaborate to:
         1. Analyze the chat history comprehensively to understand the customer's needs and the context of their inquiries.
-        2. Individually propose questions based on their expertise that address specific aspects or issues mentioned in the chat.
-        3. Discuss their proposed follow-up questions collectively and decide on the three most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
+        2. Individually propose questions based on their expertise that address specific aspects or issues mentioned in the chat, ensuring that the questions are directly relevant to the customer's context and concerns.
+        3. Discuss their proposed follow-up questions collectively and decide on the 3 most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
         These questions should reflect a thorough understanding of the entire conversation and focus on moving towards a resolution.
-        Provide the final list of three questions, formatted as a list of strings. Each string should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
+        The final 3 questions should be specific, actionable, and tailored to the customer's unique situation and goals.
+        You always return the list of 3 questions in a JSON array. Each question should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
         Example format:
         ["What steps have you already taken to resolve the issue, and what were the outcomes of those actions?", "Could you provide any screenshots or error logs that occurred when the problem happened? This information can help us diagnose the issue more accurately.",
         "Have you tried any troubleshooting steps, such as restarting your device or clearing your browser cache?"]
         """
-
+        
         prompt = ChatPromptTemplate.from_template(template)
 
         chain = (
@@ -352,7 +353,7 @@ class GPTInstance:
         # if self.debug: print("Elaboration result: ", elaboration_result)
         return elaboration_result
 
-    def get_follow_up_questions(self, chat_history: List[str], question: str) -> str:
+    def get_follow_up_questions(self, chat_history: List[str], question: str):
         """
         Generate follow up questions
         """
