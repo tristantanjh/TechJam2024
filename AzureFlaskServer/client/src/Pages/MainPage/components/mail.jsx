@@ -1,15 +1,10 @@
 import {
-  AlertCircle,
-  Archive,
-  ArchiveX,
-  File,
-  Inbox,
-  MessagesSquare,
-  Search,
-  Send,
-  ShoppingCart,
-  Trash2,
+  SquareKanban,
+  BotMessageSquare,
+  Workflow,
+  Settings,
   Users2,
+  MessagesSquare,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -65,40 +60,32 @@ export function Mail({
             isCollapsed={isCollapsed}
             links={[
               {
-                title: "Inbox",
-                label: "128",
-                icon: Inbox,
+                title: "Transcriber",
+                label: "",
+                icon: MessagesSquare,
                 variant: "default",
+                to: "transcriber",
               },
               {
-                title: "Drafts",
-                label: "9",
-                icon: File,
-                variant: "ghost",
-              },
-              {
-                title: "Sent",
+                title: "Copilot",
                 label: "",
-                icon: Send,
+                icon: BotMessageSquare,
                 variant: "ghost",
+                to: "copilot",
               },
               {
-                title: "Junk",
-                label: "23",
-                icon: ArchiveX,
-                variant: "ghost",
-              },
-              {
-                title: "Trash",
+                title: "Jira",
                 label: "",
-                icon: Trash2,
+                icon: SquareKanban,
                 variant: "ghost",
+                to: "jira",
               },
               {
-                title: "Archive",
+                title: "Actions",
                 label: "",
-                icon: Archive,
+                icon: Workflow,
                 variant: "ghost",
+                to: "actions",
               },
             ]}
           />
@@ -107,34 +94,18 @@ export function Mail({
             isCollapsed={isCollapsed}
             links={[
               {
-                title: "Social",
-                label: "972",
+                title: "Account",
+                label: "",
                 icon: Users2,
                 variant: "ghost",
+                to: "account",
               },
               {
-                title: "Updates",
-                label: "342",
-                icon: AlertCircle,
+                title: "Settings",
+                label: "",
+                icon: Settings,
                 variant: "ghost",
-              },
-              {
-                title: "Forums",
-                label: "128",
-                icon: MessagesSquare,
-                variant: "ghost",
-              },
-              {
-                title: "Shopping",
-                label: "8",
-                icon: ShoppingCart,
-                variant: "ghost",
-              },
-              {
-                title: "Promotions",
-                label: "21",
-                icon: Archive,
-                variant: "ghost",
+                to: "settings",
               },
             ]}
           />

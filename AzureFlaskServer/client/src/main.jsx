@@ -5,12 +5,12 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import ReactDOM from "react-dom/client";
-import ErrorPage from "./ErrorPage/ErrorPage";
+import ErrorPage from "./Pages/ErrorPage/ErrorPage";
 import CallerPage from "./CallerPage/CallerPage";
-import WebsocketPage from "./websocketPage/websocketPage";
-import CallerPageNew from "./CallerPageNew/CallerPageNew";
+import WebsocketPage from "./Pages/websocketPage/websocketPage";
+import CallerPageNew from "./Pages/CallerPageNew/CallerPageNew";
 import DefaultLayout from "./layouts/DefaultLayout";
-import MainPage from "./MainPage/MainPage";
+import MainPage from "./Pages/MainPage/MainPage";
 import "./index.css";
 
 const router = createBrowserRouter([
