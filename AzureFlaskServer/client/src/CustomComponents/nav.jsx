@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 export function Nav({ links, isCollapsed }) {
-  const { routeName, setRouteName } = useNavbar();
+  const { setRouteName } = useNavbar();
 
   const handleClick = (route) => (e) => {
     setRouteName(route);
