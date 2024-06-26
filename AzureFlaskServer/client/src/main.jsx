@@ -13,6 +13,7 @@ import AppLayout from "./layouts/AppLayout";
 import TranscriberPage from "./Pages/TranscriberPage/TranscriberPage";
 import "./index.css";
 import DashboardPage from "./Pages/DashboardPage/DashboardPage";
+import SettingsPage from "./Pages/SettingsPage/SettingsPage";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "transcriber",
         element: <TranscriberPage />,
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />,
       },
     ],
   },
