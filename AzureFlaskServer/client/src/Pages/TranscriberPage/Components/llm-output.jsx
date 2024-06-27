@@ -1,7 +1,11 @@
-export default function LLMOutput() {
+import AiMessage from "./ai-message";
+
+export default function LLMOutput({ aiMessages }) {
   return (
     <div>
-      <h1>LLM Output</h1>
+      {aiMessages?.map((item, idx) => (
+        <AiMessage key={idx} points={item.split("-").slice(1)} />
+      ))}
     </div>
   );
 }
