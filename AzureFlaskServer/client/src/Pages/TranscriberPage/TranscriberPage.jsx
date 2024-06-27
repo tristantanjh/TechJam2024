@@ -91,10 +91,18 @@ export default function TranscriberPage() {
           <h1 className="text-4xl font-bold text-primary">Transcriber</h1>
 
           <div className="flex space-x-4">
-            <Button onClick={handleStart} className="btn-primary" disabled={callStatus !== 0}>
+            <Button
+              onClick={handleStart}
+              className="btn-primary"
+              disabled={callStatus !== 0}
+            >
               Start Call
             </Button>
-            <Button onClick={handleStop} className="btn-primary" disabled={callStatus !== 1}>
+            <Button
+              onClick={handleStop}
+              className="btn-primary"
+              disabled={callStatus !== 1}
+            >
               Stop Call
             </Button>
           </div>
@@ -110,7 +118,7 @@ export default function TranscriberPage() {
           <ResizablePanel defaultSize={65} minSize={45} maxSize={85}>
             <ResizablePanelGroup direction="horizontal" className="h-full">
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                <LLMOutput />
+                <LLMOutput aiMessages={aiMessages} />
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
