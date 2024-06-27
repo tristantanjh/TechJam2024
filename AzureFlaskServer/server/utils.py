@@ -19,6 +19,7 @@ class MessageStore:
     def __init__(self):
         self.messages = {}
         self.ai_messages = {}
+        self.follow_up_questions = {}
 
     def add_message(self, formatted_message):
         sessionId = formatted_message['sessionId']
@@ -41,6 +42,15 @@ class MessageStore:
     
     def get_ai_messages(self, sessionId):
         return self.ai_messages.get(sessionId, [])
+    
+    def add_follow_up_questions(self, data):
+        if data['sessionId'] in self.follow_up_questions:
+            self.follow_up_questions[data['sessionId']].append(data['followUpQuestions'])
+        else:
+            self.follow_up_questions[data['sessionId']] = [data['followUpQuestions']]
+            
+    def get_follow_up_questions(self, sessionId):
+        return self.follow_up_questions.get(sessionId, [])
 
 class Chains:
     def __init__(self, llm):
@@ -324,17 +334,18 @@ class GPTInstance:
         print("Initial check result: ", initial_check_result) # for debug
 
         if initial_check_result:
-            
-            
             response = response_chain.invoke({"question": message})
             print("Response: " + response)
             print("History: " + str(message_store.get_messages(sessionId)))
             history_check_result = history_check_chain.invoke({"text": response, "history": message_store.get_messages(sessionId)})
             print("History check result: " + str(history_check_result))
             if not history_check_result:
-                return response
+                chat_history = message_store.get_messages(sessionId)
+                follow_up_questions = self.get_follow_up_questions(chat_history, response)
+                
+                return [response, follow_up_questions]
             else:
-                return ''
+                return ["", ""]
                 # return messag e
                 # elaboration_result = elaboration_chain.invoke({"text": message})
 
@@ -342,7 +353,7 @@ class GPTInstance:
 
                 # return elaboration_result
         else:
-            return ""
+            return ["", ""]
     
     def elaborate_on_chosen_point(self, message: str) -> str:
         """

@@ -20,6 +20,10 @@ export default function TranscriberPage() {
   const [socketInstance, setSocketInstance] = useState(null);
   const messageInitialised = useRef(false); // useEffect check
   const [aiMessages, setAiMessages] = useState([]);
+  const [followUpData, setFollowUpData] = useState({
+    headerText: [],
+    followUpQuestions: [],
+  });
   const [callStatus, setCallStatus] = useState(0);
   const {
     StartTranscription,
@@ -62,9 +66,26 @@ export default function TranscriberPage() {
       });
 
       socket.on("ai-response", (data) => {
-        console.log("AI Response: ", data);
         if (data["aiMessage"]) {
           setAiMessages((prevList) => [...prevList, data["aiMessage"]]);
+        }
+      });
+
+      socket.on("follow-up-questions", (data) => {
+        if (data) {
+          const parsedFollowUpQuestions = JSON.parse(data["followUpQuestions"])
+          console.log(parsedFollowUpQuestions)
+
+          setFollowUpData((prevData) => ({
+            headerText: [
+              ...prevData.headerText,
+              data["headerText"],
+            ],
+            followUpQuestions: [
+              ...prevData.followUpQuestions,
+              parsedFollowUpQuestions,
+            ],
+          }));
         }
       });
 
@@ -75,6 +96,11 @@ export default function TranscriberPage() {
   const handleStart = async () => {
     await StartTranscription();
     setCallStatus(1);
+    setAiMessages([]);
+    setFollowUpData({
+      headerText: [],
+      followUpQuestions: [],
+    });
     setDisplayText("SPEAK INTO THE MIC...");
   };
 
@@ -124,7 +150,7 @@ export default function TranscriberPage() {
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
                 <ResizablePanelGroup direction="vertical" className="h-full">
                   <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                    <FollowUpQuestion />
+                    <FollowUpQuestion followUpData={followUpData} />
                   </ResizablePanel>
                   <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>

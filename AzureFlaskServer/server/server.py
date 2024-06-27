@@ -36,14 +36,8 @@ def handle_message(data):
                 'sessionId': sessionId,
                 'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
             }
-
-            # Retrieve the updated chat history
-            # chat_history = message_store.get_messages(sessionId)
-            # print("Chat History:", chat_history)
-            # ai_response = gpt_instance.get_follow_up_questions(chat_history, new_message['text'])
-            # message_store.add_message(formatted_message)
             
-            ai_response = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
+            [ai_response, follow_up_questions] = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
             message_store.add_message(formatted_message)
 
             if ai_response != "":
@@ -56,6 +50,17 @@ def handle_message(data):
                 # Emit the AI response to the client
                 emit('ai-response', {
                     'aiMessage': ai_response
+                })
+                
+            if follow_up_questions:
+                message_store.add_follow_up_questions({
+                    'sessionId': sessionId,
+                    'followUpQuestions': follow_up_questions
+                })
+                
+                emit('follow-up-questions', {
+                    'headerText': new_message['text'],
+                    'followUpQuestions': follow_up_questions
                 })
 
 # in case needed in the future
