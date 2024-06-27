@@ -1,14 +1,30 @@
 import { accounts } from "@/data/data";
-import { createContext, useContext, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useLocation } from "react-router-dom";
 
 const NavbarContext = createContext();
 
 export const NavbarProvider = ({ children }) => {
   const [accountList, setAccountList] = useState(accounts);
-  const [routeName, setRouteName] = useState("");
+  const location = useLocation();
+  const [routeName, setRouteName] = useState(
+    location.pathname.split("/").slice(-1)[0]
+  );
   const [isCollapsed, setIsCollapsed] = useState(true);
   const navCollapsedSize = useRef(6);
   const defaultLayout = useRef([15, 85]);
+
+  useEffect(() => {
+    const route = location.pathname.split("/").slice(-1)[0];
+    setRouteName(route);
+  }, [location]);
 
   const value = useMemo(
     () => ({

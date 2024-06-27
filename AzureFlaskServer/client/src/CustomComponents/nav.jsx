@@ -9,11 +9,6 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 export function Nav({ links, isCollapsed }) {
-  const { setRouteName } = useNavbar();
-
-  const handleClick = (route) => (e) => {
-    setRouteName(route);
-  };
   return (
     <div
       data-collapsed={isCollapsed}
@@ -26,7 +21,6 @@ export function Nav({ links, isCollapsed }) {
               <TooltipTrigger asChild>
                 <Link
                   to={`${link.to}`}
-                  onClick={handleClick(link.title)}
                   className={cn(
                     buttonVariants({ variant: link.variant, size: "icon" }),
                     "h-9 w-9",
@@ -51,7 +45,6 @@ export function Nav({ links, isCollapsed }) {
             <Link
               to={`${link.to}`}
               key={index}
-              onClick={handleClick(link.title)}
               className={cn(
                 buttonVariants({ variant: link.variant, size: "sm" }),
                 link.variant === "default" &&
