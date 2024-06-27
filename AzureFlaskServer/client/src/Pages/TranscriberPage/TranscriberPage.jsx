@@ -12,11 +12,10 @@ import { io } from "socket.io-client";
 import { useTranscriber } from "@/hooks/useTranscriber";
 import AiMessage from "@/Pages/CallerPage/components/AiMessage";
 import { Button } from "@/components/ui/button";
+import LLMOutput from "./Components/llm-output";
 
 export default function TranscriberPage() {
-  const [displayText, setDisplayText] = useState(
-    "WAITING TO START CALL..."
-  );
+  const [displayText, setDisplayText] = useState("WAITING TO START CALL...");
   const socketInitialised = useRef(false); // useEffect check
   const [socketInstance, setSocketInstance] = useState(null);
   const messageInitialised = useRef(false); // useEffect check
@@ -98,18 +97,29 @@ export default function TranscriberPage() {
           </div>
         </div>
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-            <Transcriber displayText={displayText} transcribedList={transcribedList}/>
+          <ResizablePanel defaultSize={35} minSize={25} maxSize={55}>
+            <Transcriber
+              displayText={displayText}
+              transcribedList={transcribedList}
+            />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-            <ResizablePanelGroup direction="vertical" className="h-full">
+          <ResizablePanel defaultSize={65} minSize={45} maxSize={85}>
+            <ResizablePanelGroup direction="horizontal" className="h-full">
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                <FollowUpQuestion />
+                <LLMOutput />
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                <TangentualInfo />
+                <ResizablePanelGroup direction="vertical" className="h-full">
+                  <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+                    <FollowUpQuestion />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+                    <TangentualInfo />
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
