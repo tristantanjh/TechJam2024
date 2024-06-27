@@ -20,6 +20,7 @@ export default function TranscriberPage() {
   const [socketInstance, setSocketInstance] = useState(null);
   const messageInitialised = useRef(false); // useEffect check
   const [aiMessages, setAiMessages] = useState([]);
+  const [callStatus, setCallStatus] = useState(0);
   const {
     StartTranscription,
     StopTranscription,
@@ -73,25 +74,27 @@ export default function TranscriberPage() {
 
   const handleStart = async () => {
     await StartTranscription();
+    setCallStatus(1);
     setDisplayText("SPEAK INTO THE MIC...");
   };
 
   const handleStop = async () => {
     await StopTranscription();
+    setCallStatus(0);
     setDisplayText("WAITING TO START CALL...");
   };
 
   return (
     <>
       <div className="flex flex-col h-full">
-        <div className="h-[15vh] p-10">
+        <div className="flex justify-between items-center h-[15vh] p-10">
           <h1 className="text-4xl font-bold text-primary">Transcriber</h1>
 
-          <div className="">
-            <Button onClick={handleStart} className="btn-primary">
+          <div className="flex space-x-4">
+            <Button onClick={handleStart} className="btn-primary" disabled={callStatus !== 0}>
               Start Call
             </Button>
-            <Button onClick={handleStop} className="btn-primary">
+            <Button onClick={handleStop} className="btn-primary" disabled={callStatus !== 1}>
               Stop Call
             </Button>
           </div>
