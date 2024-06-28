@@ -88,11 +88,7 @@ def handle_follow_up_selection(data):
         })
 
 ### TODO: generation of tangential questions
-#
-#
-#
-#
-############################################
+
 
 @socketio.on('extract')
 def handle_extraction(data):

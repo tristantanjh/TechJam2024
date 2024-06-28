@@ -210,7 +210,39 @@ class Chains:
         )
 
         return chain
-    
+
+    def get_tangential_questions_chain(self):
+        template = """
+        You are given the full chat history of an ongoing conversation between a customer and a customer service assistant, along with the latest customer inquiry which might reference context in the chat history.
+        
+        Chat History: 
+        {chat_history}
+
+        Latest Inquiry: {customer_inquiry}
+
+        Based on this information, imagine a panel of three customer service experts reviewing both the chat history and the inquiry. Each expert is tasked with formulating one question that could further clarify or provide more technical details on the customer's issue. These questions should be designed to guide the customer service assistant towards gathering necessary information from the SOP or knowledge graph.
+
+        Provide the final list of three questions in JSON array format. Each question should be a complete question, concise, and clearly formulated for immediate use by the customer service assistant.
+
+        Example format:
+        ["Tell me more about the TikTok manual payment billing option.", "Tell me more about the TikTok automatic payment billing option.", "Tell me more about the TikTok monthly payment billing option."]
+        """
+        
+        prompt = ChatPromptTemplate.from_template(template)
+
+        chain = (
+            RunnableParallel(
+                {
+                    "chat_history": lambda x: x["chat_history"],
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | self.safeListOutputParser
+        )
+        return chain
+
     def get_entity_chain(self):
         """
         Returns the entity chain
@@ -350,7 +382,7 @@ class GPTInstance:
         self.chains = Chains(self.llm)
         self.debug = debug
 
-    def process_message(self, message: str, message_store: MessageStore, sessionId) -> str:
+    def process_message(self, message: str, message_store: MessageStore, sessionId) -> List[str]:
         """
         Process the message
         """
@@ -414,6 +446,18 @@ class GPTInstance:
         """
         tangential_chain = self.chains.get_full_response_chain()
         tangential_result = tangential_chain.invoke({"question": question})
+        if self.debug: print("Tangential result: ", tangential_result)
+        return tangential_result
+    
+    def get_tangential_questions(self, chat_history: List[str], question: str):
+        """
+        Generate tangential questions
+        """
+        tangential_chain = self.chains.get_tangential_questions_chain()
+        tangential_result = tangential_chain.invoke({
+        "chat_history": chat_history,
+        "question": question
+        })
         if self.debug: print("Tangential result: ", tangential_result)
         return tangential_result
 
