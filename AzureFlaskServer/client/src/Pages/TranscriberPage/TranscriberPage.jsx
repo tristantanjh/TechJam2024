@@ -32,6 +32,7 @@ export default function TranscriberPage() {
     GetSessionId,
     speakerSet,
   } = useTranscriber();
+  const [rightBoxHeight, setRightBoxHeight] = useState(null);
 
   // Send data to server everytime transcribedList is updated
   useEffect(() => {
@@ -148,12 +149,23 @@ export default function TranscriberPage() {
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
                 <ResizablePanelGroup direction="vertical" className="h-full">
-                  <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                    <FollowUpQuestion followUpData={followUpData} />
+                  <ResizablePanel
+                    defaultSize={50}
+                    minSize={30}
+                    maxSize={70}
+                    onResize={(e) => setRightBoxHeight(Math.floor(e))}
+                  >
+                    <FollowUpQuestion
+                      followUpData={followUpData}
+                      height={rightBoxHeight}
+                    />
                   </ResizablePanel>
                   <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                    <TangentialInfo socketInstance={socketInstance} />
+                    <TangentialInfo
+                      socketInstance={socketInstance}
+                      height={100 - rightBoxHeight}
+                    />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>

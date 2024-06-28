@@ -18,7 +18,7 @@ const exampleQuestion = [
   ["4", "5", "6"],
 ];
 
-export default function TangentialInfo({ socketInstance }) {
+export default function TangentialInfo({ socketInstance, height }) {
   const { GetSessionId } = useTranscriber();
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
@@ -35,8 +35,8 @@ export default function TangentialInfo({ socketInstance }) {
   //       new Array(3).fill(undefined),
   //     ]);
   //   }
-  // }, [tangentialQuestions]); 
-  
+  // }, [tangentialQuestions]);
+
   // this is for testing on exampleQuestion
   useEffect(() => {
     if (exampleQuestion.length > 0) {
@@ -63,11 +63,11 @@ export default function TangentialInfo({ socketInstance }) {
     console.log("Clicked", idx);
     const currentItem = idx.toString();
     if (openItems.includes(currentItem)) {
-      setOpenItems(openItems.filter(item => item !== currentItem));
+      setOpenItems(openItems.filter((item) => item !== currentItem));
     } else {
       setOpenItems([...openItems, currentItem]);
     }
-    
+
     if (socketInstance && llmOutput[page][idx] === undefined) {
       const data = {
         sessionId: GetSessionId(),
@@ -89,7 +89,6 @@ export default function TangentialInfo({ socketInstance }) {
       });
 
       // TODO: get tangential questions from server and update state
-
     }
   }, [socketInstance]);
 
@@ -117,17 +116,17 @@ export default function TangentialInfo({ socketInstance }) {
           onClick={goToNextPage}
           style={{
             stroke:
-            exampleQuestion.length === 0 ||
+              exampleQuestion.length === 0 ||
               page === exampleQuestion.length - 1
                 ? "#ccc"
                 : "black",
             cursor:
-            exampleQuestion.length === 0 ||
+              exampleQuestion.length === 0 ||
               page === exampleQuestion.length - 1
                 ? "default"
                 : "pointer",
             fill:
-            exampleQuestion.length === 0 ||
+              exampleQuestion.length === 0 ||
               page === exampleQuestion.length - 1
                 ? "#ccc"
                 : hoveredRight
@@ -137,18 +136,20 @@ export default function TangentialInfo({ socketInstance }) {
           onMouseEnter={() => setHoveredRight(true)}
           onMouseLeave={() => setHoveredRight(false)}
           disabled={
-            exampleQuestion.length === 0 ||
-            page === exampleQuestion.length - 1
+            exampleQuestion.length === 0 || page === exampleQuestion.length - 1
           }
         />
       </div>
-      <div>
+      <div
+        style={{
+          height: `${height * 0.67}vh`,
+          overflowY: "auto",
+        }}
+      >
         <div
           style={{
-            height: "75vh",
-            overflowY: "auto",
             backgroundColor:
-            exampleQuestion.length === 0 ? "#a1a1a1" : "inherit",
+              exampleQuestion.length === 0 ? "#a1a1a1" : "inherit",
           }}
         >
           {exampleQuestion.length === 0 ? (
@@ -156,7 +157,12 @@ export default function TangentialInfo({ socketInstance }) {
               No related information
             </h4>
           ) : (
-            <Accordion type="multiple" collapsible className="w-full" value={openItems}>
+            <Accordion
+              type="multiple"
+              collapsible
+              className="w-full"
+              value={openItems}
+            >
               {exampleQuestion[page].map((item, idx) => (
                 <AccordionItem key={idx} value={idx.toString()} className="p-2">
                   <AccordionTrigger

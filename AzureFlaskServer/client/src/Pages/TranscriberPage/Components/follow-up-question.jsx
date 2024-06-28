@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 
-export default function FollowUpQuestion({ followUpData }) {
+export default function FollowUpQuestion({ followUpData, height }) {
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
   const [hoveredRight, setHoveredRight] = useState(false);
@@ -21,8 +21,12 @@ export default function FollowUpQuestion({ followUpData }) {
     }
   };
 
+  useEffect(() => {
+    console.log(height);
+  });
+
   return (
-    <div>
+    <div className="overflow-scroll h-fit">
       <h3 className="p-3 flex justify-start border-t text-lg font-bold text-slate-700 antialiased tracking-normal">
         Follow Up Questions
       </h3>
@@ -70,11 +74,14 @@ export default function FollowUpQuestion({ followUpData }) {
           }
         />
       </div>
-      <div>
+      <div
+        style={{
+          height: `calc(${height * 0.67}vh - 20px)`,
+          overflowY: "auto",
+        }}
+      >
         <div
           style={{
-            height: "75vh",
-            overflowY: "auto",
             backgroundColor:
               followUpData.headerText.length === 0 ? "#a1a1a1" : "inherit",
           }}
