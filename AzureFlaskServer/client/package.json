@@ -28,6 +28,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.12",
+    "ldrs": "^1.0.2",
     "lucide-react": "^0.396.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.38.0",
     "react": "^18.2.0",

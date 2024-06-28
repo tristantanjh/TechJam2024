@@ -10,9 +10,23 @@ import TangentialInfo from "./Components/tangential-info";
 import FollowUpQuestion from "./Components/follow-up-question";
 import { io } from "socket.io-client";
 import { useTranscriber } from "@/hooks/useTranscriber";
-import AiMessage from "@/Pages/CallerPage/components/AiMessage";
+import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { Button } from "@/components/ui/button";
 import LLMOutput from "./Components/llm-output";
+import "ldrs/ring2";
+import { set } from "date-fns";
+
+const loadingStates = [
+  {
+    text: "Authenticating Azure Speech Service...",
+  },
+  {
+    text: "Fetching Data...",
+  },
+  {
+    text: "Initialising Transcriber...",
+  },
+];
 
 export default function TranscriberPage() {
   const [displayText, setDisplayText] = useState("WAITING TO START CALL...");
@@ -31,8 +45,11 @@ export default function TranscriberPage() {
     transcribedList,
     GetSessionId,
     speakerSet,
+    transcriberLoaded,
   } = useTranscriber();
   const [rightBoxHeight, setRightBoxHeight] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [minLoaded, setMinLoaded] = useState(false);
 
   // Send data to server everytime transcribedList is updated
   useEffect(() => {
@@ -92,7 +109,18 @@ export default function TranscriberPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (transcriberLoaded && !minLoaded) {
+      setLoading(false);
+    }
+  }, [transcriberLoaded, minLoaded]);
+
   const handleStart = async () => {
+    setLoading(true);
+    setMinLoaded(true);
+    setTimeout(() => {
+      setMinLoaded(false);
+    }, 3000);
     await StartTranscription();
     setCallStatus(1);
     setAiMessages([]);
@@ -118,10 +146,21 @@ export default function TranscriberPage() {
           <div className="flex space-x-4">
             <Button
               onClick={handleStart}
-              className="btn-primary"
+              className="btn-primary w-[90px]"
               disabled={callStatus !== 0}
             >
-              Start Call
+              {loading ? (
+                <l-ring-2
+                  size="25"
+                  stroke="5"
+                  stroke-length="0.25"
+                  bg-opacity="0.1"
+                  speed="0.8"
+                  color="white"
+                ></l-ring-2>
+              ) : (
+                "Start Call"
+              )}
             </Button>
             <Button
               onClick={handleStop}
@@ -132,7 +171,17 @@ export default function TranscriberPage() {
             </Button>
           </div>
         </div>
-        <ResizablePanelGroup direction="horizontal" className="h-full">
+
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="h-full w-full relative"
+        >
+          <Loader
+            loadingStates={loadingStates}
+            loading={loading}
+            duration={1000}
+            loop={false}
+          />
           <ResizablePanel defaultSize={35} minSize={25} maxSize={55}>
             <Transcriber
               displayText={displayText}
