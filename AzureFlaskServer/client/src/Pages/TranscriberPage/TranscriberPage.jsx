@@ -14,7 +14,6 @@ import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { Button } from "@/components/ui/button";
 import LLMOutput from "./Components/llm-output";
 import "ldrs/ring2";
-import { set } from "date-fns";
 
 const loadingStates = [
   {
@@ -29,7 +28,7 @@ const loadingStates = [
 ];
 
 export default function TranscriberPage() {
-  const [displayText, setDisplayText] = useState("WAITING TO START CALL...");
+  const [displayText, setDisplayText] = useState("Waiting to start call...");
   const socketInitialised = useRef(false); // useEffect check
   const [socketInstance, setSocketInstance] = useState(null);
   const messageInitialised = useRef(false); // useEffect check
@@ -128,13 +127,13 @@ export default function TranscriberPage() {
       headerText: [],
       followUpQuestions: [],
     });
-    setDisplayText("SPEAK INTO THE MIC...");
+    setDisplayText("Speak into the mic...");
   };
 
   const handleStop = async () => {
     await StopTranscription();
     setCallStatus(0);
-    setDisplayText("WAITING TO START CALL...");
+    setDisplayText("Waiting to start call...");
   };
 
   return (

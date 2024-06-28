@@ -11,8 +11,6 @@ export default function FollowUpQuestion({ followUpData, height }) {
     setPage((prev) => prev - 1);
   };
 
-  console.log(followUpData.followUpQuestions.length);
-
   const goToNextPage = () => {
     if (followUpData.followUpQuestions.length === 0) return;
 
@@ -20,10 +18,6 @@ export default function FollowUpQuestion({ followUpData, height }) {
       setPage(page + 1);
     }
   };
-
-  useEffect(() => {
-    console.log(height);
-  });
 
   return (
     <div className="overflow-scroll h-fit">
@@ -83,12 +77,12 @@ export default function FollowUpQuestion({ followUpData, height }) {
         <div
           style={{
             backgroundColor:
-              followUpData.headerText.length === 0 ? "#a1a1a1" : "inherit",
+              followUpData.headerText.length === 0 ? "inherit" : "inherit",
           }}
         >
           {followUpData.headerText.length === 0 ? (
             <h4 className="mt-40 flex justify-center items-center text-xl font-semibold tracking-tight">
-              No follow up questions
+              No follow up questions...
             </h4>
           ) : (
             <>
