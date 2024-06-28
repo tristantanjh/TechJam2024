@@ -6,7 +6,7 @@ import {
 import React, { useEffect, useState, useRef } from "react";
 import "./TranscriberPage.css";
 import Transcriber from "./Components/transcriber";
-import TangentualInfo from "./Components/tangentual-info";
+import TangentialInfo from "./Components/tangential-info";
 import FollowUpQuestion from "./Components/follow-up-question";
 import { io } from "socket.io-client";
 import { useTranscriber } from "@/hooks/useTranscriber";
@@ -154,7 +154,7 @@ export default function TranscriberPage() {
                   </ResizablePanel>
                   <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
-                    <TangentualInfo />
+                    <TangentialInfo socketInstance={socketInstance} />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>
