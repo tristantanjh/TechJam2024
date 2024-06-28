@@ -64,25 +64,35 @@ def handle_message(data):
                 })
 
 # in case needed in the future
-# @socketio.on('selected-question')
-# def handle_follow_up_selection(data):
-#     sessionId = data['sessionId']
-#     selected_question = data['selectedQuestion']
-#     print("selected question: ", selected_question)
+@socketio.on('selected-question')
+def handle_follow_up_selection(data):
+    sessionId = data['sessionId']
+    selected_question = data['selectedQuestion']
 
-#     # process the selected question with response chain
-#     response = gpt_instance.process_message(selected_question)
-#     if response != "":
-#         # add the ai response to the message store
-#         message_store.add_ai_message({
-#             'sessionId': sessionId,
-#             'aiMessage': response
-#         })
+    # process the selected question with response chain
+    response = gpt_instance.get_tangential_output(selected_question)
+    if response != "":
+        ### TODO: add the tangential question and response to the message store
+        # add the tangential question and response to the message store
+        # message_store.add_tangential_questions({
+        #     'sessionId': sessionId,
+        #     'tangentialQuestion': selected_question,
+        #     'tangentialResponse': response
+        # })
 
-#         # emit the ai response to the client
-#         emit('ai-response', {
-#             'aiMessage': response
-#         })
+        # emit the ai response to the client
+        emit('tangential-questions-response', {
+            'response': response,
+            'idx': data['idx'],
+            'page': data['page'],
+        })
+
+### TODO: generation of tangential questions
+#
+#
+#
+#
+############################################
 
 @socketio.on('extract')
 def handle_extraction(data):

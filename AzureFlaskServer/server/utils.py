@@ -20,6 +20,7 @@ class MessageStore:
         self.messages = {}
         self.ai_messages = {}
         self.follow_up_questions = {}
+        # self.tangential_questions = {}
 
     def add_message(self, formatted_message):
         sessionId = formatted_message['sessionId']
@@ -51,6 +52,15 @@ class MessageStore:
             
     def get_follow_up_questions(self, sessionId):
         return self.follow_up_questions.get(sessionId, [])
+    
+    # def add_tangential_questions(self, data):
+    #     if data['sessionId'] in self.tangential_questions:
+    #         self.tangential_questions[data['sessionId']].append(data['tangentialQuestions'])
+    #     else:
+    #         self.tangential_questions[data['sessionId']] = [data['tangentialQuestions']]
+            
+    # def get_tangential_questions(self, sessionId):
+    #     return self.tangential_questions.get(sessionId, [])
 
 class Chains:
     def __init__(self, llm):
@@ -276,9 +286,31 @@ class Chains:
         Use natural language and answer it concisely in point form
         Answer:"""
 
-
         prompt = ChatPromptTemplate.from_template(template)
 
+        chain = (
+            RunnableParallel(
+                {
+                    "context": lambda x: self.get_context(x["question"]),
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | StrOutputParser()
+        )
+
+        return chain
+    
+    def get_full_response_chain(self) -> str:
+        template = """Answer the question based only on the following context:
+        {context}
+
+        Question: {question}
+        Use natural language and answer it concisely
+        Answer:"""
+
+        prompt = ChatPromptTemplate.from_template(template)
 
         chain = (
             RunnableParallel(
@@ -375,7 +407,15 @@ class GPTInstance:
         })
         if self.debug: print("Follow up result: ", follow_up_result)
         return follow_up_result
-
+    
+    def get_tangential_output(self, question: str):
+        """
+        Generate output for tangential question
+        """
+        tangential_chain = self.chains.get_full_response_chain()
+        tangential_result = tangential_chain.invoke({"question": question})
+        if self.debug: print("Tangential result: ", tangential_result)
+        return tangential_result
 
 class Entities(BaseModel):
     """

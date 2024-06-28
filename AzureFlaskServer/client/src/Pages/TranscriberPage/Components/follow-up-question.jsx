@@ -1,29 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 
-const exampleHeader = [
-  "Follow Up Questions 1",
-  "Follow Up Questions 2",
-  "Follow Up Questions 3",
-];
-const exampleQuestions = [
-  [
-    "What is your favorite color?",
-    "What is your favorite food?",
-    "What is your favorite movie?",
-  ],
-  [
-    "What is your favorite animal?",
-    "What is your favorite book?",
-    "What is your favorite song?",
-  ],
-  [
-    "What is your favorite hobby?",
-    "What is your favorite sport?",
-    "What is your favorite place?",
-  ],
-];
-
 export default function FollowUpQuestion({ followUpData }) {
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
