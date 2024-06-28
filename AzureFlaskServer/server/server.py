@@ -37,8 +37,12 @@ def handle_message(data):
                 'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
             }
             
+            ### TODO: generation of tangential questions
+            # should be part of this process_message method, then return the tangential question also
             [ai_response, follow_up_questions] = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
             message_store.add_message(formatted_message)
+            
+            # then check if got tangential question processed, then add to message store under its own object, then return to client
 
             if ai_response != "":
                 # Store and possibly broadcast the AI's response
@@ -86,13 +90,6 @@ def handle_follow_up_selection(data):
             'idx': data['idx'],
             'page': data['page'],
         })
-
-### TODO: generation of tangential questions
-#
-#
-#
-#
-############################################
 
 @socketio.on('extract')
 def handle_extraction(data):
