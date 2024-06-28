@@ -46,7 +46,10 @@ export default function FollowUpQuestion({ followUpData }) {
 
   return (
     <div>
-      <div className="flex justify-around items-center border-t border-b">
+      <h3 className="p-3 flex justify-start border-t text-lg font-bold text-slate-700 antialiased tracking-normal">
+        Follow Up Questions
+      </h3>
+      <div className="flex justify-around items-center ">
         <ArrowBigLeft
           className="arrow-icon"
           onClick={goToPreviousPage}
@@ -59,23 +62,24 @@ export default function FollowUpQuestion({ followUpData }) {
           onMouseLeave={() => setHoveredLeft(false)}
           disabled={page === 0}
         />
-        <h3 className="p-3 scroll-m-20 text-2xl font-semibold tracking-tight">
-          Follow Up Questions
-        </h3>
+
         <ArrowBigRight
           className="arrow-icon"
           onClick={goToNextPage}
           style={{
             stroke:
-              followUpData.followUpQuestions.length === 0 || page === followUpData.headerText.length - 1
+              followUpData.followUpQuestions.length === 0 ||
+              page === followUpData.headerText.length - 1
                 ? "#ccc"
                 : "black",
             cursor:
-            followUpData.followUpQuestions.length === 0 || page === followUpData.headerText.length - 1
+              followUpData.followUpQuestions.length === 0 ||
+              page === followUpData.headerText.length - 1
                 ? "default"
                 : "pointer",
             fill:
-            followUpData.followUpQuestions.length === 0 || page === followUpData.headerText.length - 1
+              followUpData.followUpQuestions.length === 0 ||
+              page === followUpData.headerText.length - 1
                 ? "#ccc"
                 : hoveredRight
                 ? "black"
@@ -83,7 +87,10 @@ export default function FollowUpQuestion({ followUpData }) {
           }}
           onMouseEnter={() => setHoveredRight(true)}
           onMouseLeave={() => setHoveredRight(false)}
-          disabled={followUpData.followUpQuestions.length === 0 || page === followUpData.headerText.length - 1}
+          disabled={
+            followUpData.followUpQuestions.length === 0 ||
+            page === followUpData.headerText.length - 1
+          }
         />
       </div>
       <div>

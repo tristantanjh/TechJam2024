@@ -30,6 +30,7 @@ export default function TranscriberPage() {
     StopTranscription,
     transcribedList,
     GetSessionId,
+    speakerSet,
   } = useTranscriber();
 
   // Send data to server everytime transcribedList is updated
@@ -73,14 +74,11 @@ export default function TranscriberPage() {
 
       socket.on("follow-up-questions", (data) => {
         if (data) {
-          const parsedFollowUpQuestions = JSON.parse(data["followUpQuestions"])
-          console.log(parsedFollowUpQuestions)
+          const parsedFollowUpQuestions = JSON.parse(data["followUpQuestions"]);
+          console.log(parsedFollowUpQuestions);
 
           setFollowUpData((prevData) => ({
-            headerText: [
-              ...prevData.headerText,
-              data["headerText"],
-            ],
+            headerText: [...prevData.headerText, data["headerText"]],
             followUpQuestions: [
               ...prevData.followUpQuestions,
               parsedFollowUpQuestions,
@@ -138,6 +136,7 @@ export default function TranscriberPage() {
             <Transcriber
               displayText={displayText}
               transcribedList={transcribedList}
+              speakers={Array.from(speakerSet)}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />

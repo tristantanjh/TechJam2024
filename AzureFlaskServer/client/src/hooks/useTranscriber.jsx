@@ -7,6 +7,7 @@ const AzureContext = createContext();
 export const AzureProvider = ({ children }) => {
   const transcriberInstance = useRef(null);
   const [transcribedList, setTranscribedList] = useState([]);
+  const [speakerSet, setSpeakerSet] = useState(new Set());
   const sessionId = useRef(null);
 
   const InitialiseTranscriber = async () => {
@@ -66,6 +67,10 @@ export const AzureProvider = ({ children }) => {
             speakerId: e.result.speakerId,
           },
         ]);
+        if (!speakerSet.has(e.result.speakerId)) {
+          setSpeakerSet(prev => new Set([...prev, e.result.speakerId]))
+        }
+
       }
     };
   };
@@ -125,6 +130,7 @@ export const AzureProvider = ({ children }) => {
       GetTranscribedList,
       SetTranscribedEvent,
       transcribedList,
+      speakerSet,
       GetSessionId,
     }),
     [transcriberInstance, transcribedList]
