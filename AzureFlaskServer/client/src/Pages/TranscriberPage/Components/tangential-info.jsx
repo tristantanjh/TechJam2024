@@ -25,6 +25,7 @@ export default function TangentialInfo({ socketInstance }) {
   const [hoveredRight, setHoveredRight] = useState(false);
   const [tangentialQuestions, setTangentialQuestions] = useState([]);
   const [llmOutput, setLlmOutput] = useState([]);
+  const [openItems, setOpenItems] = useState([]);
 
   // append 1 empty array to llmOutput everytime tangentialQuestions is updated
   // useEffect(() => {
@@ -47,18 +48,27 @@ export default function TangentialInfo({ socketInstance }) {
   const goToPreviousPage = () => {
     if (page === 0) return;
     setPage((prev) => prev - 1);
+    setOpenItems([]);
   };
 
   const goToNextPage = () => {
     if (exampleQuestion.length === 0) return;
     if (page < exampleQuestion.length - 1) {
       setPage(page + 1);
+      setOpenItems([]);
     }
   };
 
   const handleClick = (idx) => {
     console.log("Clicked", idx);
-    if (socketInstance && llmOutput[page][idx] !== "") {
+    const currentItem = idx.toString();
+    if (openItems.includes(currentItem)) {
+      setOpenItems(openItems.filter(item => item !== currentItem));
+    } else {
+      setOpenItems([...openItems, currentItem]);
+    }
+    
+    if (socketInstance && llmOutput[page][idx] === undefined) {
       const data = {
         sessionId: GetSessionId(),
         selectedQuestion: exampleQuestion[page][idx],
@@ -146,7 +156,7 @@ export default function TangentialInfo({ socketInstance }) {
               No related information
             </h4>
           ) : (
-            <Accordion type="multiple" collapsible className="w-full">
+            <Accordion type="multiple" collapsible className="w-full" value={openItems}>
               {exampleQuestion[page].map((item, idx) => (
                 <AccordionItem key={idx} value={idx.toString()} className="p-2">
                   <AccordionTrigger
