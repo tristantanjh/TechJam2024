@@ -103,6 +103,7 @@ class Chains:
         The input ai_message is expected to be a string in JSON format.
         """
         # Assuming the text content is directly accessible as a string, adjust according to your AIMessage structure
+        print(ai_message)
         try:
             # Extracting text content from AIMessage, adjust the attribute access as necessary
             message_text = ai_message.content
@@ -152,10 +153,11 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Answer yes if the current question similar to any of the previous questions in meaning. If there are no previous questions, answer "no"
+                    You are given a chat history of questions asked by a customer towards a customer service assistant and the latest user question which might be repeated from before. 
+                    Answer yes only if the current question has been repeated in meaning compared to previous questions. Do not answer yes just because they mention the same nouns. If there are no previous questions, answer "no"
 
                     Previous questions: {history}
-                    Current questions: {text}
+                    Latest question: {text}
 
                     """
                 )
@@ -422,12 +424,12 @@ class GPTInstance:
 
         if initial_check_result:
             response = response_chain.invoke({"question": message})
+            chat_history = message_store.get_messages(sessionId)
             print("Response: " + response)
-            print("History: " + str(message_store.get_messages(sessionId)))
-            history_check_result = history_check_chain.invoke({"text": response, "history": message_store.get_messages(sessionId)})
+            print("History: " + str(chat_history))
+            history_check_result = history_check_chain.invoke({"text": response, "history": chat_history})
             print("History check result: " + str(history_check_result))
             if not history_check_result:
-                chat_history = message_store.get_messages(sessionId)
                 follow_up_questions = self.get_follow_up_questions(chat_history, response)
                 tangential_questions = self.get_tangential_questions(chat_history, response)
                 return [response, follow_up_questions, tangential_questions]

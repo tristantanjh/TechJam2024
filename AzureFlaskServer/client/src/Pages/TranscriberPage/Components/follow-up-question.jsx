@@ -86,13 +86,13 @@ export default function FollowUpQuestion({ followUpData, height }) {
             </h4>
           ) : (
             <>
-              <p className="p-2 font-bold text-blue-950 ml-4 mt-2">
+              <p className="p-2 font-bold text-blue-950 ml-4 mt-2 mb-3">
                 {followUpData.headerText[page]}
               </p>
               {followUpData.followUpQuestions[page].map((item, idx) => (
                 <p
                   key={idx}
-                  className="p-2 mb-2 rounded-lg border border-gray-300 mx-4"
+                  className="p-3 mb-3 font-normal rounded-lg border border-gray-300 mx-4"
                 >
                   {item}
                 </p>

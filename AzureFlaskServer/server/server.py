@@ -41,9 +41,10 @@ def handle_message(data):
             ### TODO: generation of tangential questions
             # should be part of this process_message method, then return the tangential question also
             [ai_response, follow_up_questions, tangential_questions] = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
-            message_store.add_message(formatted_message)
+            
           
-            if ai_response != "":
+            if ai_response:
+                message_store.add_message(formatted_message)
                 # Store and possibly broadcast the AI's response
                 message_store.add_ai_message({
                     'sessionId': sessionId,
@@ -69,6 +70,7 @@ def handle_message(data):
             if tangential_questions:
                 print("tangential questions: ", tangential_questions)
                 emit ('tangential-questions', {
+                    'sessionId': sessionId,
                     'tangentialQuestions': tangential_questions
                 })
 

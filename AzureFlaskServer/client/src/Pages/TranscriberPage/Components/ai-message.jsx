@@ -12,17 +12,17 @@ export default function AiMessage({ points }) {
     setVisible("");
   };
   return (
-    <div className="p-2 flex items-start justify-center">
+    <div className="p-2 flex items-start justify-center border-solid border-b-2 border-gray-300">
       <Avatar className="mt-2">
         <AvatarFallback>
           <BotMessageSquare />
         </AvatarFallback>
       </Avatar>
-      <div className="flex flex-col  ml-4 w-[80%]">
+      <div className="flex flex-col ml-4 w-[80%]">
         {points.map((point, idx) => (
           <>
             <div
-              key={idx}
+              key={idx + point}
               onMouseOver={() => handleHover(idx)}
               onMouseLeave={handleLeave}
               className="flex rounded-md hover:bg-slate-100 transition-colors"

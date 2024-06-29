@@ -92,7 +92,6 @@ export default function TranscriberPage() {
       socket.on("follow-up-questions", (data) => {
         if (data) {
           const parsedFollowUpQuestions = JSON.parse(data["followUpQuestions"]);
-          console.log(parsedFollowUpQuestions);
 
           setFollowUpData((prevData) => ({
             headerText: [...prevData.headerText, data["headerText"]],
@@ -103,6 +102,8 @@ export default function TranscriberPage() {
           }));
         }
       });
+
+      
 
       socketInitialised.current = true;
     }
