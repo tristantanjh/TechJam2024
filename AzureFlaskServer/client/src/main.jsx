@@ -15,6 +15,7 @@ import "./index.css";
 import DashboardPage from "./Pages/DashboardPage/DashboardPage";
 import SettingsPage from "./Pages/SettingsPage/SettingsPage";
 import ActionsPage from "./Pages/ActionsPage/ActionsPage";
+import CopilotPage from "./Pages/CopilotPage/CopilotPage";
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: "actions",
         element: <ActionsPage />,
+      },
+      {
+        path: "copilot",
+        element: <CopilotPage />,
       },
     ],
   },
