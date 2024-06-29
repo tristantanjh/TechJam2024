@@ -22,6 +22,7 @@ def handle_connect():
     print(f'Client connected. Client ID: {request.sid}')
     emit('connected', {'data': f'{request.sid} is connected'})
 
+# runs on every newly transcripted message
 @socketio.on('data')
 def handle_message(data):
     """event listener when client types a message"""
@@ -37,9 +38,11 @@ def handle_message(data):
                 'text': f"{new_message['speakerId']}: {new_message['text'].strip()}"
             }
             
-            [ai_response, follow_up_questions] = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
+            ### TODO: generation of tangential questions
+            # should be part of this process_message method, then return the tangential question also
+            [ai_response, follow_up_questions, tangential_questions] = gpt_instance.process_message(new_message['text'], message_store, sessionId)            
             message_store.add_message(formatted_message)
-
+            
             if ai_response != "":
                 # Store and possibly broadcast the AI's response
                 message_store.add_ai_message({
@@ -62,15 +65,26 @@ def handle_message(data):
                     'headerText': new_message['text'],
                     'followUpQuestions': follow_up_questions
                 })
+            
+            if tangential_questions:
+                print("tangential questions: ", tangential_questions)
+                emit ('tangential-questions', {
+                    'tangentialQuestions': tangential_questions
+                })
+
 
 # in case needed in the future
 @socketio.on('selected-question')
 def handle_follow_up_selection(data):
     sessionId = data['sessionId']
     selected_question = data['selectedQuestion']
+    prev_selected_questions = message_store.get_selected_questions(sessionId)
+    if selected_question in prev_selected_questions:
+        response = message_store.get_selected_question_response(sessionId, selected_question)
+    else:
+        # process the selected question with response chain
+        response = gpt_instance.get_tangential_output(selected_question)
 
-    # process the selected question with response chain
-    response = gpt_instance.get_tangential_output(selected_question)
     if response != "":
         ### TODO: add the tangential question and response to the message store
         # add the tangential question and response to the message store
@@ -79,16 +93,15 @@ def handle_follow_up_selection(data):
         #     'tangentialQuestion': selected_question,
         #     'tangentialResponse': response
         # })
-
+        message_store.add_selected_question_and_response(
+            sessionId, selected_question, response
+        )
         # emit the ai response to the client
         emit('tangential-questions-response', {
             'response': response,
             'idx': data['idx'],
             'page': data['page'],
         })
-
-### TODO: generation of tangential questions
-
 
 @socketio.on('extract')
 def handle_extraction(data):
@@ -162,7 +175,7 @@ def get_token():
             })
         except requests.exceptions.RequestException as e:
             abort(500, description=str(e))
-
+        
 @app.errorhandler(400)
 def bad_request(error):
     return jsonify({

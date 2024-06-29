@@ -20,6 +20,7 @@ class MessageStore:
         self.messages = {}
         self.ai_messages = {}
         self.follow_up_questions = {}
+        self.selected_questions_responses = {}
         # self.tangential_questions = {}
 
     def add_message(self, formatted_message):
@@ -53,6 +54,19 @@ class MessageStore:
     def get_follow_up_questions(self, sessionId):
         return self.follow_up_questions.get(sessionId, [])
     
+    def add_selected_question_and_response(self, sessionId, selected_question, response):
+        if sessionId not in self.selected_questions_responses:
+            self.selected_questions_responses[sessionId] = {}
+        # Store the question and its response
+        self.selected_questions_responses[sessionId][selected_question] = response
+        
+    def get_selected_questions(self, sessionId):
+        session_data = self.selected_questions_responses.get(sessionId, {})
+        return list(session_data.keys())  # Return only the questions
+     
+    def get_selected_question_response(self, sessionId, selected_question):
+        return self.selected_questions_responses.get(sessionId, {}).get(question)
+
     # def add_tangential_questions(self, data):
     #     if data['sessionId'] in self.tangential_questions:
     #         self.tangential_questions[data['sessionId']].append(data['tangentialQuestions'])
@@ -213,19 +227,28 @@ class Chains:
 
     def get_tangential_questions_chain(self):
         template = """
-        You are given the full chat history of an ongoing conversation between a customer and a customer service assistant, along with the latest customer inquiry which might reference context in the chat history.
-        
-        Chat History: 
+        Review the chat history and the customer's latest inquiry to determine if there are complex terms or processes that need explaining.
+        If relevant, generate three tangential questions that clarify these terms or outline basic procedures. 
+        If the inquiry is straightforward with no such complexities, return an empty JSON array.
+
+        Chat History:
         {chat_history}
 
-        Latest Inquiry: {customer_inquiry}
+        Latest Inquiry:
+        {question}
 
-        Based on this information, imagine a panel of three customer service experts reviewing both the chat history and the inquiry. Each expert is tasked with formulating one question that could further clarify or provide more technical details on the customer's issue. These questions should be designed to guide the customer service assistant towards gathering necessary information from the SOP or knowledge graph.
-
-        Provide the final list of three questions in JSON array format. Each question should be a complete question, concise, and clearly formulated for immediate use by the customer service assistant.
-
-        Example format:
-        ["Tell me more about the TikTok manual payment billing option.", "Tell me more about the TikTok automatic payment billing option.", "Tell me more about the TikTok monthly payment billing option."]
+        Directions:
+        - Identify complex terms or detailed processes.
+        - Consider what basic knowledge is necessary to understand these aspects.
+        - Formulate questions that:
+            1. Define and clarify critical terms.
+            2. Describe basic procedural steps.
+            3. Explain initial setups or usage of services or technologies.
+        
+        You always return the list of 3 questions in a JSON array if complex terms or detailed processes are identified.
+        Expected Output:
+        - If actionable topics are identified: ["Question 1", "Question 2", "Question 3"]
+        - If not: []
         """
         
         prompt = ChatPromptTemplate.from_template(template)
@@ -406,18 +429,18 @@ class GPTInstance:
             if not history_check_result:
                 chat_history = message_store.get_messages(sessionId)
                 follow_up_questions = self.get_follow_up_questions(chat_history, response)
-                
-                return [response, follow_up_questions]
+                tangential_questions = self.get_tangential_questions(chat_history, response)
+                return [response, follow_up_questions, tangential_questions]
             else:
-                return ["", ""]
-                # return messag e
+                return ["", "", ""]
+                # return message
                 # elaboration_result = elaboration_chain.invoke({"text": message})
 
                 # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
 
                 # return elaboration_result
         else:
-            return ["", ""]
+            return ["", "", ""]
     
     def elaborate_on_chosen_point(self, message: str) -> str:
         """
@@ -458,7 +481,7 @@ class GPTInstance:
         "chat_history": chat_history,
         "question": question
         })
-        if self.debug: print("Tangential result: ", tangential_result)
+        if self.debug: print("Tangential questions: ", tangential_result)
         return tangential_result
 
 class Entities(BaseModel):
