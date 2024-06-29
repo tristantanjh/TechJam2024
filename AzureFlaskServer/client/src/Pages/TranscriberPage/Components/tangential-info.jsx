@@ -82,7 +82,7 @@ export default function TangentialInfo({ socketInstance, height }) {
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("tangential-questions-response", (data) => {
+      socketInstance.on("tangential-questions", (data) => {
         const updatedLlmOutput = [...llmOutput];
         updatedLlmOutput[data.page][data.idx] = data.response;
         setLlmOutput(updatedLlmOutput);
