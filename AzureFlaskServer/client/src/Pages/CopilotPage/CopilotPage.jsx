@@ -5,13 +5,17 @@ import AiMessage from "./components/ai-message";
 const placeholders = [
   "Enter your question here!",
   "Help me create a new Jira issue!",
-  "Show me the most recent sales.",
+  "Show me the most recent sales. lorem",
 ];
 const placeholderMessages = [
   { type: "ai", text: "Sure! I can help you with that." },
   { type: "ai", text: "I can help you with that." },
-  { type: "ai", text: "I can help you with that." },
+  {
+    type: "ai",
+    text: "I can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiuI can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiu",
+  },
 ];
+
 export default function CopilotPage() {
   const [input, setInput] = useState("");
   const [responding, setResponding] = useState(false);
