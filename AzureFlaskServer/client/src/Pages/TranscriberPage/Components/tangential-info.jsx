@@ -18,7 +18,7 @@ const exampleQuestion = [
   ["4", "5", "6"],
 ];
 
-export default function TangentialInfo({ socketInstance }) {
+export default function TangentialInfo({ socketInstance, height }) {
   const { GetSessionId } = useTranscriber();
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
@@ -140,11 +140,14 @@ export default function TangentialInfo({ socketInstance }) {
           }
         />
       </div>
-      <div>
+      <div
+        style={{
+          height: `${height * 0.67}vh`,
+          overflowY: "auto",
+        }}
+      >
         <div
           style={{
-            height: "75vh",
-            overflowY: "auto",
             backgroundColor:
               exampleQuestion.length === 0 ? "#a1a1a1" : "inherit",
           }}

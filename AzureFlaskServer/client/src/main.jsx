@@ -14,6 +14,7 @@ import TranscriberPage from "./Pages/TranscriberPage/TranscriberPage";
 import "./index.css";
 import DashboardPage from "./Pages/DashboardPage/DashboardPage";
 import SettingsPage from "./Pages/SettingsPage/SettingsPage";
+import ActionsPage from "./Pages/ActionsPage/ActionsPage";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <SettingsPage />,
+      },
+      {
+        path: "actions",
+        element: <ActionsPage />,
       },
     ],
   },

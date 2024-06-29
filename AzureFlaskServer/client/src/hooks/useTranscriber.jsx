@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useRef, useState } from "react";
 import { getTokenOrRefresh } from "../utils/utils";
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
+import { set } from "date-fns";
 
 const AzureContext = createContext();
 
@@ -9,6 +10,7 @@ export const AzureProvider = ({ children }) => {
   const [transcribedList, setTranscribedList] = useState([]);
   const [speakerSet, setSpeakerSet] = useState(new Set());
   const sessionId = useRef(null);
+  const [transcriberLoaded, setTranscriberLoaded] = useState(false);
 
   const InitialiseTranscriber = async () => {
     // get the token and region
@@ -68,9 +70,8 @@ export const AzureProvider = ({ children }) => {
           },
         ]);
         if (!speakerSet.has(e.result.speakerId)) {
-          setSpeakerSet(prev => new Set([...prev, e.result.speakerId]))
+          setSpeakerSet((prev) => new Set([...prev, e.result.speakerId]));
         }
-
       }
     };
   };
@@ -82,6 +83,7 @@ export const AzureProvider = ({ children }) => {
       console.log(
         "Transcriber instance initialised successfully... Starting transcription..."
       );
+      setTranscriberLoaded(true);
       await transcriberInstance.current.startTranscribingAsync();
       setTranscribedList([]);
     } else {
@@ -93,7 +95,7 @@ export const AzureProvider = ({ children }) => {
   const StopTranscription = async () => {
     if (transcriberInstance.current) {
       await transcriberInstance.current.stopTranscribingAsync();
-
+      setTranscriberLoaded(false);
       setTranscribedList((prevList) => [
         ...prevList,
         {
@@ -132,8 +134,9 @@ export const AzureProvider = ({ children }) => {
       transcribedList,
       speakerSet,
       GetSessionId,
+      transcriberLoaded,
     }),
-    [transcriberInstance, transcribedList]
+    [transcriberInstance, transcribedList, speakerSet, transcriberLoaded]
   );
 
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 
-export default function FollowUpQuestion({ followUpData }) {
+export default function FollowUpQuestion({ followUpData, height }) {
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
   const [hoveredRight, setHoveredRight] = useState(false);
@@ -10,8 +10,6 @@ export default function FollowUpQuestion({ followUpData }) {
     if (page === 0) return;
     setPage((prev) => prev - 1);
   };
-
-  console.log(followUpData.followUpQuestions.length);
 
   const goToNextPage = () => {
     if (followUpData.followUpQuestions.length === 0) return;
@@ -22,7 +20,7 @@ export default function FollowUpQuestion({ followUpData }) {
   };
 
   return (
-    <div>
+    <div className="overflow-scroll h-fit">
       <h3 className="p-3 flex justify-start border-t text-lg font-bold text-slate-700 antialiased tracking-normal">
         Follow Up Questions
       </h3>
@@ -70,18 +68,21 @@ export default function FollowUpQuestion({ followUpData }) {
           }
         />
       </div>
-      <div>
+      <div
+        style={{
+          height: `calc(${height * 0.67}vh - 20px)`,
+          overflowY: "auto",
+        }}
+      >
         <div
           style={{
-            height: "75vh",
-            overflowY: "auto",
             backgroundColor:
-              followUpData.headerText.length === 0 ? "#a1a1a1" : "inherit",
+              followUpData.headerText.length === 0 ? "inherit" : "inherit",
           }}
         >
           {followUpData.headerText.length === 0 ? (
             <h4 className="mt-40 flex justify-center items-center text-xl font-semibold tracking-tight">
-              No follow up questions
+              No follow up questions...
             </h4>
           ) : (
             <>
