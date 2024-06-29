@@ -8,42 +8,29 @@ import {
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { useTranscriber } from "@/hooks/useTranscriber";
 
-const exampleQuestion = [
-  [
-    "Tell me more about the TikTok Manual Payment billing option.",
-    "Tell me more about the TikTok Automatic Payment billing option.",
-    "Tell me more about the TikTok Monthly Invoicing billing option.",
-  ],
-  ["1", "2", "3"],
-  ["4", "5", "6"],
-];
+// const exampleQuestion = [
+//   [
+//     "Tell me more about the TikTok Manual Payment billing option.",
+//     "Tell me more about the TikTok Automatic Payment billing option.",
+//     "Tell me more about the TikTok Monthly Invoicing billing option.",
+//   ],
+//   ["1", "2", "3"],
+//   ["4", "5", "6"],
+// ];
 
 export default function TangentialInfo({ socketInstance, height }) {
   const { GetSessionId } = useTranscriber();
   const [page, setPage] = useState(0);
   const [hoveredLeft, setHoveredLeft] = useState(false);
   const [hoveredRight, setHoveredRight] = useState(false);
-  const [tangentialQuestions, setTangentialQuestions] = useState([]);
   const [llmOutput, setLlmOutput] = useState([]);
   const [openItems, setOpenItems] = useState([]);
 
-  // append 1 empty array to llmOutput everytime tangentialQuestions is updated
-  // useEffect(() => {
-  //   if (tangentialQuestions.length > 0) {
-  //     setLlmOutput((prevLlmOutput) => [
-  //       ...prevLlmOutput,
-  //       new Array(3).fill(undefined),
-  //     ]);
-  //   }
-  // }, [tangentialQuestions]);
 
-  // this is for testing on exampleQuestion
-  useEffect(() => {
-    if (exampleQuestion.length > 0) {
-      const initialLlmOutput = exampleQuestion.map(() => []);
-      setLlmOutput(initialLlmOutput);
-    }
-  }, [exampleQuestion]);
+  const [tangentialData, setTangentialData] = useState({
+    questions: [],
+    answers: []
+  })
 
   const goToPreviousPage = () => {
     if (page === 0) return;
@@ -52,8 +39,8 @@ export default function TangentialInfo({ socketInstance, height }) {
   };
 
   const goToNextPage = () => {
-    if (exampleQuestion.length === 0) return;
-    if (page < exampleQuestion.length - 1) {
+    if (tangentialData.questions.length === 0) return;
+    if (page < tangentialData.questions.length - 1) {
       setPage(page + 1);
       setOpenItems([]);
     }
@@ -61,6 +48,7 @@ export default function TangentialInfo({ socketInstance, height }) {
 
   const handleClick = (idx) => {
     console.log("Clicked", idx);
+    console.log(tangentialData)
     const currentItem = idx.toString();
     if (openItems.includes(currentItem)) {
       setOpenItems(openItems.filter((item) => item !== currentItem));
@@ -68,10 +56,10 @@ export default function TangentialInfo({ socketInstance, height }) {
       setOpenItems([...openItems, currentItem]);
     }
 
-    if (socketInstance && llmOutput[page][idx] === undefined) {
+    if (socketInstance && !tangentialData.answers[page][idx]) {
       const data = {
         sessionId: GetSessionId(),
-        selectedQuestion: exampleQuestion[page][idx],
+        selectedQuestion: tangentialData.questions[page][idx],
         idx: idx,
         page: page,
       };
@@ -82,13 +70,32 @@ export default function TangentialInfo({ socketInstance, height }) {
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("tangential-questions-response", (data) => {
-        const updatedLlmOutput = [...llmOutput];
-        updatedLlmOutput[data.page][data.idx] = data.response;
-        setLlmOutput(updatedLlmOutput);
-      });
+      socketInstance.on("tangential-questions", (data) => {
+        if (data) {
+          const parsedTangentialQuestions = JSON.parse(data["tangentialQuestions"])
+
+          setTangentialData((prevData) => ({
+            questions: [...prevData.questions, parsedTangentialQuestions],
+            answers: [...prevData.answers, ["", "", ""]]
+          }))
+        }
+      })
 
       // TODO: get tangential questions from server and update state
+      socketInstance.on('tangential-questions-response', ({response, idx, page}) => {
+        if (response) {
+          console.log("Changing response FE")
+
+          setTangentialData((prevData) => {
+            const tmp = prevData.answers
+            tmp[page][idx] = response
+            return {
+              ...prevData,
+              answers: tmp
+            }
+          })
+        }
+      })
     }
   }, [socketInstance]);
 
@@ -116,18 +123,18 @@ export default function TangentialInfo({ socketInstance, height }) {
           onClick={goToNextPage}
           style={{
             stroke:
-              exampleQuestion.length === 0 ||
-              page === exampleQuestion.length - 1
+            tangentialData.questions.length === 0 ||
+              page === tangentialData.questions.length - 1
                 ? "#ccc"
                 : "black",
             cursor:
-              exampleQuestion.length === 0 ||
-              page === exampleQuestion.length - 1
+            tangentialData.questions.length === 0 ||
+              page === tangentialData.questions.length - 1
                 ? "default"
                 : "pointer",
             fill:
-              exampleQuestion.length === 0 ||
-              page === exampleQuestion.length - 1
+            tangentialData.questions.length === 0 ||
+              page === tangentialData.questions.length - 1
                 ? "#ccc"
                 : hoveredRight
                 ? "black"
@@ -136,7 +143,7 @@ export default function TangentialInfo({ socketInstance, height }) {
           onMouseEnter={() => setHoveredRight(true)}
           onMouseLeave={() => setHoveredRight(false)}
           disabled={
-            exampleQuestion.length === 0 || page === exampleQuestion.length - 1
+            tangentialData.questions.length === 0 || page === tangentialData.questions.length - 1
           }
         />
       </div>
@@ -146,15 +153,10 @@ export default function TangentialInfo({ socketInstance, height }) {
           overflowY: "auto",
         }}
       >
-        <div
-          style={{
-            backgroundColor:
-              exampleQuestion.length === 0 ? "#a1a1a1" : "inherit",
-          }}
-        >
-          {exampleQuestion.length === 0 ? (
+        <div>
+          {tangentialData.questions.length === 0 ? (
             <h4 className="mt-40 flex justify-center items-center text-xl font-semibold tracking-tight">
-              No related information
+              No related information...
             </h4>
           ) : (
             <Accordion
@@ -163,7 +165,7 @@ export default function TangentialInfo({ socketInstance, height }) {
               className="w-full"
               value={openItems}
             >
-              {exampleQuestion[page].map((item, idx) => (
+              {tangentialData.questions[page].map((item, idx) => (
                 <AccordionItem key={idx} value={idx.toString()} className="p-2">
                   <AccordionTrigger
                     className="p-2"
@@ -172,8 +174,8 @@ export default function TangentialInfo({ socketInstance, height }) {
                     {item}
                   </AccordionTrigger>
                   <AccordionContent className="p-2">
-                    {llmOutput[page]?.[idx] !== undefined ? (
-                      <p>{llmOutput[page]?.[idx]}</p>
+                    {tangentialData.answers[page]?.[idx] ? (
+                      <p className="p-3 text-base">{tangentialData.answers[page]?.[idx]}</p>
                     ) : (
                       <p>Loading...</p>
                     )}

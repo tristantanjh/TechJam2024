@@ -20,6 +20,7 @@ class MessageStore:
         self.messages = {}
         self.ai_messages = {}
         self.follow_up_questions = {}
+        self.selected_questions_responses = {}
         # self.tangential_questions = {}
 
     def add_message(self, formatted_message):
@@ -53,6 +54,19 @@ class MessageStore:
     def get_follow_up_questions(self, sessionId):
         return self.follow_up_questions.get(sessionId, [])
     
+    def add_selected_question_and_response(self, sessionId, selected_question, response):
+        if sessionId not in self.selected_questions_responses:
+            self.selected_questions_responses[sessionId] = {}
+        # Store the question and its response
+        self.selected_questions_responses[sessionId][selected_question] = response
+        
+    def get_selected_questions(self, sessionId):
+        session_data = self.selected_questions_responses.get(sessionId, {})
+        return list(session_data.keys())  # Return only the questions
+     
+    def get_selected_question_response(self, sessionId, selected_question):
+        return self.selected_questions_responses.get(sessionId, {}).get(question)
+
     # def add_tangential_questions(self, data):
     #     if data['sessionId'] in self.tangential_questions:
     #         self.tangential_questions[data['sessionId']].append(data['tangentialQuestions'])
@@ -89,6 +103,7 @@ class Chains:
         The input ai_message is expected to be a string in JSON format.
         """
         # Assuming the text content is directly accessible as a string, adjust according to your AIMessage structure
+        print(ai_message)
         try:
             # Extracting text content from AIMessage, adjust the attribute access as necessary
             message_text = ai_message.content
@@ -138,10 +153,11 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    Answer yes if the current question similar to any of the previous questions in meaning. If there are no previous questions, answer "no"
+                    You are given a chat history of questions asked by a customer towards a customer service assistant and the latest user question which might be repeated from before. 
+                    Answer yes only if the current question has been repeated in meaning compared to previous questions. Do not answer yes just because they mention the same nouns. If there are no previous questions, answer "no"
 
                     Previous questions: {history}
-                    Current questions: {text}
+                    Latest question: {text}
 
                     """
                 )
@@ -210,7 +226,48 @@ class Chains:
         )
 
         return chain
-    
+
+    def get_tangential_questions_chain(self):
+        template = """
+        Review the chat history and the customer's latest inquiry to determine if there are complex terms or processes that need explaining.
+        If relevant, generate three tangential questions that clarify these terms or outline basic procedures. 
+        If the inquiry is straightforward with no such complexities, return an empty JSON array.
+
+        Chat History:
+        {chat_history}
+
+        Latest Inquiry:
+        {question}
+
+        Directions:
+        - Identify complex terms or detailed processes.
+        - Consider what basic knowledge is necessary to understand these aspects.
+        - Formulate questions that:
+            1. Define and clarify critical terms.
+            2. Describe basic procedural steps.
+            3. Explain initial setups or usage of services or technologies.
+        
+        You always return the list of 3 questions in a JSON array if complex terms or detailed processes are identified.
+        Expected Output:
+        - If actionable topics are identified: ["Question 1", "Question 2", "Question 3"]
+        - If not: []
+        """
+        
+        prompt = ChatPromptTemplate.from_template(template)
+
+        chain = (
+            RunnableParallel(
+                {
+                    "chat_history": lambda x: x["chat_history"],
+                    "question": lambda x: x["question"],
+                }
+            )
+            | prompt
+            | self.llm
+            | self.safeListOutputParser
+        )
+        return chain
+
     def get_entity_chain(self):
         """
         Returns the entity chain
@@ -350,7 +407,7 @@ class GPTInstance:
         self.chains = Chains(self.llm)
         self.debug = debug
 
-    def process_message(self, message: str, message_store: MessageStore, sessionId) -> str:
+    def process_message(self, message: str, message_store: MessageStore, sessionId) -> List[str]:
         """
         Process the message
         """
@@ -367,25 +424,25 @@ class GPTInstance:
 
         if initial_check_result:
             response = response_chain.invoke({"question": message})
+            chat_history = message_store.get_messages(sessionId)
             print("Response: " + response)
-            print("History: " + str(message_store.get_messages(sessionId)))
-            history_check_result = history_check_chain.invoke({"text": response, "history": message_store.get_messages(sessionId)})
+            print("History: " + str(chat_history))
+            history_check_result = history_check_chain.invoke({"text": response, "history": chat_history})
             print("History check result: " + str(history_check_result))
             if not history_check_result:
-                chat_history = message_store.get_messages(sessionId)
                 follow_up_questions = self.get_follow_up_questions(chat_history, response)
-                
-                return [response, follow_up_questions]
+                tangential_questions = self.get_tangential_questions(chat_history, response)
+                return [response, follow_up_questions, tangential_questions]
             else:
-                return ["", ""]
-                # return messag e
+                return ["", "", ""]
+                # return message
                 # elaboration_result = elaboration_chain.invoke({"text": message})
 
                 # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
 
                 # return elaboration_result
         else:
-            return ["", ""]
+            return ["", "", ""]
     
     def elaborate_on_chosen_point(self, message: str) -> str:
         """
@@ -415,6 +472,18 @@ class GPTInstance:
         tangential_chain = self.chains.get_full_response_chain()
         tangential_result = tangential_chain.invoke({"question": question})
         if self.debug: print("Tangential result: ", tangential_result)
+        return tangential_result
+    
+    def get_tangential_questions(self, chat_history: List[str], question: str):
+        """
+        Generate tangential questions
+        """
+        tangential_chain = self.chains.get_tangential_questions_chain()
+        tangential_result = tangential_chain.invoke({
+        "chat_history": chat_history,
+        "question": question
+        })
+        if self.debug: print("Tangential questions: ", tangential_result)
         return tangential_result
 
 class Entities(BaseModel):
