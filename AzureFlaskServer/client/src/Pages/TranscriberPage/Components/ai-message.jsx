@@ -3,6 +3,7 @@ import { BotMessageSquare, Copy } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "./copy-button";
 
+
 export default function AiMessage({ points }) {
   const [visible, setVisible] = useState("");
   const handleHover = (idx) => {

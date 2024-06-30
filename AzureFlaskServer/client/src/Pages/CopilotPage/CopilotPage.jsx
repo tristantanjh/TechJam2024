@@ -38,7 +38,7 @@ export default function CopilotPage() {
       <div className="flex flex-col justify-between h-[100%]">
         <h1 className="text-4xl font-bold text-primary">Copilot</h1>
         <div className="flex flex-col items-center">
-          <div className="h-[80vh] w-[70%]">
+          <div className="h-[80vh] max-w-[60%]">  
             {messageList.map((message, idx) => {
               return (
                 <div key={idx}>

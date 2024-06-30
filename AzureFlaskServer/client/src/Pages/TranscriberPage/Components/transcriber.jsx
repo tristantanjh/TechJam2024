@@ -51,7 +51,7 @@ export default function Transcriber({
             className="mr-3"
             onValueChange={(e) => setServicePersonnel(e)}
           >
-            <SelectTrigger className="w-[80%] text-base">
+            <SelectTrigger className="w-[80%] text-base mr-2">
               <SelectValue placeholder="Select which speaker you are" />
             </SelectTrigger>
             <SelectContent>
