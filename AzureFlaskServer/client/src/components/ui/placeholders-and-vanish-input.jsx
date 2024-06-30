@@ -199,8 +199,10 @@ export function PlaceholdersAndVanishInput({
           <motion.div
             animate={{ rotate: 180 }}
             transition={{
-              duration: 0.5,
+              duration: 0.7,
               ease: "easeInOut",
+              repeat: Infinity,
+              repeatDelay: 0.3,
             }}
           >
             <motion.svg
