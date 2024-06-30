@@ -6,6 +6,7 @@ import {
   Users2,
   MessagesSquare,
   House,
+  Share2Icon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/Components/ui/tooltip";
@@ -27,6 +28,7 @@ export default function NavbarLayout({ children }) {
     isCollapsed,
     setIsCollapsed,
     routeName,
+    routePath,
   } = useNavbar();
 
   return (
@@ -92,11 +94,13 @@ export default function NavbarLayout({ children }) {
                     to: "copilot",
                   },
                   {
-                    title: "Jira",
+                    title: "Integrations",
                     label: "",
-                    icon: SquareKanban,
-                    variant: routeName === "jira" ? "default" : "ghost",
-                    to: "jira",
+                    icon: Share2Icon,
+                    variant: routePath.includes("integrations")
+                      ? "default"
+                      : "ghost",
+                    to: "integrations",
                   },
                   {
                     title: "Actions",

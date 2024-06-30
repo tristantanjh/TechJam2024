@@ -20,10 +20,11 @@ export const NavbarProvider = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const navCollapsedSize = useRef(6);
   const defaultLayout = useRef([15, 85]);
+  const [routePath, setRoutePath] = useState(location.pathname.split("/"));
 
   useEffect(() => {
-    const route = location.pathname.split("/").slice(-1)[0];
-    setRouteName(route);
+    setRouteName(location.pathname.split("/").slice(-1)[0]);
+    setRoutePath(location.pathname.split("/"));
   }, [location]);
 
   const value = useMemo(
@@ -36,8 +37,9 @@ export const NavbarProvider = ({ children }) => {
       setIsCollapsed,
       navCollapsedSize,
       defaultLayout,
+      routePath,
     }),
-    [accountList, routeName, isCollapsed]
+    [accountList, routeName, isCollapsed, routePath]
   );
 
   return (

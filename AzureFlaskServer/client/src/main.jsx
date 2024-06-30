@@ -16,6 +16,9 @@ import DashboardPage from "./Pages/DashboardPage/DashboardPage";
 import SettingsPage from "./Pages/SettingsPage/SettingsPage";
 import ActionsPage from "./Pages/ActionsPage/ActionsPage";
 import CopilotPage from "./Pages/CopilotPage/CopilotPage";
+import IntegrationsPage from "./Pages/IntegrationsPage/IntegrationsPage";
+import JiraPage from "./Pages/IntegrationsPage/pages/JiraPage";
+import IndexPage from "./Pages/IntegrationsPage/pages/IndexPage";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +61,20 @@ const router = createBrowserRouter([
       {
         path: "copilot",
         element: <CopilotPage />,
+      },
+      {
+        path: "integrations",
+        element: <IntegrationsPage />,
+        children: [
+          {
+            index: true,
+            element: <IndexPage />,
+          },
+          {
+            path: "jira",
+            element: <JiraPage />,
+          },
+        ],
       },
     ],
   },
