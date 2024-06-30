@@ -411,38 +411,67 @@ class GPTInstance:
         """
         Process the message
         """
-        # possible improvement: refine the message if the raw transcribed message is poor 
+        # # possible improvement: refine the message if the raw transcribed message is poor 
+        # initial_check_chain = self.chains.get_initial_check_chain()
+        # history_check_chain = self.chains.get_history_check_chain()
+        # # elaboration_chain = self.chains.get_elaboration_chain()
+        # response_chain = self.chains.get_response_chain()
+        
+        # print("Messages: " + message)
+        # initial_check_result = initial_check_chain.invoke({"text": message})
+        
+        # print("Initial check result: ", initial_check_result) # for debug
+
+        # if initial_check_result:
+        #     response = response_chain.invoke({"question": message})
+        #     chat_history = message_store.get_messages(sessionId)
+        #     print("Response: " + response)
+        #     print("History: " + str(chat_history))
+        #     history_check_result = history_check_chain.invoke({"text": response, "history": chat_history})
+        #     print("History check result: " + str(history_check_result))
+        #     if not history_check_result:
+        #         follow_up_questions = self.get_follow_up_questions(chat_history, response)
+        #         tangential_questions = self.get_tangential_questions(chat_history, response)
+        #         return [response, follow_up_questions, tangential_questions]
+        #     else:
+        #         return ["", "", ""]
+        #         # return message
+        #         # elaboration_result = elaboration_chain.invoke({"text": message})
+
+        #         # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
+
+        #         # return elaboration_result
+        # else:
+        #     return ["", "", ""]
+        
+        chat_history = message_store.get_messages(sessionId)
+        response_chain = self.chains.get_response_chain()
+        response = response_chain.invoke({"question": message})
+        
+        follow_up_questions = self.get_follow_up_questions(chat_history, response)
+        tangential_questions = self.get_tangential_questions(chat_history, response)
+        return [response, follow_up_questions, tangential_questions]
+        
+    def check_for_response(self, message: str, message_store: MessageStore, sessionId) -> bool:
+        """
+        Check whether the message needs a response
+        """
+        print("Messages: " + message)
         initial_check_chain = self.chains.get_initial_check_chain()
         history_check_chain = self.chains.get_history_check_chain()
-        elaboration_chain = self.chains.get_elaboration_chain()
-        response_chain = self.chains.get_response_chain()
         
-        print("Messages: " + message)
+        chat_history = message_store.get_messages(sessionId)
         initial_check_result = initial_check_chain.invoke({"text": message})
         
-        print("Initial check result: ", initial_check_result) # for debug
-
         if initial_check_result:
-            response = response_chain.invoke({"question": message})
-            chat_history = message_store.get_messages(sessionId)
-            print("Response: " + response)
-            print("History: " + str(chat_history))
-            history_check_result = history_check_chain.invoke({"text": response, "history": chat_history})
-            print("History check result: " + str(history_check_result))
-            if not history_check_result:
-                follow_up_questions = self.get_follow_up_questions(chat_history, response)
-                tangential_questions = self.get_tangential_questions(chat_history, response)
-                return [response, follow_up_questions, tangential_questions]
-            else:
-                return ["", "", ""]
-                # return message
-                # elaboration_result = elaboration_chain.invoke({"text": message})
-
-                # if self.debug: print("Elaboration result: ", elaboration_result) # for debug
-
-                # return elaboration_result
-        else:
-            return ["", "", ""]
+            return True
+        
+        history_check_result = history_check_chain.invoke({"text": message, "history": chat_history})
+        
+        if history_check_result:
+            return False
+        
+        return history_check_result
     
     def elaborate_on_chosen_point(self, message: str) -> str:
         """

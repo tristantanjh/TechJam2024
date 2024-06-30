@@ -55,11 +55,13 @@ export default function Transcriber({
               <SelectValue placeholder="Select which speaker you are" />
             </SelectTrigger>
             <SelectContent>
-              {speakers.map((sp) => (
-                <SelectItem key={sp} value={sp}>
-                  {sp}
-                </SelectItem>
-              ))}
+              {speakers
+                .filter((sp) => sp !== "Unknown")
+                .map((sp) => (
+                  <SelectItem key={sp} value={sp}>
+                    {sp}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
 
@@ -92,9 +94,11 @@ export default function Transcriber({
                 key={idx}
                 className={`p-2 ${getBackgroundColor(item.speakerId)}`}
               >
-                {item.speakerId == servicePersonnel
+                {item.speakerId === servicePersonnel
                   ? "You"
-                  : item.speakerId != "Unknown"
+                  : servicePersonnel === ""
+                  ? "Speaker " + item.speakerId
+                  : item.speakerId !== "Unknown"
                   ? "Customer"
                   : "Speaker " + item.speakerId}
                 : {item.text}

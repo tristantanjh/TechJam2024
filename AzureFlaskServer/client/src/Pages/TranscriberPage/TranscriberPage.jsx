@@ -10,6 +10,7 @@ import TangentialInfo from "./Components/tangential-info";
 import FollowUpQuestion from "./Components/follow-up-question";
 import { io } from "socket.io-client";
 import { useTranscriber } from "@/hooks/useTranscriber";
+import { useLoadingMessage } from "@/hooks/useLoadingMessage";
 import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import LLMOutput from "./Components/llm-output";
 import "ldrs/ring2";
+import { set } from "date-fns";
 
 const loadingStates = [
   {
@@ -62,6 +64,9 @@ export default function TranscriberPage() {
   const [isTranscripting, setIsTranscripting] = useState(true);
   const [actionItems, setActionItems] = useState([]);
   const [selectedActionItems, setSelectedActionItems] = useState([]);
+  const [actionItemsSubmitted, setActionItemsSubmitted] = useState(true);
+  const [refreshTangential, setRefreshTangential] = useState(false);
+  const { setNewQueryReceived } = useLoadingMessage();
 
   // Send data to server everytime transcribedList is updated
   useEffect(() => {
@@ -97,6 +102,12 @@ export default function TranscriberPage() {
         console.log(`Connected to websocket as ${data.data}`);
       });
 
+      socket.on("should-generate-message", (data) => {
+        if (data === 1) {
+          setNewQueryReceived(true);
+        }
+      });
+
       socket.on("ai-response", (data) => {
         if (data["aiMessage"]) {
           setAiMessages((prevList) => [...prevList, data["aiMessage"]]);
@@ -114,11 +125,12 @@ export default function TranscriberPage() {
               parsedFollowUpQuestions,
             ],
           }));
+
+          setNewQueryReceived(false);
         }
       });
 
       socket.on("action-item-check", (data) => {
-        console.log("FRONTEND action-item-check: ", data);
         setActionItems(data);
       });
 
@@ -146,7 +158,11 @@ export default function TranscriberPage() {
       headerText: [],
       followUpQuestions: [],
     });
+    setRefreshTangential(true);
     setDisplayText("Speak into the mic...");
+    setActionItemsSubmitted(false);
+
+    setNewQueryReceived(false);
   };
 
   const handleStop = async () => {
@@ -162,6 +178,7 @@ export default function TranscriberPage() {
     socketInstance.emit("create-action-item", selectedActionItems);
     setActionItems([]);
     setSelectedActionItems([]);
+    setActionItemsSubmitted(true);
   };
 
   const toggleSelection = (index) => {
@@ -211,10 +228,10 @@ export default function TranscriberPage() {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle className="mb-2">
+                    <DialogTitle className="mb-7 border-b-2 pb-2">
                       Edit & Confirm Jira Action Items
                     </DialogTitle>
-                    <DialogDescription className="mb-1">
+                    <DialogDescription className="mb-1 h-[50vh] overflow-scroll">
                       {actionItems.map((item, index) => (
                         <div key={index}>
                           <div key={index} className="items-top flex space-x-2">
@@ -228,7 +245,7 @@ export default function TranscriberPage() {
                                 type="text"
                                 value={item.summary}
                                 onChange={(e) => handleSummaryChange(e, index)}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                                className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 border-b border-gray-300 focus:border-blue-500 focus:outline-none"
                               />
                               <textarea
                                 value={item.description}
@@ -236,7 +253,7 @@ export default function TranscriberPage() {
                                   handleDescriptionChange(e, index)
                                 }
                                 className="text-sm text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 border-b border-gray-300 focus:border-blue-500 focus:outline-none"
-                                rows="3"
+                                rows="5"
                               />
                             </div>
                           </div>
@@ -255,7 +272,7 @@ export default function TranscriberPage() {
             <Button
               onClick={handleStart}
               className="btn-primary w-[90px]"
-              disabled={callStatus !== 0}
+              disabled={callStatus !== 0 || !actionItemsSubmitted}
             >
               {loading ? (
                 <l-ring-2
@@ -322,6 +339,8 @@ export default function TranscriberPage() {
                     <TangentialInfo
                       socketInstance={socketInstance}
                       height={100 - rightBoxHeight}
+                      refreshTangential={refreshTangential}
+                      setRefreshTangential={setRefreshTangential}
                     />
                   </ResizablePanel>
                 </ResizablePanelGroup>

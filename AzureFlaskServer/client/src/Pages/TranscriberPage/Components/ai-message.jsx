@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback } from "@/Components/ui/avatar";
-import { BotMessageSquare, Copy } from "lucide-react";
+import { BotMessageSquare } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "./copy-button";
-
+import { useLoadingMessage } from "@/hooks/useLoadingMessage";
 
 export default function AiMessage({ points }) {
   const [visible, setVisible] = useState("");
@@ -12,6 +12,7 @@ export default function AiMessage({ points }) {
   const handleLeave = () => {
     setVisible("");
   };
+
   return (
     <div className="p-2 flex items-start justify-center border-solid border-b-2 border-gray-300">
       <Avatar className="mt-2">
