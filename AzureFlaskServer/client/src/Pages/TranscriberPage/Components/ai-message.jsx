@@ -1,7 +1,9 @@
 import { Avatar, AvatarFallback } from "@/Components/ui/avatar";
 import { BotMessageSquare, Copy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CopyButton from "./copy-button";
+import { useLoadingMessage } from "@/hooks/useLoadingMessage";
+import LoadingMessage from "./loading-message";
 
 export default function AiMessage({ points }) {
   const [visible, setVisible] = useState("");
@@ -11,28 +13,35 @@ export default function AiMessage({ points }) {
   const handleLeave = () => {
     setVisible("");
   };
+  const { newQueryReceived } = useLoadingMessage();
+
+  console.log(newQueryReceived);
+
   return (
-    <div className="p-2 flex items-start justify-center border-solid border-b-2 border-gray-300">
-      <Avatar className="mt-2">
-        <AvatarFallback>
-          <BotMessageSquare />
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col ml-4 w-[80%]">
-        {points.map((point, idx) => (
-          <>
-            <div
-              key={idx + point}
-              onMouseOver={() => handleHover(idx)}
-              onMouseLeave={handleLeave}
-              className="flex rounded-md hover:bg-slate-100 transition-colors"
-            >
-              <p className="p-2 m-1 font-medium  w-[85%]">• {point}</p>
-              <CopyButton point={point} idx={idx} visible={visible} />
-            </div>
-          </>
-        ))}
+    <>
+      <div className="p-2 flex items-start justify-center border-solid border-b-2 border-gray-300">
+        <Avatar className="mt-2">
+          <AvatarFallback>
+            <BotMessageSquare />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col ml-4 w-[80%]">
+          {points.map((point, idx) => (
+            <>
+              <div
+                key={idx + point}
+                onMouseOver={() => handleHover(idx)}
+                onMouseLeave={handleLeave}
+                className="flex rounded-md hover:bg-slate-100 transition-colors"
+              >
+                <p className="p-2 m-1 font-medium  w-[85%]">• {point}</p>
+                <CopyButton point={point} idx={idx} visible={visible} />
+              </div>
+            </>
+          ))}
+        </div>
       </div>
-    </div>
+      {/* {newQueryReceived && <LoadingMessage />} */}
+    </>
   );
 }
