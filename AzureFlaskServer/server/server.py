@@ -113,6 +113,7 @@ def handle_extraction(data):
     json_extracted = []
     for item in extracted:
         json_extracted.append({
+            "id": extracted.index(item),
             "summary": item.summary,
             "description": item.description
         })

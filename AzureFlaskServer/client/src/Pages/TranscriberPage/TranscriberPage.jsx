@@ -12,6 +12,16 @@ import { io } from "socket.io-client";
 import { useTranscriber } from "@/hooks/useTranscriber";
 import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import LLMOutput from "./Components/llm-output";
 import "ldrs/ring2";
 
@@ -49,6 +59,9 @@ export default function TranscriberPage() {
   const [rightBoxHeight, setRightBoxHeight] = useState(null);
   const [loading, setLoading] = useState(false);
   const [minLoaded, setMinLoaded] = useState(false);
+  const [isTranscripting, setIsTranscripting] = useState(true);
+  const [actionItems, setActionItems] = useState([]);
+  const [selectedActionItems, setSelectedActionItems] = useState([]);
 
   // Send data to server everytime transcribedList is updated
   useEffect(() => {
@@ -63,6 +76,7 @@ export default function TranscriberPage() {
         };
 
         socketInstance.emit("data", data);
+        !isTranscripting && socketInstance.emit("extract", data);
       }
     }
   }, [transcribedList]);
@@ -103,7 +117,10 @@ export default function TranscriberPage() {
         }
       });
 
-      
+      socket.on("action-item-check", (data) => {
+        console.log("FRONTEND action-item-check: ", data);
+        setActionItems(data);
+      });
 
       socketInitialised.current = true;
     }
@@ -121,6 +138,7 @@ export default function TranscriberPage() {
     setTimeout(() => {
       setMinLoaded(false);
     }, 3000);
+    setIsTranscripting(true);
     await StartTranscription();
     setCallStatus(1);
     setAiMessages([]);
@@ -132,9 +150,51 @@ export default function TranscriberPage() {
   };
 
   const handleStop = async () => {
+    setIsTranscripting(false);
     await StopTranscription();
     setCallStatus(0);
     setDisplayText("Waiting to start call...");
+  };
+
+  const ConfirmActionItems = () => {
+    console.log("Creating Jira Action Items...");
+    console.log(selectedActionItems);
+    socketInstance.emit("create-action-item", selectedActionItems);
+    setActionItems([]);
+    setSelectedActionItems([]);
+  };
+
+  const toggleSelection = (index) => {
+    const selectedItem = actionItems[index];
+    const isSelected = selectedActionItems.some(
+      (item) => item.id === selectedItem.id
+    );
+
+    if (!isSelected) {
+      setSelectedActionItems([...selectedActionItems, selectedItem]);
+    } else {
+      setSelectedActionItems(
+        selectedActionItems.filter((item) => item.id !== selectedItem.id)
+      );
+    }
+  };
+
+  const handleSummaryChange = (e, index) => {
+    const updatedItems = [...actionItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      summary: e.target.value,
+    };
+    setActionItems(updatedItems);
+  };
+
+  const handleDescriptionChange = (e, index) => {
+    const updatedItems = [...actionItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      description: e.target.value,
+    };
+    setActionItems(updatedItems);
   };
 
   return (
@@ -144,6 +204,54 @@ export default function TranscriberPage() {
           <h1 className="text-4xl font-bold text-primary">Transcriber</h1>
 
           <div className="flex space-x-4">
+            {actionItems.length != 0 && (
+              <Dialog defaultOpen={true}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive">Confirm Action Items</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="mb-2">
+                      Edit & Confirm Jira Action Items
+                    </DialogTitle>
+                    <DialogDescription className="mb-1">
+                      {actionItems.map((item, index) => (
+                        <div key={index}>
+                          <div key={index} className="items-top flex space-x-2">
+                            <Checkbox
+                              id={`item_${index}`}
+                              checked={selectedActionItems.includes(item)}
+                              onCheckedChange={() => toggleSelection(index)}
+                            />
+                            <div className="flex flex-col w-full">
+                              <input
+                                type="text"
+                                value={item.summary}
+                                onChange={(e) => handleSummaryChange(e, index)}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                              />
+                              <textarea
+                                value={item.description}
+                                onChange={(e) =>
+                                  handleDescriptionChange(e, index)
+                                }
+                                className="text-sm text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                                rows="3"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button onClick={() => ConfirmActionItems()}>
+                      Confirm
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
             <Button
               onClick={handleStart}
               className="btn-primary w-[90px]"
