@@ -5,6 +5,7 @@ import CopyButton from "./copy-button";
 import { useLoadingMessage } from "@/hooks/useLoadingMessage";
 import LoadingMessage from "./loading-message";
 
+
 export default function AiMessage({ points }) {
   const [visible, setVisible] = useState("");
   const handleHover = (idx) => {
