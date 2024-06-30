@@ -173,7 +173,7 @@ const features = [
     Icon: Share2Icon,
     name: "Integrations",
     description: "Supports 100+ integrations and counting.",
-    href: "/",
+    href: "integrations",
     cta: "Learn more",
     className: "col-span-3 lg:col-span-2",
     background: (
