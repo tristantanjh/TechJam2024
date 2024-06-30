@@ -26,10 +26,10 @@ export default function LoadingMessage() {
           onMouseOver={() => handleHover(0)}
           onMouseLeave={handleLeave}
         >
-          <div class="loader-custom">
-            <li class="ball-custom"></li>
-            <li class="ball-custom"></li>
-            <li class="ball-custom"></li>
+          <div className="loader-custom">
+            <li className="ball-custom"></li>
+            <li className="ball-custom"></li>
+            <li className="ball-custom"></li>
           </div>
         </div>
       </div>

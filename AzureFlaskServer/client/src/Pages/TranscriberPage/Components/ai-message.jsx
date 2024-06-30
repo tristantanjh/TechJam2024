@@ -1,10 +1,8 @@
 import { Avatar, AvatarFallback } from "@/Components/ui/avatar";
-import { BotMessageSquare, Copy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BotMessageSquare } from "lucide-react";
+import { useState } from "react";
 import CopyButton from "./copy-button";
 import { useLoadingMessage } from "@/hooks/useLoadingMessage";
-import LoadingMessage from "./loading-message";
-
 
 export default function AiMessage({ points }) {
   const [visible, setVisible] = useState("");
@@ -14,9 +12,6 @@ export default function AiMessage({ points }) {
   const handleLeave = () => {
     setVisible("");
   };
-  const { newQueryReceived } = useLoadingMessage();
-
-  console.log(newQueryReceived);
 
   return (
     <>

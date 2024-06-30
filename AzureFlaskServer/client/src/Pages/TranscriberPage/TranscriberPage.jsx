@@ -228,10 +228,10 @@ export default function TranscriberPage() {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle className="mb-2">
+                    <DialogTitle className="mb-7 border-b-2 pb-2">
                       Edit & Confirm Jira Action Items
                     </DialogTitle>
-                    <DialogDescription className="mb-1 max-h-3xl overflow-y">
+                    <DialogDescription className="mb-1 h-[50vh] overflow-scroll">
                       {actionItems.map((item, index) => (
                         <div key={index}>
                           <div key={index} className="items-top flex space-x-2">

@@ -40,8 +40,6 @@ export default function TangentialInfo({
   };
 
   const handleClick = (idx) => {
-    console.log("Clicked", idx);
-    console.log(tangentialData);
     const currentItem = idx.toString();
     if (openItems.includes(currentItem)) {
       setOpenItems(openItems.filter((item) => item !== currentItem));
@@ -172,7 +170,7 @@ export default function TangentialInfo({
           ) : (
             <Accordion
               type="multiple"
-              collapsible
+              collapsible="true"
               className="w-full"
               value={openItems}
             >
@@ -190,13 +188,13 @@ export default function TangentialInfo({
                         {tangentialData.answers[page]?.[idx]}
                       </p>
                     ) : (
-                    <div className="p-3 h-10 flex justify-center items-end">
-                    <div className="loader-custom">
-                        <li class="ball-custom"></li>
-                        <li class="ball-custom"></li>
-                        <li class="ball-custom"></li>
+                      <div className="p-3 h-10 flex justify-center items-end">
+                        <div className="loader-custom">
+                          <li className="ball-custom"></li>
+                          <li className="ball-custom"></li>
+                          <li className="ball-custom"></li>
+                        </div>
                       </div>
-                    </div>
                     )}
                   </AccordionContent>
                 </AccordionItem>
