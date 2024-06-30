@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from "@/Components/ui/avatar";
-import { BotMessageSquare, Copy } from "lucide-react";
+import { BotMessageSquare } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "./copy-button";
 

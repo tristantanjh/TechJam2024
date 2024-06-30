@@ -7,7 +7,7 @@ import {
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 
-export default function CopyButton({ point, visible, idx }) {
+export default function CopyButton({ point, visible }) {
   const [clicked, setClicked] = useState(false);
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);

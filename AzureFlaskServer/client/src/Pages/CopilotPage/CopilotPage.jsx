@@ -5,7 +5,7 @@ import AiMessage from "./components/ai-message";
 const placeholders = [
   "Enter your question here!",
   "Help me create a new Jira issue!",
-  "Show me the most recent sales. lorem",
+  "Show me the most recent sales. ",
 ];
 const placeholderMessages = [
   { type: "ai", text: "Sure! I can help you with that." },
@@ -38,7 +38,7 @@ export default function CopilotPage() {
       <div className="flex flex-col justify-between h-[100%]">
         <h1 className="text-4xl font-bold text-primary">Copilot</h1>
         <div className="flex flex-col items-center">
-          <div className="h-[80vh] max-w-[60%]">  
+          <div className="h-[80vh] max-w-[60%]">
             {messageList.map((message, idx) => {
               return (
                 <div key={idx}>
