@@ -21,17 +21,15 @@ export default function AiMessage({ points }) {
       </Avatar>
       <div className="flex flex-col ml-4 w-[80%]">
         {points.map((point, idx) => (
-          <>
-            <div
-              key={idx + point}
-              onMouseOver={() => handleHover(idx)}
-              onMouseLeave={handleLeave}
-              className="flex rounded-md hover:bg-slate-100 transition-colors"
-            >
-              <p className="p-2 m-1 font-medium  w-[85%]">• {point}</p>
-              <CopyButton point={point} idx={idx} visible={visible} />
-            </div>
-          </>
+          <div
+            key={idx}
+            onMouseOver={() => handleHover(idx)}
+            onMouseLeave={handleLeave}
+            className="flex rounded-md hover:bg-slate-100 transition-colors"
+          >
+            <p className="p-2 m-1 font-medium  w-[85%]">• {point}</p>
+            <CopyButton point={point} idx={idx} visible={visible} />
+          </div>
         ))}
       </div>
     </div>
