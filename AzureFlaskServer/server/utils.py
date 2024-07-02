@@ -9,6 +9,8 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
 from langchain_core.runnables import RunnableParallel
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
 from dotenv import load_dotenv
 import os
 import json
@@ -514,6 +516,27 @@ class GPTInstance:
         })
         if self.debug: print("Tangential questions: ", tangential_result)
         return tangential_result
+    
+class CSVAgentGPTInstance:
+    def __init__(self, debug=False) -> None:
+        self.llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
+        self.chains = Chains(self.llm)
+        self.debug = debug
+        
+    def get_csv_agent_output(self, dbName: str, question: str):
+            """
+            Generate output for csv agent question
+            """
+            agent_executor = create_csv_agent(
+                self.llm,
+                dbName,
+                verbose=True,
+                agent_type=AgentType.OPENAI_FUNCTIONS,
+                allow_dangerous_code=True,
+            )
+            csv_agent_result = agent_executor.invoke({"question": question})
+            if self.debug: print("CSV agent result: ", csv_agent_result)
+            return csv_agent_result
 
 class Entities(BaseModel):
     """

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import requests
 
-from utils import MessageStore, GPTInstance
+from utils import MessageStore, GPTInstance, CSVAgentGPTInstance
 
 from jira_integration.extract import extract_action_item, create_action_item
 
@@ -16,6 +16,7 @@ app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 message_store = MessageStore()
 gpt_instance = GPTInstance(debug=True)
+csv_agent_gpt_instance = CSVAgentGPTInstance(debug=True)
 
 @socketio.on('connect')
 def handle_connect():
@@ -123,6 +124,20 @@ def handle_extraction(data):
 def handle_create_action_item(data):
     """event listener when client confirms action item"""
     create_action_item(data)
+
+@socketio.on('csv-agent-query')
+def handle_csv_agent_query(data):
+    """event listener when user queries copilot"""
+    # assuming this is the data structure
+    # const data = {
+    #     question: qns
+    # };
+
+    # OSCAR's db routing, dbName eg. "supermarket_sales - Sheet1.csv"
+    dbName = dbRouting()
+    csv_agent_result = csv_agent_gpt_instance.get_csv_agent_output(dbName, data['question'])
+
+    emit('csv-agent-output', csv_agent_result)
 
 # in case needed in the future
 # @socketio.on('selected-question')
