@@ -14,6 +14,7 @@ from langchain_experimental.agents.agent_toolkits import create_csv_agent
 from dotenv import load_dotenv
 import os
 import json
+import pandas as pd
 
 load_dotenv()
 
