@@ -1,8 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// import { labels, priorities, statuses } from "../data/data";
-// import { Task } from "../data/schema";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { DataTableRowActions } from "./DataTableRowActions";
 
@@ -31,91 +28,63 @@ export const columns = [
     enableSorting: false,
     enableHiding: false,
   },
+  
   {
-    accessorKey: "id",
+    accessorKey: "action",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Task" />
-    ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "title",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Title" />
+      <DataTableColumnHeader column={column} title="Action" />
     ),
     cell: ({ row }) => {
-    //   const label = labels.find((label) => label.value === row.original.label);
-
       return (
         <div className="flex space-x-2">
-          {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-          <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("title")}
+          <span className="max-w-[100] truncate font-medium">
+            {row.getValue("action")}
           </span>
         </div>
       );
     },
+    enableHiding: false,
+    enableSorting: false
   },
   {
-    accessorKey: "status",
+    accessorKey: "description",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Description" />
+    ),
+    cell: ({ row }) => <div className="min-w-[300px] truncate">
+      {row.getValue("description")}
+    </div>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: "action_type",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => {
-    //   const status = statuses.find(
-    //     (status) => status.value === row.getValue("status"),
-    //   );
-
-    //   if (!status) {
-    //     return null;
-    //   }
-
       return (
-        <div className="flex w-[100px] items-center">
-            <p>test status</p>
-          {/* {status.icon && (
-            <status.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{status.label}</span> */}
-        </div>
-      );
+        <Badge variant="outline">{row.getValue("action_type")}</Badge>
+      ); 
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
+    // filterFn: (row, id, value) => {
+    //   return value.includes(row.getValue(id));
+    // },
   },
-  {
-    accessorKey: "priority",
+  { 
+    accessorKey: "database",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Priority" />
+      <DataTableColumnHeader column={column} title="Database" />
     ),
     cell: ({ row }) => {
-    //   const priority = priorities.find(
-    //     (priority) => priority.value === row.getValue("priority"),
-    //   );
 
-    //   if (!priority) {
-    //     return null;
-    //   }
 
-      return (
-        <div className="flex items-center">
-          {/* {priority.icon && (
-            <priority.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{priority.label}</span> */}
-          <p>test priority</p>
-        </div>
-      );
+      return <div className="w-[150px] font-medium">{row.getValue("database")}</div>
+
+      
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
+    // filterFn: (row, id, value) => {
+    //   return value.includes(row.getValue(id));
+    // },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
-  },
+
 ];
