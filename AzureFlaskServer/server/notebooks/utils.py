@@ -14,6 +14,7 @@ from langchain_experimental.agents.agent_toolkits import create_csv_agent
 from dotenv import load_dotenv
 import os
 import json
+import pandas as pd
 
 load_dotenv()
 
@@ -522,6 +523,18 @@ class CSVAgentGPTInstance:
         self.llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
         self.chains = Chains(self.llm)
         self.debug = debug
+    
+    def get_csv_agent(self, dbPath: str):
+        """
+        Get the csv agent
+        """
+        return create_csv_agent(
+            self.llm,
+            dbPath,
+            verbose=True,
+            agent_type=AgentType.OPENAI_FUNCTIONS,
+            allow_dangerous_code=True,
+        )
         
     def get_csv_agent_output(self, dbName: str, question: str):
             """
