@@ -23,7 +23,7 @@ import { DataTablePagination } from "../components/DataTablePagination";
 import { DataTableToolbar } from "../components/DataTableToolbar";
 
 
-export function ListView({ columns, data }) {
+export function ListView({ columns, data, type }) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const [columnFilters, setColumnFilters] = useState([]);
@@ -51,9 +51,15 @@ export function ListView({ columns, data }) {
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const databases = data.reduce((x, curr) => {
+    x.add(curr.database);
+    return x;
+  }, new Set())
+
+
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
+      <DataTableToolbar table={table} databases={Array.from(databases)} type={type}/>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
