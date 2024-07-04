@@ -1,7 +1,9 @@
 import { PlaceholdersAndVanishInput } from "@/Components/ui/placeholders-and-vanish-input";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import HumanMessage from "./components/human-message";
 import AiMessage from "./components/ai-message";
+import { io } from "socket.io-client";
+
 const placeholders = [
   "Enter your question here!",
   "Help me create a new Jira issue!",
@@ -19,6 +21,8 @@ const placeholderMessages = [
 export default function CopilotPage() {
   const [input, setInput] = useState("");
   const [responding, setResponding] = useState(false);
+  const socketInitialised = useRef(false);
+  const [socketInstance, setSocketInstance] = useState(null);
   const [messageList, setMessageList] = useState(placeholderMessages); // [ { type: "human" | "ai", text: string }
   const handleInput = (e) => {
     setInput(e.target.value);
@@ -33,6 +37,27 @@ export default function CopilotPage() {
       setResponding(false);
     }, 3000);
   };
+
+  // Initialise the socket on page load
+  useEffect(() => {
+    if (!socketInitialised.current) {
+      const socket = io("http://localhost:9000/", {
+        transports: ["websocket"],
+        cors: {
+          origin: "http://localhost:3000",
+        },
+      });
+
+      setSocketInstance(socket);
+
+      socket.on("connected", (data) => {
+        console.log(`Connected to websocket as ${data.data}`);
+      });
+
+      socketInitialised.current = true;
+    }
+  }, []);
+
   return (
     <div className="h-screen w-full p-10">
       <div className="flex flex-col justify-between h-[100%]">
