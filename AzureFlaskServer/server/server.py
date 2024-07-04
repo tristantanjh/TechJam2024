@@ -192,6 +192,12 @@ def get_token():
             })
         except requests.exceptions.RequestException as e:
             abort(500, description=str(e))
+
+@app.route("/api/get-databases", methods=["GET"])
+def get_databases():
+    with open("./text_db/db.txt", "r") as f:
+        content = f.read()
+        return content
         
 @app.errorhandler(400)
 def bad_request(error):
