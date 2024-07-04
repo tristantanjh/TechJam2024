@@ -10,34 +10,41 @@ import { DataTableViewOptions } from "./DataTableViewOptions";
 import { DataTableFacetedFilter } from "./DataTableFacetedFilter";
 
 
-export function DataTableToolbar({ table }) {
+export function DataTableToolbar({ table, databases, type }) {
+  const db_processed = []
+  if (type == "Actions") {
+    for (const db of databases) {
+      db_processed.push({value: db, label: db})
+    }
+  }
+  
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter tasks..."
-          value={(table.getColumn("title")?.getFilterValue()) ?? ""}
+          placeholder={type == "Actions" ? "Filter actions..." : "Filter databases"}
+          value={type == "Actions" ? table.getColumn("action")?.getFilterValue() ?? "" : type == "Databases" ? table.getColumn("db_name")?.getFilterValue() ?? "" : ""}
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            type == "Actions" ? table.getColumn("action")?.setFilterValue(event.target.value) : type == "Databases" ? table.getColumn("db_name")?.setFilterValue(event.target.value) : ""
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {/* {table.getColumn("status") && (
+        {type == "Actions" && table.getColumn("action_type") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
+            column={table.getColumn("action_type")}
             title="Status"
-            options={statuses}
+            options={[{value: "Query", label: "Query"}, {value: "API", label: "API"}]}
           />
         )}
-        {table.getColumn("priority") && (
+        {type == "Actions" && table.getColumn("database") && (
           <DataTableFacetedFilter
-            column={table.getColumn("priority")}
-            title="Priority"
-            options={priorities}
+            column={table.getColumn("database")}
+            title="Database"
+            options={db_processed}
           />
-        )} */}
+        )}
         {isFiltered && (
           <Button
             variant="ghost"
