@@ -27,7 +27,7 @@ export const db_columns = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Description" />
     ),
-    cell: ({ row }) => <div className="min-w-[300px] truncate">
+    cell: ({ row }) => <div className="min-w-[300px] max-w-[1000px] truncate">
       {row.getValue("description")}
     </div>,
     enableSorting: false,
