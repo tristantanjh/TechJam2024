@@ -596,6 +596,33 @@ class Chains:
         )
         final_output_chain = final_output_prompt | self.llm | StrOutputParser()
         return final_output_chain
+    
+    def get_api_extract_input_chain(self):
+        api_extract_input_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an expert at extracting information from a user query for input parameter of an API call. 
+                Your task is to extract each input parameter for the API call from the user query.
+                The action, its description and the input parameters are provided below.
+                Return the JSON with the input as the keys with no premable or explanation.
+                Do not alter the input parameter names in any way when used as the key.
+                You should leave the value empty if the input parameter is not present in the query.
+
+                Action:
+
+                Action name: {action_name}
+                Action description: {action_desc}
+                Action input: {action_input}
+                """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        api_extract_input_chain = api_extract_input_prompt | self.llm | JsonOutputParser()
+        return api_extract_input_chain
 
 def generate_full_text_query(input: str) -> str:
     """
@@ -938,6 +965,7 @@ class ActionAgent():
         self.chains = chains
         self.action_router_chain = self.chains.get_action_router_chain(self.actions_list)
         self.generate_action_prompt_chain = self.chains.get_generate_action_prompt_chain()
+        self.api_extract_input_chain = self.chains.get_api_extract_input_chain()
         self.DBAgent = DBAgent(self.llm, self.chains, self.database_list)
 
     def actions_router_node(self, state: ActionAgentGraphState):
@@ -997,9 +1025,21 @@ class ActionAgent():
         Returns:
             state (dict): New key added to state, generation, that contains LLM generation
         """
-        
         if state['verbose']: print("Step: Generating API Call Response")
-        return None
+        selected_actions = [action for action in self.actions_list if action['action_name'] in state['actions']]
+        response = self.api_extract_input_chain.invoke({
+            "query": state["query"],
+            "action_name": selected_actions[0]['action_name'],
+            "action_desc": selected_actions[0]['action_description'],
+            "action_input": str(selected_actions[0]['input'])
+        })
+        payload = {
+            "action_name": selected_actions[0]['action_name'],
+            "action_desc": selected_actions[0]['action_description'],
+            "action_type": "api_call",
+            'extracted_inputs': response
+        }
+        return {"output": payload}
     
     def generate_action_prompt(self, state: ActionAgentGraphState):
         """

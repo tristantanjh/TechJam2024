@@ -594,6 +594,32 @@ class Chains:
         )
         final_output_chain = final_output_prompt | self.llm | StrOutputParser()
         return final_output_chain
+    
+    def get_api_extract_input_chain(self):
+        api_extract_input_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an expert at extracting information from a user query for input parameter of an API call. 
+                Your task is to extract each input parameter for the API call from the user query.
+                The action, its description and the input parameters are provided below.
+                Return the JSON with the input as the keys with no premable or explanation.
+                You should leave the value empty if the input parameter is not present in the query.
+
+                Action:
+
+                Action name: {action_name}
+                Action description: {action_desc}
+                Action input: {action_input}
+                """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        api_extract_input_chain = api_extract_input_prompt | self.llm | JsonOutputParser()
+        return api_extract_input_chain
 
 
 def generate_full_text_query(input: str) -> str:
