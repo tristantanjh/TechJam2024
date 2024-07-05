@@ -18,12 +18,19 @@ import {
 import { DataTableFacetedFilter } from "./DataTableFacetedFilter";
 
 export function DataTableToolbar({ table, databases, type }) {
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const db_processed = []
   if (type == "Actions") {
     for (const db of databases) {
       db_processed.push({value: db, label: db})
     }
   }
+
   
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -62,6 +69,30 @@ export function DataTableToolbar({ table, databases, type }) {
             <Cross2Icon className="ml-2 h-4 w-4" />
           </Button>
         )}
+      </div>
+      <div>
+        <Button
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex mr-2"
+          onClick={handleOpen}
+        >
+          Add Action
+        </Button>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            <Typography
+              variant="h6"
+              align="center"
+              component="div"
+              fontWeight="Bold"
+            >
+              Create an Action
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <ActionForm onClose={handleClose} />
+          </DialogContent>
+        </Dialog>
       </div>
       <DataTableViewOptions table={table} />
     </div>
