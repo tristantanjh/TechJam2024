@@ -18,12 +18,19 @@ import {
 import { DataTableFacetedFilter } from "./DataTableFacetedFilter";
 
 export function DataTableToolbar({ table, databases, type }) {
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const db_processed = []
   if (type == "Actions") {
     for (const db of databases) {
       db_processed.push({value: db, label: db})
     }
   }
+
   
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -32,9 +39,9 @@ export function DataTableToolbar({ table, databases, type }) {
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder={type == "Actions" ? "Filter actions..." : "Filter databases"}
-          value={type == "Actions" ? table.getColumn("action")?.getFilterValue() ?? "" : type == "Databases" ? table.getColumn("db_name")?.getFilterValue() ?? "" : ""}
+          value={type == "Actions" ? table.getColumn("action")?.getFilterValue() ?? "" : type == "Databases" ? table.getColumn("database_name")?.getFilterValue() ?? "" : ""}
           onChange={(event) =>
-            type == "Actions" ? table.getColumn("action")?.setFilterValue(event.target.value) : type == "Databases" ? table.getColumn("db_name")?.setFilterValue(event.target.value) : ""
+            type == "Actions" ? table.getColumn("action")?.setFilterValue(event.target.value) : type == "Databases" ? table.getColumn("database_name")?.setFilterValue(event.target.value) : ""
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
@@ -62,6 +69,30 @@ export function DataTableToolbar({ table, databases, type }) {
             <Cross2Icon className="ml-2 h-4 w-4" />
           </Button>
         )}
+      </div>
+      <div>
+        <Button
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex mr-2"
+          onClick={handleOpen}
+        >
+          Add Action
+        </Button>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            <Typography
+              variant="h6"
+              align="center"
+              component="div"
+              fontWeight="Bold"
+            >
+              Create an Action
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <ActionForm onClose={handleClose} />
+          </DialogContent>
+        </Dialog>
       </div>
       <DataTableViewOptions table={table} />
     </div>
