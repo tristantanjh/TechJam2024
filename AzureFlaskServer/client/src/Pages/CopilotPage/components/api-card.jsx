@@ -20,13 +20,15 @@ import {
 import { AccordionContent } from "@radix-ui/react-accordion";
 import { CircleCheck, CircleX } from "lucide-react";
 import { Input } from "@/Components/ui/input";
+import { useCopilot } from "@/hooks/useCopilot";
 
-export default function ApiCard({ data, socket }) {
+export default function ApiCard({ data, index }) {
   const [inputData, setInputData] = useState(data?.extracted_inputs);
   const [state, setState] = useState("initial");
   const initialised = useRef(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [reminder, setReminder] = useState(false);
+  const { socketInstance, setChatHistory } = useCopilot();
 
   const handleInput = (e) => {
     setInputData({ ...inputData, [e.target.id]: e.target.value });
@@ -37,6 +39,7 @@ export default function ApiCard({ data, socket }) {
   };
 
   const handleSubmit = () => {
+    console.log(index);
     if (!validateInput()) {
       setReminder(true);
       setTimeout(() => {
@@ -46,29 +49,51 @@ export default function ApiCard({ data, socket }) {
     }
     console.log("Submitted");
     setState("loading");
-    socket.emit("api-call", {
+    socketInstance.emit("api-call", {
       action_name: data?.action_name,
       extracted_inputs: inputData,
     });
   };
 
+  const updateChatHistory = (index, newMessage) => {
+    setChatHistory((prevList) => {
+      const newList = [...prevList];
+      newList[index] = newMessage;
+      return newList;
+    });
+  };
+
   useEffect(() => {
     if (!initialised.current) {
-      socket.on("api-response", (data) => {
-        console.log(data);
+      socketInstance?.on("api-response", (dataNew) => {
         setState("submitted");
-        setApiResponse(data);
+        setApiResponse(dataNew);
+        const newMessage = {
+          type: "apiSubmitted",
+          status: dataNew.status,
+          text: {
+            ...data,
+            extracted_inputs: dataNew.extracted_inputs,
+          },
+        };
+        updateChatHistory(index, newMessage);
       });
       initialised.current = true;
     }
-  }, []);
+  }, [socketInstance]);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">
           {"Action: " + data?.action_name}
         </CardTitle>
-        <CardDescription>Please confirm the fields below</CardDescription>
+        <AnimatePresence>
+          {state === "initial" && (
+            <motion.div exit={{ opacity: 0 }}>
+              <CardDescription>Please confirm the fields below</CardDescription>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardHeader>
       <AnimatePresence mode="wait">
         {state === "initial" && (

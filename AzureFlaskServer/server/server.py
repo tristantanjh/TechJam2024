@@ -210,9 +210,11 @@ def handle_api_call(data):
     # ADD API CALL ACTION HERE#######
 
     payload = {
-        'status': "success"
+        'status': "success",
+        'extracted_inputs': data['extracted_inputs'],
     }
     emit('api-response', payload)
+    print("API CALL SUCCESSFUL")
 
 
 # in case needed in the future
