@@ -21,7 +21,7 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import { CircleCheck, CircleX } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 
-export default function ApiCard({ data, socket, key }) {
+export default function ApiCard({ data, socket }) {
   const [inputData, setInputData] = useState(data?.extracted_inputs);
   const [state, setState] = useState("initial");
   const initialised = useRef(false);
@@ -63,7 +63,7 @@ export default function ApiCard({ data, socket, key }) {
     }
   }, []);
   return (
-    <Card key={key}>
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg">
           {"Action: " + data?.action_name}
