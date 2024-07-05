@@ -248,4 +248,4 @@ def hello():
 if __name__ == '__main__':
     port = 9000
     print('Server is running on http://localhost:{}/'.format(port))
-    socketio.run(app, host="0.0.0.0", port=port, debug=True, use_reloader=True)
+    socketio.run(app, host="0.0.0.0", port=port, debug=False, use_reloader=False)

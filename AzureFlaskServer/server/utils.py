@@ -414,9 +414,9 @@ class Chains:
                 You are a expert at routing a user query to the database provided below. 
                 You can select more than one database if the query requires information from multiple databases.
                 Your choices should be the database's name. 
-                You can return NA if the query is not related to any of the databases.
-                You should return a list of database names.
-                Return the JSON with a single key 'choice' with no premable or explanation.
+                If there is a match to any database, you should return a list of database names.
+                If there is a match to any action, you should return a list of database names. Return the JSON with a single key 'name' with no premable or explanation.
+                Return the JSON output with a single key 'name' and the value being 'NA' if and only if the query is not related to any of the databases. Do not return it in a list format.
 
                 Choices:
                 """
@@ -439,9 +439,8 @@ class Chains:
                 Your task is to match a user's query to a list of actions based on the inputs required for each action. 
                 Each action has a specific set of inputs that it requires. 
                 You should identify which actions can be taken based on the inputs mentioned in the user's query and return those actions in JSON format.
-                Return NA if and only if the query is not related to any of the actions.
-                You should return a list of action names.
-                Return the JSON with a single key 'name' with no premable or explanation.
+                If there is a match to any action, you should return a list of action names. Return the JSON with a single key 'name' with no premable or explanation.
+                Return the JSON output with a single key 'name' and the value being 'NA' if and only if the query is not related to any of the actions. Do not return it in a list format.
 
                 Choices:
                 """
@@ -876,6 +875,7 @@ class DBAgent():
         """
         if state['verbose']: print("Step: Routing Query")
         query = state['query']
+        
         output = self.multi_db_router_chain.invoke({"query": query})
         if output['choice'] == "NA":
             if state['verbose']: print("Step: Routing Query to General")
@@ -1029,6 +1029,9 @@ class ActionAgent():
         if state['verbose']: print("Step: Choosing Actions")
         query = state['query']
         output = self.action_router_chain.invoke({"query": query})
+        
+        print(output)
+        
         if output['name'] == "NA":
             if state['verbose']: print("Step: No Actions to Take")
             return {'actions': "NA"}
