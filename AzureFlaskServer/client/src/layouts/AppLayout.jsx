@@ -4,19 +4,22 @@ import { NavbarProvider } from "@/hooks/useNavbar";
 import { ActionsProvider } from "@/hooks/useActions";
 import { LoadingMessageProvider } from "@/hooks/useLoadingMessage";
 import NavbarLayout from "./NavbarLayout";
+import { CopilotProvider } from "@/hooks/useCopilot";
 
 export default function AppLayout() {
   return (
     <AzureProvider>
-      <NavbarProvider>
-        <ActionsProvider>
-          <LoadingMessageProvider>
-            <NavbarLayout>
-              <Outlet />
-            </NavbarLayout>
-          </LoadingMessageProvider>
-        </ActionsProvider>
-      </NavbarProvider>
+      <LoadingMessageProvider>
+        <CopilotProvider>
+          <NavbarProvider>
+            <ActionsProvider>
+              <NavbarLayout>
+                <Outlet />
+              </NavbarLayout>
+            </ActionsProvider>
+          </NavbarProvider>
+        </CopilotProvider>
+      </LoadingMessageProvider>
     </AzureProvider>
   );
 }

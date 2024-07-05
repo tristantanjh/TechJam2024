@@ -3,8 +3,9 @@ import { BotMessageSquare } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "./copy-button";
 import ApiCard from "./api-card";
+import ApiCardSubmitted from "./api-card-submitted";
 
-export default function AiMessage({ text, type, socket }) {
+export default function AiMessage({ text, type, index }) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="p-2 flex items-start justify-start">
@@ -14,7 +15,7 @@ export default function AiMessage({ text, type, socket }) {
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col ml-4 w-[70%]">
-        {type === "ai" ? (
+        {type === "ai" && (
           <div
             onMouseOver={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
@@ -23,8 +24,10 @@ export default function AiMessage({ text, type, socket }) {
             <p className="p-2 m-1 font-medium  w-[90%]">{text}</p>
             <CopyButton point={text} visible={visible} />
           </div>
-        ) : (
-          <ApiCard data={text} socket={socket} />
+        )}
+        {type === "ai-api" && <ApiCard index={index} data={text} />}
+        {type === "apiSubmitted" && (
+          <ApiCardSubmitted index={index} data={text} />
         )}
       </div>
     </div>

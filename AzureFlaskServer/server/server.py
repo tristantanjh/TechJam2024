@@ -156,9 +156,12 @@ def handle_api_call(data):
     # ADD API CALL ACTION HERE#######
 
     payload = {
-        'status': "success"
+        'status': "success",
+        'extracted_inputs': data['extracted_inputs'],
+        'index': data['index'],
     }
     emit('api-response', payload)
+    print("API CALL SUCCESSFUL")
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
