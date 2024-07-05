@@ -596,6 +596,46 @@ class Chains:
         )
         final_output_chain = final_output_prompt | self.llm | StrOutputParser()
         return final_output_chain
+    
+    def get_general_response_chain(self):
+        general_response_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an intelligent agent, with the name Waffles Copilot.
+                Your role is to give general answers to questions that are not related to CRM related tasks or actions.
+
+                You should follow these specific guidelines to answering:
+
+                1. **Non-CRM Related Queries:**
+                    - If a user asks a question that is unrelated to CRM processes (e.g., "What is the weather today?" or "What is the Nvidia share price today?"), 
+                    respond with a general-purpose message to redirect the user back to CRM-related tasks.
+
+                2. **General Purpose or Personal Queries:**
+                    - If a user asks about your purpose or general well-being (e.g., "Hi, what is your purpose?" or "How are you doing today?"), respond with your purpose and role. 
+                    
+                3. **Hateful Queries:**
+                - If the user provides any hateful message or expresses inappropriate emotion (e.g., "You suck" or "You are useless'), respond with a message that you acknowledge their feelings but you cannot answer such questions or that the question is inappropriate,
+                and redirect the user back to CRM-related tasks.
+                
+                4. **Inappropriate Queries:**
+                - If the user provides any inappropriate message (for example, racially insensitive, sexually explicit, violent, politically sensitive, etc), 
+                (e.g., "I hate all people from this country" or "I want to kill someone" or "I hate this political party"),
+                respond with a message that you cannot answer such questions and redirect the user back to CRM-related tasks.
+                
+                5. **Non-English Queries:**
+                - If the user asks a question in a language other than English, respond with a message that you can only understand and respond to questions in English.
+
+                Remember, your main role is to assist with CRM processes and enhance the user's customer management experience.
+                """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        general_response_chain = general_response_prompt | self.llm | StrOutputParser()
+        return general_response_chain
 
 def generate_full_text_query(input: str) -> str:
     """
@@ -791,6 +831,9 @@ class DBAgent():
         self.llm = llm
         self.chains = chains
         self.multi_db_router_chain = self.chains.get_multi_db_router_chain(self.database_list)
+        self.get_initial_check_chain = self.chains.get_initial_check_chain()
+        self.get_full_response_chain = self.chains.get_full_response_chain()
+        self.get_general_response_chain = self.chains.get_general_response_chain()
         self.csvAgent = CSVAgentGPTInstance()
 
     # Node - db_router
@@ -854,7 +897,6 @@ class DBAgent():
         else:
             response = self.csvAgent.get_csv_agent_output(db_paths, query)
             
-
         return {"output": response}
 
     def general(self, state: DBAgentGraphState):
@@ -872,9 +914,15 @@ class DBAgent():
         question = state["query"]
 
         # Answer Generation
-        print(f"Answering general question: {question}")
-        return None
-
+        # print(f"Answering general question: {question}")
+        need_response_from_general_database = self.get_initial_check_chain.invoke({"text": question})
+        if need_response_from_general_database:
+            response = self.get_full_response_chain.invoke({"question": question})
+            return {"output": response}
+        else:
+            response = self.get_general_response_chain.invoke({"query": question})
+            return {"output": response}
+        
     def build_workflow(self):
         """
         Build the workflow for the graph
@@ -1041,6 +1089,11 @@ class ActionAgent():
         
         if state['verbose']: print("Step: Generating DB Response")
         query_output = []
+                
+        if state['actions_prompts'] == None:
+            response = self.DBAgent.run_agent(state['query'])
+            return {"query_output": [response]}
+        
         for action_prompt in state['actions_prompts']:
             response = self.DBAgent.run_agent(action_prompt)
             query_output.append(response)
@@ -1060,28 +1113,40 @@ class ActionAgent():
         
         if state['verbose']: print("Step: Generating Final Response")
         query_output = state["query_output"]
+        
+        print(query_output)
+        
+        # print(query_output['output'])
+        
+        for item in query_output:
+            if 'output' in item:
+                if isinstance (item['output'], str):
+                    return {"output": item['output']}
+                else:
+                    return {"output": "Testing"}
+            
         output_strings = [item['output']['output'] for item in query_output]
         final_output_chain = self.chains.get_final_output_chain(output_strings)
         response = final_output_chain.invoke({"query": state["query"]})
         return {"output": response}
     
-    def general(self, state: ActionAgentGraphState):
-        """
-        Generate answer
+    # def general(self, state: ActionAgentGraphState):
+    #     """
+    #     Generate answer
 
-        Args:
-            state (dict): The current graph state
+    #     Args:
+    #         state (dict): The current graph state
 
-        Returns:
-            state (dict): New key added to state, generation, that contains LLM generation
-        """
+    #     Returns:
+    #         state (dict): New key added to state, generation, that contains LLM generation
+    #     """
         
-        if state['verbose']: print("Step: Generating General Response")
-        question = state["query"]
+    #     if state['verbose']: print("Step: Generating General Response")
+    #     question = state["query"]
 
-        # Answer Generation
-        print(f"Answering general question: {question}")
-        return None
+    #     # Answer Generation
+    #     print(f"Stub")
+    #     return None
 
     def build_workflow(self):
         """
@@ -1090,7 +1155,7 @@ class ActionAgent():
         # Build the nodes
         workflow = StateGraph(ActionAgentGraphState)
         workflow.add_node("actions_router_node", self.actions_router_node)
-        workflow.add_node("general", self.general)
+        # workflow.add_node("general", self.general)
         workflow.add_node("generate_action_prompt", self.generate_action_prompt)
         workflow.add_node("db_query", self.db_query)
         workflow.add_node("generate_final_output", self.generate_final_output)
@@ -1104,12 +1169,12 @@ class ActionAgent():
             "actions_router_node",
             self.actions_router_edge,
             {
-                "general": "general",
+                "general": "db_query",
                 "generate_action_prompt": "generate_action_prompt",
                 "api_type_node": "api_type_node",
             },
         )
-        workflow.add_edge("general", END)
+        # workflow.add_edge("general", END)
         workflow.add_edge("generate_action_prompt", "db_query")
         workflow.add_edge("db_query", "generate_final_output")
         workflow.add_edge("generate_final_output", END)
