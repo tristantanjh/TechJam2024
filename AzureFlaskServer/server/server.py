@@ -5,79 +5,23 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
 from jira_integration.extract import extract_action_item, create_action_item
-
-#read from text_db folder once format is settled
-database_list = [
-  {
-    "database_name": "Sales_database123",
-    "database_description": "A database that contains information about supermarket sales.",
-    'columns': "Invoice ID, Product ID, Shop ID, Customer ID, Date, Time, Payment, Unit Price, Quantity, Total Price",
-    "database_path": "csv_db/supermarket_sales_db.csv",
-  },
-  {
-    "database_name": "Outlet_database",
-    "database_description": "A database that contains information about physical outlets.",
-    "columns": "Shop ID, Country, City, State, Shop Name, Shop Type, Shop Size, Address",
-    "database_path": "csv_db/shop_outlet_db.csv",
-  },
-  {
-    "database_name": "Customer_database",
-    "database_description": "A database that contains information about customers.",
-    "columns": "Customer ID, Customer Name, Customer Email, Customer Phone, Customer Address, Gender, Age",
-    "database_path": "csv_db/customer_db.csv",
-  },
-  {
-    "database_name": "Product_database",
-    "database_description": "A database that contains information about products.",
-    "columns": "Product ID, Product Name, Product Price, Product Category",
-    "database_path": "csv_db/product_db.csv",
-  },
-]
-
-actions_list = [
-  {
-    "action_type": "query_database",
-    "action_name": "most_product_sales_for_shop",
-    "action_description": "Search for which product had the most sales from a specific shop.",
-    "input": ["sales", "shop name",],
-    "output": ["product name", "product ID",],
-  },
-  {
-    "action_type": "query_database",
-    "action_name": "most_customer_sales_for_shop",
-    "action_description": "Search for which customer had the most sales from a specific shop.",
-    "input": ["sales", "shop name",],
-    "output": ["customer name", "customer ID",],
-  },
-  {
-    "action_type": "query_database",
-    "action_name": "full_description_of_product",
-    "action_description": "Give the full description of a product.",
-    "input": ["product name",],
-    "output": ["product ID", "product name", "product price", "product category",],
-  },
-  {
-    "action_type": "api_call",
-    "action_name": "create_jira_issue",
-    "action_description": "Creates a Jira Issue with the given details.",
-    "input": ["issue title", "issue description", "issue type", "issue priority",],
-    "output": [],
-  },
-]
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
-# db_txt = open("./text_db/db.txt", "r")
-# database_list = db_txt.read()
-# actions_txt = open("./text_db/actions.txt", "r")
-# actions_list = actions_txt.read()
+
+with open("./text_db/db.txt", 'r') as db_txt:
+     database_list = json.loads(db_txt.read())
+with open("./text_db/actions.txt", 'r') as actions_txt:
+     actions_list = json.loads(actions_txt.read())
+
 message_store = MessageStore()
 llm_instance = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 chain_instance = Chains(llm_instance)
