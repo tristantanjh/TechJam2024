@@ -5,6 +5,7 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
@@ -263,6 +264,21 @@ def get_databases():
     with open("./text_db/db.txt", "r") as f:
         content = f.read()
         return content
+
+@app.route("/api/databases", methods=["POST"])
+def post_databases():
+    # print(data)
+    print(request.form.get("database_name"))
+    print(request.files['database_file'])
+    with open("./text_db/db.txt", "r") as f:
+        content = f.read()
+        data = json.loads(content)
+        data.append({
+            "database_name": request.form.get("database_name"),
+            "database_description": request.form.get("database_description")
+        })
+        print(data)
+    return "success"
         
 @app.errorhandler(400)
 def bad_request(error):
