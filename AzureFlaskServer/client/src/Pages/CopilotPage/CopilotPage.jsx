@@ -10,12 +10,13 @@ const placeholders = [
   "Show me the most recent sales. ",
 ];
 const placeholderMessages = [
-  { type: "ai", text: "Sure! I can help you with that." },
-  { type: "ai", text: "I can help you with that." },
-  {
-    type: "ai",
-    text: "I can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiuI can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiu",
-  },
+  // { type: "ai", text: "Sure! I can help you with that." },
+  // { type: "ai", text: "I can help you with that." },
+  // {
+  //   type: "ai",
+  //   text: "I can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiuI can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiu",
+  // },
+  { type: "ai", text: "Ask me anything! I can help you with that." },
 ];
 
 export default function CopilotPage() {
@@ -32,9 +33,13 @@ export default function CopilotPage() {
     if (responding) return;
     setMessageList((prev) => [...prev, { type: "human", text: input }]);
     console.log(messageList);
+    socketInstance.emit("copilot-query", {
+      query: input
+    });
     setResponding(true);
     setTimeout(() => {
       setResponding(false);
+      setInput("");
     }, 3000);
   };
 
@@ -53,6 +58,14 @@ export default function CopilotPage() {
       socket.on("connected", (data) => {
         console.log(`Connected to websocket as ${data.data}`);
       });
+
+      socket.on("copilot-output", (data) => {
+        console.log(`Returned copilot output ${data["output"]}`);
+
+        if (data["output"]) {
+          setMessageList((prevList) => [...prevList, { type: "ai", text: data["output"] }]);
+        }
+      })
 
       socketInitialised.current = true;
     }
