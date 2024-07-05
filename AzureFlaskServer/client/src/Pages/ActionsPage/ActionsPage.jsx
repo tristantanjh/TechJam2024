@@ -4,6 +4,7 @@ import { ListView } from "./components/ListView";
 import { columns } from "./components/columns";
 import { db_columns } from "./components/db_columns";
 import axiosInstance from "../../../axios.config";
+import { useActions } from "@/hooks/useActions";
 
 export default function ActionsPage() {
 
@@ -40,13 +41,18 @@ export default function ActionsPage() {
     },
   ])
 
-  const [dbInfo, setDBInfo] = useState([])
+  const {
+    dbInfo,
+    setDBInfo
+  } = useActions();
+
+  // const [dbInfo, setDBInfo] = useState([])
 
   useEffect(() => {
     axiosInstance.get("/api/get-databases").then(res => {
       setDBInfo(res.data)
     })
-  }, [])
+  }, [setDBInfo])
 
   return (
     <div className="flex flex-col h-full">

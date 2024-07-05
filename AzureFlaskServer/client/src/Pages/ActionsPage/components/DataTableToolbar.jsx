@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./DataTableViewOptions";
 import ActionForm from "./ActionForm";
+import { DatabaseForm } from "./DatabaseForm";
 import {
   Dialog,
   DialogActions,
@@ -23,6 +24,9 @@ export function DataTableToolbar({ table, databases, type }) {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [dbModalOpen, setdbModalOpen] = useState(false)
+
 
   const db_processed = []
   if (type == "Actions") {
@@ -70,7 +74,7 @@ export function DataTableToolbar({ table, databases, type }) {
           </Button>
         )}
       </div>
-      <div>
+      {type == "Actions" ? <div>
         <Button
           size="sm"
           className="ml-auto hidden h-8 lg:flex mr-2"
@@ -93,7 +97,31 @@ export function DataTableToolbar({ table, databases, type }) {
             <ActionForm onClose={handleClose} />
           </DialogContent>
         </Dialog>
-      </div>
+      </div> : 
+      <div>
+        <Button
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex mr-2"
+          onClick={() => setdbModalOpen(true)}
+        >
+          Add Database
+        </Button>
+        <Dialog open={dbModalOpen} onClose={() => setdbModalOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            <Typography
+              variant="h6"
+              align="center"
+              component="div"
+              fontWeight="Bold"
+            >
+              Create a database
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <DatabaseForm closeModal={() => setdbModalOpen(false)}/>
+          </DialogContent>
+        </Dialog>
+      </div>}
       <DataTableViewOptions table={table} />
     </div>
   );

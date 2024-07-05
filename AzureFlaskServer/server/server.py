@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import datetime
+import csv
 
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
@@ -158,29 +160,6 @@ def handle_api_call(data):
     }
     emit('api-response', payload)
 
-
-# in case needed in the future
-# @socketio.on('selected-question')
-# def handle_follow_up_selection(data):
-#     sessionId = data['sessionId']
-#     selected_question = data['selectedQuestion']
-#     print("selected question: ", selected_question)
-
-#     # process the selected question with response chain
-#     response = gpt_instance.process_message(selected_question)
-#     if response != "":
-#         # add the ai response to the message store
-#         message_store.add_ai_message({
-#             'sessionId': sessionId,
-#             'aiMessage': response
-#         })
-
-#         # emit the ai response to the client
-#         emit('ai-response', {
-#             'aiMessage': response
-#         })
-
-
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
     sessionId = request.form.get('sessionId') # must be x-www-form-urlencoded
@@ -218,6 +197,35 @@ def get_databases():
     with open("./text_db/db.txt", "r") as f:
         content = f.read()
         return content
+
+@app.route("/api/databases", methods=["POST"])
+def post_databases():
+
+    with open("./text_db/db.txt", "r") as f:
+        content = f.read()
+        data = json.loads(content)
+        if request.files['database_file'].filename.endswith('.csv'):
+            file_path = os.path.join("./csv_db/" + request.files['database_file'].filename)
+            request.files['database_file'].save(file_path)
+        
+        with open(file_path, 'r') as csv_f:
+            csv_reader = csv.reader(csv_f)
+            headers = next(csv_reader)
+
+        data.append({
+            "database_name": request.form.get("database_name"),
+            "database_description": request.form.get("database_description"),
+            "columns": ", ".join(headers),
+            "database_path": file_path,
+            "date": datetime.date.today().strftime('%d-%m-%Y')
+        })
+
+    with open("./text_db/db.txt", "w") as f:
+        data_json = json.dumps(data, indent=4)
+        f.write(data_json)
+    print(data)
+        
+    return data_json, 200
         
 @app.errorhandler(400)
 def bad_request(error):
