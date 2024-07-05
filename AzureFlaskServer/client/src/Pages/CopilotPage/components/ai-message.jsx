@@ -4,7 +4,7 @@ import { useState } from "react";
 import CopyButton from "./copy-button";
 import ApiCard from "./api-card";
 
-export default function AiMessage({ text, type, socket, key }) {
+export default function AiMessage({ text, type, socket }) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="p-2 flex items-start justify-start">
@@ -24,7 +24,7 @@ export default function AiMessage({ text, type, socket, key }) {
             <CopyButton point={text} visible={visible} />
           </div>
         ) : (
-          <ApiCard key={key} data={text} socket={socket} />
+          <ApiCard data={text} socket={socket} />
         )}
       </div>
     </div>

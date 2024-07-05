@@ -217,29 +217,6 @@ def handle_api_call(data):
     }
     emit('api-response', payload)
 
-
-# in case needed in the future
-# @socketio.on('selected-question')
-# def handle_follow_up_selection(data):
-#     sessionId = data['sessionId']
-#     selected_question = data['selectedQuestion']
-#     print("selected question: ", selected_question)
-
-#     # process the selected question with response chain
-#     response = gpt_instance.process_message(selected_question)
-#     if response != "":
-#         # add the ai response to the message store
-#         message_store.add_ai_message({
-#             'sessionId': sessionId,
-#             'aiMessage': response
-#         })
-
-#         # emit the ai response to the client
-#         emit('ai-response', {
-#             'aiMessage': response
-#         })
-
-
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
     sessionId = request.form.get('sessionId') # must be x-www-form-urlencoded
