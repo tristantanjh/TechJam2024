@@ -13,7 +13,6 @@ import {
   } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FileUpload } from 'primereact/fileupload';
 import axiosInstance from "../../../../axios.config";
 import { useActions } from "@/hooks/useActions";
         
@@ -99,9 +98,6 @@ export function DatabaseForm({closeModal}) {
                 <FormControl>
                 <Input placeholder="Database Description" {...field} />
                 </FormControl>
-                {/* <FormDescription>
-                This database name will be displayed to others in the future
-                </FormDescription> */}
                 <FormMessage />
             </FormItem>
             )}

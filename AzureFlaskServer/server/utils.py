@@ -415,8 +415,9 @@ class Chains:
                 You can select more than one database if the query requires information from multiple databases.
                 Your choices should be the database's name. 
                 You can return NA if the query is not related to any of the databases.
-                You should return a list of database names.
-                Return the JSON with a single key 'choice' with no premable or explanation.
+                You should return a list of database names without point form.
+                Return the JSON with a single key 'choice' and the list of database names as the value with no preamble or explanation.
+                This JSON should be wrapped in curly braces.
 
                 Choices:
                 """
