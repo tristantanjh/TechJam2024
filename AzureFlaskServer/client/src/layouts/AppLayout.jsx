@@ -9,17 +9,17 @@ import { CopilotProvider } from "@/hooks/useCopilot";
 export default function AppLayout() {
   return (
     <AzureProvider>
-      <CopilotProvider>
-        <NavbarProvider>
-          <ActionsProvider>
-            <LoadingMessageProvider>
+      <LoadingMessageProvider>
+        <CopilotProvider>
+          <NavbarProvider>
+            <ActionsProvider>
               <NavbarLayout>
                 <Outlet />
               </NavbarLayout>
-            </LoadingMessageProvider>
-          </ActionsProvider>
-        </NavbarProvider>
-      </CopilotProvider>
+            </ActionsProvider>
+          </NavbarProvider>
+        </CopilotProvider>
+      </LoadingMessageProvider>
     </AzureProvider>
   );
 }

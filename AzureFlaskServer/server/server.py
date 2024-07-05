@@ -158,6 +158,7 @@ def handle_api_call(data):
     payload = {
         'status': "success",
         'extracted_inputs': data['extracted_inputs'],
+        'index': data['index'],
     }
     emit('api-response', payload)
     print("API CALL SUCCESSFUL")

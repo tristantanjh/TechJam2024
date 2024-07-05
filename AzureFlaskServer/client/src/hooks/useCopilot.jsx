@@ -7,6 +7,7 @@ import {
   useRef,
 } from "react";
 import { io } from "socket.io-client";
+import { useLoadingMessage } from "./useLoadingMessage";
 
 const CopilotContext = createContext();
 
@@ -19,6 +20,7 @@ export const CopilotProvider = ({ children }) => {
   const [responding, setResponding] = useState(false);
   const [socketInstance, setSocketInstance] = useState(null);
   const socketInitialised = useRef(false);
+  const { setNewQueryReceivedCopilot } = useLoadingMessage();
 
   useEffect(() => {
     if (!socketInitialised.current) {
@@ -48,6 +50,7 @@ export const CopilotProvider = ({ children }) => {
           ]);
         }
         setResponding(false);
+        setNewQueryReceivedCopilot(false);
         setInput("");
       });
 

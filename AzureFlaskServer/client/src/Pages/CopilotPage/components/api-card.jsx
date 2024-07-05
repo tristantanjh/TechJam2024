@@ -52,6 +52,7 @@ export default function ApiCard({ data, index }) {
     socketInstance.emit("api-call", {
       action_name: data?.action_name,
       extracted_inputs: inputData,
+      index: index,
     });
   };
 
@@ -68,15 +69,18 @@ export default function ApiCard({ data, index }) {
       socketInstance?.on("api-response", (dataNew) => {
         setState("submitted");
         setApiResponse(dataNew);
-        const newMessage = {
-          type: "apiSubmitted",
-          status: dataNew.status,
-          text: {
-            ...data,
-            extracted_inputs: dataNew.extracted_inputs,
-          },
-        };
-        updateChatHistory(index, newMessage);
+        if (dataNew.index === index) {
+          const newMessage = {
+            type: "apiSubmitted",
+            status: dataNew.status,
+            text: {
+              ...data,
+              extracted_inputs: dataNew.extracted_inputs,
+            },
+          };
+
+          updateChatHistory(index, newMessage);
+        }
       });
       initialised.current = true;
     }
