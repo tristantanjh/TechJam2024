@@ -105,9 +105,6 @@ export function DatabaseForm({ closeModal }) {
               <FormControl>
                 <Input placeholder="Database Description" {...field} />
               </FormControl>
-              {/* <FormDescription>
-                This database name will be displayed to others in the future
-                </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
