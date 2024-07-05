@@ -21,7 +21,7 @@ export default function AiMessage({ text, type, index }) {
             onMouseLeave={() => setVisible(false)}
             className="flex justify-between rounded-2xl bg-slate-100 hover:bg-slate-200 transition-colors"
           >
-            <p className="p-2 m-1 font-medium  w-[85%]">{text}</p>
+            <p className="p-2 m-1 font-medium  w-[90%]">{text}</p>
             <CopyButton point={text} visible={visible} />
           </div>
         )}

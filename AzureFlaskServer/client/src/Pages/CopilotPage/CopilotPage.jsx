@@ -2,7 +2,9 @@ import { PlaceholdersAndVanishInput } from "@/Components/ui/placeholders-and-van
 import { useState, useEffect, useRef } from "react";
 import HumanMessage from "./components/human-message";
 import AiMessage from "./components/ai-message";
+import LoadingMessage from "./components/loading-message";
 import { useCopilot } from "@/hooks/useCopilot";
+import { useLoadingMessage } from "@/hooks/useLoadingMessage";
 
 const placeholders = [
   "Enter your question here!",
@@ -11,6 +13,7 @@ const placeholders = [
 ];
 
 export default function CopilotPage() {
+  const containerRef = useRef(null);
   const {
     chatHistory,
     setChatHistory,
@@ -20,6 +23,9 @@ export default function CopilotPage() {
     setInput,
     setResponding,
   } = useCopilot();
+  const { newQueryReceivedCopilot, setNewQueryReceivedCopilot } =
+    useLoadingMessage();
+
   const handleInput = (e) => {
     setInput(e.target.value);
   };
@@ -28,6 +34,7 @@ export default function CopilotPage() {
     if (responding) return;
     setChatHistory((prev) => [...prev, { type: "human", text: input }]);
     console.log(chatHistory);
+    setNewQueryReceivedCopilot(true);
     socketInstance.emit("copilot-query", {
       query: input,
     });
@@ -39,7 +46,10 @@ export default function CopilotPage() {
       <div className="flex flex-col justify-between h-[100%]">
         <h1 className="text-4xl font-bold text-primary">Copilot</h1>
         <div className="flex flex-col items-center">
-          <div className="h-[80vh] max-w-[60%] min-w-[60%] overflow-y-scroll">
+          <div
+            className="h-[80vh] max-w-[60%] min-w-[60%] overflow-y-scroll"
+            ref={containerRef}
+          >
             {chatHistory.map((message, idx) => {
               return (
                 <div key={idx}>
@@ -55,6 +65,7 @@ export default function CopilotPage() {
                 </div>
               );
             })}
+            {newQueryReceivedCopilot && <LoadingMessage />}
           </div>
           <PlaceholdersAndVanishInput
             placeholders={placeholders}

@@ -11,13 +11,16 @@ const LoadingMessageContext = createContext();
 
 export const LoadingMessageProvider = ({ children }) => {
     const [newQueryReceived, setNewQueryReceived] = useState(false);
+    const [newQueryReceivedCopilot, setNewQueryReceivedCopilot] = useState(false);
 
     const value = useMemo(
         () => ({
             newQueryReceived,
             setNewQueryReceived,
+            newQueryReceivedCopilot,
+            setNewQueryReceivedCopilot,
         }),
-        [newQueryReceived]
+        [newQueryReceived, newQueryReceivedCopilot]
     );
 
     return (
