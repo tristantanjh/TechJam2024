@@ -118,7 +118,7 @@ export function DataTableToolbar({ table, databases, type }) {
             </Typography>
           </DialogTitle>
           <DialogContent>
-            <DatabaseForm onClose={() => setdbModalOpen(false)} />
+            <DatabaseForm closeModal={() => setdbModalOpen(false)}/>
           </DialogContent>
         </Dialog>
       </div>}

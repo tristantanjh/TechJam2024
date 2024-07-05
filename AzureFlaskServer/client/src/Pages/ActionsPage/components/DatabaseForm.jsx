@@ -15,9 +15,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FileUpload } from 'primereact/fileupload';
 import axiosInstance from "../../../../axios.config";
+import { useActions } from "@/hooks/useActions";
         
 
-export function DatabaseForm() {
+export function DatabaseForm({closeModal}) {
+
+    const {
+        dbInfo,
+        setDBInfo
+      } = useActions();
 
     const formSchema = z.object({
         database_name: z.string().min(1, {
@@ -55,8 +61,15 @@ export function DatabaseForm() {
 
       function onSubmit(values) {
         console.log(values)
-        axiosInstance.post("/api/databases", values, {headers: {'Content-Type': 'multipart/form-data'}})
-
+        axiosInstance.post("/api/databases", values, {headers: {'Content-Type': 'multipart/form-data'}}).then(res => {
+            console.log(res)
+            console.log(res.data)
+            const {data, status} = res
+            if (status === 200) {
+                setDBInfo(data)
+                closeModal()
+            }
+        })
       }
 
       return <Form {...form}>

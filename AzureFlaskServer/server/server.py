@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import datetime
+import csv
 
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
@@ -278,18 +280,32 @@ def get_databases():
 
 @app.route("/api/databases", methods=["POST"])
 def post_databases():
-    # print(data)
-    print(request.form.get("database_name"))
-    print(request.files['database_file'])
+
     with open("./text_db/db.txt", "r") as f:
         content = f.read()
         data = json.loads(content)
+        if request.files['database_file'].filename.endswith('.csv'):
+            file_path = os.path.join("./csv_db/" + request.files['database_file'].filename)
+            request.files['database_file'].save(file_path)
+        
+        with open(file_path, 'r') as csv_f:
+            csv_reader = csv.reader(csv_f)
+            headers = next(csv_reader)
+
         data.append({
             "database_name": request.form.get("database_name"),
-            "database_description": request.form.get("database_description")
+            "database_description": request.form.get("database_description"),
+            "columns": ", ".join(headers),
+            "database_path": file_path,
+            "date": datetime.date.today().strftime('%d-%m-%Y')
         })
-        print(data)
-    return "success"
+
+    with open("./text_db/db.txt", "w") as f:
+        data_json = json.dumps(data, indent=4)
+        f.write(data_json)
+    print(data)
+        
+    return data_json, 200
         
 @app.errorhandler(400)
 def bad_request(error):
