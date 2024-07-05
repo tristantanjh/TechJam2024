@@ -20,9 +20,9 @@ app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 with open("./text_db/db.txt", 'r') as db_txt:
-     database_list = json.loads(db_txt.read())
+    database_list = json.loads(db_txt.read())
 with open("./text_db/actions.txt", 'r') as actions_txt:
-     actions_list = json.loads(actions_txt.read())
+    actions_list = json.loads(actions_txt.read())
 
 message_store = MessageStore()
 llm_instance = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
