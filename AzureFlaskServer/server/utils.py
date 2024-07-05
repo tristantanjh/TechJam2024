@@ -1156,14 +1156,10 @@ class ActionAgent():
         
         print(query_output)
         
-        # print(query_output['output'])
-        
         for item in query_output:
             if 'output' in item:
                 if isinstance (item['output'], str):
                     return {"output": item['output']}
-                else:
-                    return {"output": "Testing"}
             
         output_strings = [item['output']['output'] for item in query_output]
         final_output_chain = self.chains.get_final_output_chain(output_strings)
