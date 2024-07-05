@@ -6,7 +6,7 @@ import { sortingFns } from "@tanstack/react-table";
 
 export const db_columns = [
   {
-    accessorKey: "db_name",
+    accessorKey: "database_name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Database" />
     ),
@@ -14,7 +14,7 @@ export const db_columns = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[100] truncate font-medium">
-            {row.getValue("db_name")}
+            {row.getValue("database_name")}
           </span>
         </div>
       );
@@ -23,12 +23,12 @@ export const db_columns = [
     enableSorting: true
   },
   {
-    accessorKey: "description",
+    accessorKey: "database_description",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => <div className="min-w-[300px] max-w-[1000px] truncate">
-      {row.getValue("description")}
+      {row.getValue("database_description")}
     </div>,
     enableSorting: false,
     enableHiding: true

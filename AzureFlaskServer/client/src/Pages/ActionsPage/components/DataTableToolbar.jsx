@@ -39,9 +39,9 @@ export function DataTableToolbar({ table, databases, type }) {
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder={type == "Actions" ? "Filter actions..." : "Filter databases"}
-          value={type == "Actions" ? table.getColumn("action")?.getFilterValue() ?? "" : type == "Databases" ? table.getColumn("db_name")?.getFilterValue() ?? "" : ""}
+          value={type == "Actions" ? table.getColumn("action")?.getFilterValue() ?? "" : type == "Databases" ? table.getColumn("database_name")?.getFilterValue() ?? "" : ""}
           onChange={(event) =>
-            type == "Actions" ? table.getColumn("action")?.setFilterValue(event.target.value) : type == "Databases" ? table.getColumn("db_name")?.setFilterValue(event.target.value) : ""
+            type == "Actions" ? table.getColumn("action")?.setFilterValue(event.target.value) : type == "Databases" ? table.getColumn("database_name")?.setFilterValue(event.target.value) : ""
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
