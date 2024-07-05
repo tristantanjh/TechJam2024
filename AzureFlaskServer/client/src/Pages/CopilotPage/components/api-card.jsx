@@ -26,7 +26,7 @@ export default function ApiCard({ data, socket, key }) {
   const [state, setState] = useState("initial");
   const initialised = useRef(false);
   const [apiResponse, setApiResponse] = useState(null);
-  const [Reminder, setReminder] = useState(false);
+  const [reminder, setReminder] = useState(false);
 
   const handleInput = (e) => {
     setInputData({ ...inputData, [e.target.id]: e.target.value });
@@ -41,7 +41,7 @@ export default function ApiCard({ data, socket, key }) {
       setReminder(true);
       setTimeout(() => {
         setReminder(false);
-      }, 3000);
+      }, 5000);
       return;
     }
     console.log("Submitted");
@@ -160,7 +160,23 @@ export default function ApiCard({ data, socket, key }) {
       <AnimatePresence>
         {state === "initial" && (
           <motion.div exit={{ opacity: 0 }}>
-            <CardFooter>
+            <CardFooter className="flex flex-col">
+              <AnimatePresence>
+                {reminder && (
+                  <motion.div
+                    key="reminder"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, x: 25 }}
+                    className="flex justify-start w-full p-2 rounded-md text-rose-700 hover:text-rose-800"
+                  >
+                    <span className="">
+                      Please make sure all input fields are filled.
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <Button onClick={handleSubmit} className="w-full">
                 Confirm
               </Button>
