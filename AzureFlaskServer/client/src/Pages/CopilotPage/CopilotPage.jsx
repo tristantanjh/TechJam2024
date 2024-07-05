@@ -10,12 +10,6 @@ const placeholders = [
   "Show me the most recent sales. ",
 ];
 const placeholderMessages = [
-  // { type: "ai", text: "Sure! I can help you with that." },
-  // { type: "ai", text: "I can help you with that." },
-  // {
-  //   type: "ai",
-  //   text: "I can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiuI can help you with that. lorem ipsum njkasndijashdiuasgdhjdshjfbdsajfbadshjkfgadshlfgdsgfjdsbfjkdsbnfjkdshfkijdshgiu",
-  // },
   { type: "ai", text: "Ask me anything! I can help you with that." },
 ];
 
@@ -34,13 +28,9 @@ export default function CopilotPage() {
     setMessageList((prev) => [...prev, { type: "human", text: input }]);
     console.log(messageList);
     socketInstance.emit("copilot-query", {
-      query: input
+      query: input,
     });
     setResponding(true);
-    setTimeout(() => {
-      setResponding(false);
-      setInput("");
-    }, 3000);
   };
 
   // Initialise the socket on page load
@@ -49,7 +39,7 @@ export default function CopilotPage() {
       const socket = io("http://localhost:9000/", {
         transports: ["websocket"],
         cors: {
-          origin: "http://localhost:3000",
+          origin: "http://localhost:5173",
         },
       });
 
@@ -60,12 +50,21 @@ export default function CopilotPage() {
       });
 
       socket.on("copilot-output", (data) => {
-        console.log(`Returned copilot output ${data["output"]}`);
-
-        if (data["output"]) {
-          setMessageList((prevList) => [...prevList, { type: "ai", text: data["output"] }]);
+        console.log(data?.output?.action_type);
+        if (data?.output?.action_type === "api_call") {
+          setMessageList((prevList) => [
+            ...prevList,
+            { type: "ai-api", text: data["output"] },
+          ]);
+        } else {
+          setMessageList((prevList) => [
+            ...prevList,
+            { type: "ai", text: data["output"] },
+          ]);
         }
-      })
+        setResponding(false);
+        setInput("");
+      });
 
       socketInitialised.current = true;
     }
@@ -76,14 +75,19 @@ export default function CopilotPage() {
       <div className="flex flex-col justify-between h-[100%]">
         <h1 className="text-4xl font-bold text-primary">Copilot</h1>
         <div className="flex flex-col items-center">
-          <div className="h-[80vh] max-w-[60%]">
+          <div className="h-[80vh] max-w-[60%] min-w-[60%] overflow-y-scroll">
             {messageList.map((message, idx) => {
               return (
                 <div key={idx}>
                   {message.type === "human" ? (
                     <HumanMessage text={message.text} />
                   ) : (
-                    <AiMessage text={message.text} />
+                    <AiMessage
+                      key={idx}
+                      text={message.text}
+                      type={message.type}
+                      socket={socketInstance}
+                    />
                   )}
                 </div>
               );

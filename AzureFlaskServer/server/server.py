@@ -204,6 +204,16 @@ def handle_copilot_query(data):
 
     emit('copilot-output', copilot_result)
 
+@socketio.on('api-call')
+def handle_api_call(data):
+    print(data)
+    # ADD API CALL ACTION HERE#######
+
+    payload = {
+        'status': "success"
+    }
+    emit('api-response', payload)
+
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
     sessionId = request.form.get('sessionId') # must be x-www-form-urlencoded
@@ -263,4 +273,4 @@ def hello():
 if __name__ == '__main__':
     port = 9000
     print('Server is running on http://localhost:{}/'.format(port))
-    socketio.run(app, host="0.0.0.0", port=port)
+    socketio.run(app, host="0.0.0.0", port=port, debug=True, use_reloader=True)
