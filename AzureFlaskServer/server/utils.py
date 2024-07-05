@@ -1,9 +1,9 @@
 from langchain_openai import ChatOpenAI
 from typing import List, Optional
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, FewShotChatMessagePromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.messages import AIMessage
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
@@ -11,9 +11,12 @@ from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
 from langchain_core.runnables import RunnableParallel
 from langchain.agents.agent_types import AgentType
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from langgraph.graph import END, StateGraph
 from dotenv import load_dotenv
+from typing_extensions import TypedDict
 import os
 import json
+import pandas as pd
 
 load_dotenv()
 
@@ -337,7 +340,7 @@ class Chains:
         """
         return final_data
     
-    def get_response_chain(self) -> str:
+    def get_response_chain(self):
         template = """Answer the question based only on the following context:
         {context}
 
@@ -361,7 +364,7 @@ class Chains:
 
         return chain
     
-    def get_full_response_chain(self) -> str:
+    def get_full_response_chain(self):
         template = """Answer the question based only on the following context:
         {context}
 
@@ -385,6 +388,215 @@ class Chains:
 
         return chain
     
+    def get_multi_db_router_chain(self, database_list: List[dict]):
+        example_db_prompt = ChatPromptTemplate.from_messages(
+            [
+            (
+                "system",
+                """
+                Database name: {database_name}
+                Database description: {database_description}
+                Database columns: {columns}
+                """,
+            ),
+            ]
+        )
+
+        db_few_shot_prompt = FewShotChatMessagePromptTemplate(
+        example_prompt=example_db_prompt,
+        examples=database_list,
+        )
+
+        multi_db_router_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are a expert at routing a user query to the database provided below. 
+                You can select more than one database if the query requires information from multiple databases.
+                Your choices should be the database's name. 
+                You can return NA if the query is not related to any of the databases.
+                You should return a list of database names.
+                Return the JSON with a single key 'choice' with no premable or explanation.
+
+                Choices:
+                """
+                ),
+                db_few_shot_prompt,
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        multi_db_router_chain = multi_db_router_prompt | self.llm | JsonOutputParser()
+        return multi_db_router_chain
+    
+    def get_action_router_chain(self, actions_list: List[dict]):
+        choose_action_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an intelligent assistant. 
+                Your task is to match a user's query to a list of actions based on the inputs required for each action. 
+                Each action has a specific set of inputs that it requires. 
+                You should identify which actions can be taken based on the inputs mentioned in the user's query and return those actions in JSON format.
+                Return NA if and only if the query is not related to any of the actions.
+                You should return a list of action names.
+                Return the JSON with a single key 'name' with no premable or explanation.
+
+                Choices:
+                """
+                ),
+                SystemMessagePromptTemplate.from_template(
+                        "\n".join(
+                            [
+                                f"""
+                                Action type: {action['action_type']}
+                                Action name: {action['action_name']}
+                                Action description: {action['action_description']}
+                                Action input: {action['input']}
+                                Action output: {action['output']}
+                                """
+                                for action in actions_list
+                            ]
+                        )
+                    ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+
+
+        action_router_chain = choose_action_prompt | self.llm | JsonOutputParser()
+        return action_router_chain
+    
+    def get_generate_action_prompt_chain(self):
+        # Few Shot Chat Message Prompt Template
+        generate_prompt_from_action_prompt_examples = [
+            {
+                "query": "Summarize the sales for Shop A.",
+                "action_description": "Search for which product had the most sales from a specific shop.",
+                "action_input": ["sales", "shop name"],
+                "action_output": ["product name", "product ID"],
+                "answer": "First, give me the name of the product that had the most sales from Shop A. Then, use that product name to find the product ID."
+            },
+            {
+                "query": "Summarize the sales for Shop A.",
+                "action_description": "Search for which customer had the most sales from a specific shop.",
+                "action_input": ["sales", "shop name"],
+                "action_output": ["customer name", "customer ID"],
+                "answer": "First, give me the name of the customer that bought the most items from Shop A. Then, use that customer name to find the customer ID."
+            },
+            {
+                "query": "Summarize the sales for Country A.",
+                "action_description": "Search for the city which had the highest quantity of items sold in a specific country.",
+                "action_input": ["sales", "country name"],
+                "action_output": ["city name", "quantity"],
+                "answer": "First, give me the city name which had the highest quantity of items sold in Country A. Then, give me the total quantity of items sold for that city."
+            },
+            {
+                "query": "Give report on Customer A.",
+                "action_description": "Give the full details of a customer.",
+                "action_input": ["customer name"],
+                "action_output": ["customer ID", "customer name", "customer email", "customer phone", "customer address", "gender", "age"],
+                "answer": "Give me the customer ID, customer name, customer email, customer phone, customer address, gender, age of customer A."
+            }
+        ]
+
+        generate_prompt_from_action_prompt_example_prompt = ChatPromptTemplate.from_messages(
+            [
+            (
+                "system",
+                """
+                Query: {query}
+                Action description: {action_description}
+                Action input: {action_input}
+                Action output: {action_output}
+                Answer: {answer}
+                """,
+            ),
+            ]
+        )
+
+        generate_prompt_from_action_prompt_fewshotprompt = FewShotChatMessagePromptTemplate(
+            examples=generate_prompt_from_action_prompt_examples,
+            example_prompt=generate_prompt_from_action_prompt_example_prompt,
+        )
+
+        # Prompt to generate systematic and precise output
+        generate_prompt_from_action_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """      
+                You are an intelligent assistant. Your task is to create systematic and precise prompts to be fed to another llm,
+                based on a user's query and a list of actions.
+                Each action has a specific set of inputs and outputs. You should first identify the main action from the query.
+                Then, generate instructions that use intermediate results precisely.
+                Generate the step-by-step instructions using the action's inputs and outputs,
+                ensuring intermediate results are clearly stated and used in subsequent steps.
+                """
+                ),
+                SystemMessagePromptTemplate.from_template(
+                """
+                For the action:
+                Action description: {action_description}
+                Action input: {action_input}
+                Action output: {action_output}
+
+                Based on the query: "{query}", generate the output based on the action and the query.
+                
+                I will provide some examples to help you understand the task.
+                
+                Examples:
+
+                """
+                ),
+                generate_prompt_from_action_prompt_fewshotprompt,
+                SystemMessagePromptTemplate.from_template(
+                """
+                Do not include any explanation or preamble. Only return the actual answer.
+                
+                Return the answer as a string in natural language, in prose, with no bullet points, point form, or list format.
+                """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}",
+                )
+            ]
+        )
+
+        generate_action_prompt_chain = generate_prompt_from_action_prompt | self.llm | StrOutputParser()
+        return generate_action_prompt_chain
+    
+    def get_final_output_chain(self, db_output: List[str]):
+        final_output_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an intelligent assistant. 
+                Your task is to answer the user's query using the context provided below. 
+                If you don't know the answer, just say that you don't know.
+                Use natural language and elaborate meaningfully and provide suggestions for improvement when appropriate.
+
+                Context:
+                """
+                +"\n".join(
+                    [
+                        f"""
+                        {cont}
+                        """
+                        for cont in db_output
+                    ]
+                )
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        final_output_chain = final_output_prompt | self.llm | StrOutputParser()
+        return final_output_chain
+
 def generate_full_text_query(input: str) -> str:
     """
     Generate a full-text search query for a given input string.
@@ -402,11 +614,10 @@ def generate_full_text_query(input: str) -> str:
     full_text_query += f" {words[-1]}~2"
     return full_text_query.strip()
 
-
 class GPTInstance:
-    def __init__(self, debug=False) -> None:
-        self.llm = ChatOpenAI()
-        self.chains = Chains(self.llm)
+    def __init__(self, llm, chains, debug=False) -> None:
+        self.llm = llm
+        self.chains = chains
         self.debug = debug
 
     def process_message(self, message: str, message_store: MessageStore, sessionId) -> List[str]:
@@ -520,8 +731,19 @@ class GPTInstance:
 class CSVAgentGPTInstance:
     def __init__(self, debug=False) -> None:
         self.llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
-        self.chains = Chains(self.llm)
         self.debug = debug
+    
+    def get_csv_agent(self, dbPath: str):
+        """
+        Get the csv agent
+        """
+        return create_csv_agent(
+            self.llm,
+            dbPath,
+            verbose=True,
+            agent_type=AgentType.OPENAI_FUNCTIONS,
+            allow_dangerous_code=True,
+        )
         
     def get_csv_agent_output(self, dbName: str, question: str):
             """
@@ -547,6 +769,362 @@ class Entities(BaseModel):
         ...,
         description="All the object, event entities that appear in the text"
     )
+
+class DBAgentGraphState(TypedDict):
+    """
+    Represents the state of our graph.
+
+    Attributes:
+        query: query
+        database: database to route query
+        verbose: print debug statements?
+        output: LLM generation
+    """
+    query : str
+    database : str
+    output: str
+    verbose : bool
+
+class DBAgent():
+    def __init__(self, llm, chains, database_list: List[dict]):
+        self.database_list = database_list
+        self.llm = llm
+        self.chains = chains
+        self.multi_db_router_chain = self.chains.get_multi_db_router_chain(self.database_list)
+        self.csvAgent = CSVAgentGPTInstance()
+
+    # Node - db_router
+    def db_router_node(self, state: DBAgentGraphState):
+        """
+        dynamic routing to database listed in database_list
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            str: Next node to call
+        """
+        if state['verbose']: print("Step: Routing Query")
+        query = state['query']
+        output = self.multi_db_router_chain.invoke({"query": query})
+        if output['choice'] == "NA":
+            if state['verbose']: print("Step: Routing Query to General")
+            return {'database': "NA"}
+        else:
+            if state['verbose']: print("Step: Routing Query to Database")
+            return {'database': output['choice']}
+    
+    def db_router_edge(self, state: DBAgentGraphState):
+        """
+        dynamic routing to database listed in database_list
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            str: Next node to call
+        """
+        if state['database'] == "NA":
+            return "general"
+        else:
+            return "db_query"
+
+    def database_query(self, state: DBAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating DB Response")
+        query = state["query"]
+        db_paths = []
+        for datab in state['database']:
+            selected_db = list(filter(lambda db: db.get('database_name') == datab, self.database_list))[0]
+            path_to_db = selected_db.get('database_path')
+            db_paths.append(path_to_db)
+        
+            
+        if len(db_paths) == 1:
+            response = self.csvAgent.get_csv_agent_output(db_paths[0], query)
+        else:
+            response = self.csvAgent.get_csv_agent_output(db_paths, query)
+            
+
+        return {"output": response}
+
+    def general(self, state: DBAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating General Response")
+        question = state["query"]
+
+        # Answer Generation
+        print(f"Answering general question: {question}")
+        return None
+
+    def build_workflow(self):
+        """
+        Build the workflow for the graph
+        """
+        # Build the nodes
+        workflow = StateGraph(DBAgentGraphState)
+        workflow.add_node("db_router_node", self.db_router_node)
+        workflow.add_node("general", self.general)
+        workflow.add_node("db_query", self.database_query)
+
+        # Set the entry point
+        workflow.set_entry_point("db_router_node")
+
+        # Build the edges
+        workflow.add_conditional_edges(
+            "db_router_node",
+            self.db_router_edge,
+            {
+                "general": "general",
+                "db_query": "db_query",
+            },
+        )
+        workflow.add_edge("general", END)
+        workflow.add_edge("db_query", END)
+
+        # Compile the workflow
+        
+        local_agent = workflow.compile()
+
+        return local_agent
+
+    def run_agent(self, query, verbose=True):
+        local_agent = self.build_workflow()
+        output = local_agent.invoke({"query": query, "verbose": verbose})
+        return output
+
+class ActionAgentGraphState(TypedDict):
+    """
+    Represents the state of our graph.
+
+    Attributes:
+        query: query
+        database: database to route query
+        verbose: print debug statements?
+        output: LLM generation
+        action_prompts: action prompts
+        query_output: query output
+    """
+    query: str
+    actions: str
+    actions_prompts: List[str]
+    query_output: List[str]
+    output: str
+    verbose: bool
+
+class ActionAgent():
+    def __init__(self, llm, chains, actions_list: List[dict], database_list: List[dict]):
+        self.actions_list = actions_list
+        self.database_list = database_list
+        self.llm = llm
+        self.chains = chains
+        self.action_router_chain = self.chains.get_action_router_chain(self.actions_list)
+        self.generate_action_prompt_chain = self.chains.get_generate_action_prompt_chain()
+        self.DBAgent = DBAgent(self.llm, self.chains, self.database_list)
+
+    def actions_router_node(self, state: ActionAgentGraphState):
+        """
+        dynamic choose which actions to take
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            str: Next node to call
+        """
+        if state['verbose']: print("Step: Choosing Actions")
+        query = state['query']
+        output = self.action_router_chain.invoke({"query": query})
+        if output['name'] == "NA":
+            if state['verbose']: print("Step: No Actions to Take")
+            return {'actions': "NA"}
+        else:
+            selected_actions = [action for action in self.actions_list if action['action_name'] in output['name']]
+            api_type_actions = [action for action in selected_actions if action['action_type'] == 'api_call']
+            if len(api_type_actions) > 0:
+                if state['verbose']: print("Step: Routing Query to API Call Type Actions Stage")
+                api_type_actions_names = [action['action_name'] for action in api_type_actions]
+                return {'actions': api_type_actions_names}
+            else:
+                if state['verbose']: print("Step: Routing Query to DB type Actions Prompting Stage")
+                return {'actions': output['name']}
+    
+    def actions_router_edge(self, state: ActionAgentGraphState):
+        """
+        dynamic routing to database listed in database_list
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            str: Next node to call
+        """
+        if state['actions'] == "NA":
+            return "general"
+        else:
+            selected_actions = [action for action in self.actions_list if action['action_name'] in state['actions']]
+            api_type_actions = [action for action in selected_actions if action['action_type'] == 'api_call']
+            if len(api_type_actions) > 0:
+                return "api_type_node"
+            else:
+                return "generate_action_prompt"
+    
+    def api_type_node(self, state: ActionAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating API Call Response")
+        return None
+    
+    def generate_action_prompt(self, state: ActionAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating Action Prompt")
+        print("Actions: " + str(state['actions']))
+        action_prompts = []
+        for action in state['actions']:
+            selected_action = list(filter(lambda act: act.get('action_name') == action, self.actions_list))[0]
+            
+            response = self.generate_action_prompt_chain.invoke({
+                "action_description": selected_action["action_description"],
+                "action_input": selected_action["input"],
+                "action_output": selected_action["output"],
+                "query": state["query"],
+            })
+            action_prompts.append(response)
+
+        return {"actions_prompts": action_prompts}
+    
+    def db_query(self, state: ActionAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating DB Response")
+        query_output = []
+        for action_prompt in state['actions_prompts']:
+            response = self.DBAgent.run_agent(action_prompt)
+            query_output.append(response)
+
+        return {"query_output": query_output}
+    
+    def generate_final_output(self, state: ActionAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating Final Response")
+        query_output = state["query_output"]
+        output_strings = [item['output']['output'] for item in query_output]
+        final_output_chain = self.chains.get_final_output_chain(output_strings)
+        response = final_output_chain.invoke({"query": state["query"]})
+        return {"output": response}
+    
+    def general(self, state: ActionAgentGraphState):
+        """
+        Generate answer
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): New key added to state, generation, that contains LLM generation
+        """
+        
+        if state['verbose']: print("Step: Generating General Response")
+        question = state["query"]
+
+        # Answer Generation
+        print(f"Answering general question: {question}")
+        return None
+
+    def build_workflow(self):
+        """
+        Build the workflow for the graph
+        """
+        # Build the nodes
+        workflow = StateGraph(ActionAgentGraphState)
+        workflow.add_node("actions_router_node", self.actions_router_node)
+        workflow.add_node("general", self.general)
+        workflow.add_node("generate_action_prompt", self.generate_action_prompt)
+        workflow.add_node("db_query", self.db_query)
+        workflow.add_node("generate_final_output", self.generate_final_output)
+        workflow.add_node("api_type_node", self.api_type_node)
+
+        # Set the entry point
+        workflow.set_entry_point("actions_router_node")
+
+        # Build the edges
+        workflow.add_conditional_edges(
+            "actions_router_node",
+            self.actions_router_edge,
+            {
+                "general": "general",
+                "generate_action_prompt": "generate_action_prompt",
+                "api_type_node": "api_type_node",
+            },
+        )
+        workflow.add_edge("general", END)
+        workflow.add_edge("generate_action_prompt", "db_query")
+        workflow.add_edge("db_query", "generate_final_output")
+        workflow.add_edge("generate_final_output", END)
+        workflow.add_edge("api_type_node", END)
+
+        # Compile the workflow
+        
+        local_agent = workflow.compile()
+
+        return local_agent
+
+    def run_agent(self, query, verbose=True):
+        local_agent = self.build_workflow()
+        output = local_agent.invoke({"query": query, "verbose": verbose})
+        return output
 
 # entities_prompt
         

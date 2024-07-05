@@ -1,9 +1,9 @@
 from langchain_openai import ChatOpenAI
 from typing import List, Optional
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, FewShotChatMessagePromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.messages import AIMessage
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
@@ -338,7 +338,7 @@ class Chains:
         """
         return final_data
     
-    def get_response_chain(self) -> str:
+    def get_response_chain(self):
         template = """Answer the question based only on the following context:
         {context}
 
@@ -362,7 +362,7 @@ class Chains:
 
         return chain
     
-    def get_full_response_chain(self) -> str:
+    def get_full_response_chain(self):
         template = """Answer the question based only on the following context:
         {context}
 
@@ -386,6 +386,216 @@ class Chains:
 
         return chain
     
+    def get_multi_db_router_chain(self, database_list: List[dict]):
+        example_db_prompt = ChatPromptTemplate.from_messages(
+            [
+            (
+                "system",
+                """
+                Database name: {database_name}
+                Database description: {database_description}
+                Database columns: {columns}
+                """,
+            ),
+            ]
+        )
+
+        db_few_shot_prompt = FewShotChatMessagePromptTemplate(
+        example_prompt=example_db_prompt,
+        examples=database_list,
+        )
+
+        multi_db_router_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are a expert at routing a user query to the database provided below. 
+                You can select more than one database if the query requires information from multiple databases.
+                Your choices should be the database's name. 
+                You can return NA if the query is not related to any of the databases.
+                You should return a list of database names.
+                Return the JSON with a single key 'choice' with no premable or explanation.
+
+                Choices:
+                """
+                ),
+                db_few_shot_prompt,
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        multi_db_router_chain = multi_db_router_prompt | self.llm | JsonOutputParser()
+        return multi_db_router_chain
+    
+    def get_action_router_chain(self, actions_list: List[dict]):
+        choose_action_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an intelligent assistant. 
+                Your task is to match a user's query to a list of actions based on the inputs required for each action. 
+                Each action has a specific set of inputs that it requires. 
+                You should identify which actions can be taken based on the inputs mentioned in the user's query and return those actions in JSON format.
+                Return NA if and only if the query is not related to any of the actions.
+                You should return a list of action names.
+                Return the JSON with a single key 'name' with no premable or explanation.
+
+                Choices:
+                """
+                ),
+                SystemMessagePromptTemplate.from_template(
+                        "\n".join(
+                            [
+                                f"""
+                                Action type: {action['action_type']}
+                                Action name: {action['action_name']}
+                                Action description: {action['action_description']}
+                                Action input: {action['input']}
+                                Action output: {action['output']}
+                                """
+                                for action in actions_list
+                            ]
+                        )
+                    ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+
+
+        action_router_chain = choose_action_prompt | self.llm | JsonOutputParser()
+        return action_router_chain
+    
+    def get_generate_action_prompt_chain(self):
+        # Few Shot Chat Message Prompt Template
+        generate_prompt_from_action_prompt_examples = [
+            {
+                "query": "Summarize the sales for Shop A.",
+                "action_description": "Search for which product had the most sales from a specific shop.",
+                "action_input": ["sales", "shop name"],
+                "action_output": ["product name", "product ID"],
+                "answer": "First, give me the name of the product that had the most sales from Shop A. Then, use that product name to find the product ID."
+            },
+            {
+                "query": "Summarize the sales for Shop A.",
+                "action_description": "Search for which customer had the most sales from a specific shop.",
+                "action_input": ["sales", "shop name"],
+                "action_output": ["customer name", "customer ID"],
+                "answer": "First, give me the name of the customer that bought the most items from Shop A. Then, use that customer name to find the customer ID."
+            },
+            {
+                "query": "Summarize the sales for Country A.",
+                "action_description": "Search for the city which had the highest quantity of items sold in a specific country.",
+                "action_input": ["sales", "country name"],
+                "action_output": ["city name", "quantity"],
+                "answer": "First, give me the city name which had the highest quantity of items sold in Country A. Then, give me the total quantity of items sold for that city."
+            },
+            {
+                "query": "Give report on Customer A.",
+                "action_description": "Give the full details of a customer.",
+                "action_input": ["customer name"],
+                "action_output": ["customer ID", "customer name", "customer email", "customer phone", "customer address", "gender", "age"],
+                "answer": "Give me the customer ID, customer name, customer email, customer phone, customer address, gender, age of customer A."
+            }
+        ]
+
+        generate_prompt_from_action_prompt_example_prompt = ChatPromptTemplate.from_messages(
+            [
+            (
+                "system",
+                """
+                Query: {query}
+                Action description: {action_description}
+                Action input: {action_input}
+                Action output: {action_output}
+                Answer: {answer}
+                """,
+            ),
+            ]
+        )
+
+        generate_prompt_from_action_prompt_fewshotprompt = FewShotChatMessagePromptTemplate(
+            examples=generate_prompt_from_action_prompt_examples,
+            example_prompt=generate_prompt_from_action_prompt_example_prompt,
+        )
+
+        # Prompt to generate systematic and precise output
+        generate_prompt_from_action_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """      
+                You are an intelligent assistant. Your task is to create systematic and precise prompts to be fed to another llm,
+                based on a user's query and a list of actions.
+                Each action has a specific set of inputs and outputs. You should first identify the main action from the query.
+                Then, generate instructions that use intermediate results precisely.
+                Generate the step-by-step instructions using the action's inputs and outputs,
+                ensuring intermediate results are clearly stated and used in subsequent steps.
+                """
+                ),
+                SystemMessagePromptTemplate.from_template(
+                """
+                For the action:
+                Action description: {action_description}
+                Action input: {action_input}
+                Action output: {action_output}
+
+                Based on the query: "{query}", generate the output based on the action and the query.
+                
+                I will provide some examples to help you understand the task.
+                
+                Examples:
+
+                """
+                ),
+                generate_prompt_from_action_prompt_fewshotprompt,
+                SystemMessagePromptTemplate.from_template(
+                """
+                Do not include any explanation or preamble. Only return the actual answer.
+                
+                Return the answer as a string in natural language, in prose, with no bullet points, point form, or list format.
+                """
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}",
+                )
+            ]
+        )
+
+        generate_action_prompt_chain = generate_prompt_from_action_prompt | self.llm | StrOutputParser()
+        return generate_action_prompt_chain
+    
+    def get_final_output_chain(self, db_output: List[str]):
+        final_output_prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                """
+                You are an intelligent assistant. 
+                Your task is to answer the user's query using the context provided below. 
+                If you don't know the answer, just say that you don't know.
+                Use natural language and elaborate meaningfully and provide suggestions for improvement when appropriate.
+
+                Context:
+                """
+                +"\n".join(
+                    [
+                        f"""
+                        {cont}
+                        """
+                        for cont in db_output
+                    ]
+                )
+                ),
+                HumanMessagePromptTemplate.from_template(
+                "Query: {query}"
+                )
+            ]
+        )
+        final_output_chain = final_output_prompt | self.llm | StrOutputParser()
+        return final_output_chain
+
+
 def generate_full_text_query(input: str) -> str:
     """
     Generate a full-text search query for a given input string.
