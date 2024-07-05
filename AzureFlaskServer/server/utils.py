@@ -438,7 +438,7 @@ class Chains:
                 Your task is to match a user's query to a list of actions based on the inputs required for each action. 
                 Each action has a specific set of inputs that it requires. 
                 You should identify which actions can be taken based on the inputs mentioned in the user's query and return those actions in JSON format.
-                If there is a match to any action, you should return the JSON with a single key 'name' with no premable or explanation. The value should be a list of the matched action names. This JSON should be wrapped in curly braces.
+                You should return the JSON with a single key 'name' with no premable or explanation. The value should be a list of action names. This JSON should be wrapped in curly braces.
                 Return the JSON output with a single key 'name' and the value being 'NA' if and only if the query is not related to any of the actions. Do not return it in a list format.
                 
                 Choices:
