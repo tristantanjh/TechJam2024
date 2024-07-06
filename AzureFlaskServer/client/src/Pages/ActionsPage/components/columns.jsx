@@ -67,7 +67,7 @@ export const columns = [
       return <Badge variant="outline">{row.getValue("action_type")}</Badge>;
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.actionType);
+      return value.includes(row.original.action_type);
     },
   },
 
