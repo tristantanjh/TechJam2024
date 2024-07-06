@@ -1,4 +1,49 @@
-# TechJam2024
+# TechJam2024 - 2waffles.ai
+
+## _2waffles.ai: 2 Waffles, 1 Powerful CRM Solution_ <br/>By 2Waffles
+
+<div>
+
+<img src="https://img.shields.io/badge/neo4j-4581C3?style=flat-square&logo=neo4j&logoColor=61DAFB" alt="neo4j">
+<img src="https://img.shields.io/badge/python-3776AB?style=flat-square&logo=python&logoColor=white" alt="python">
+<img src="https://img.shields.io/badge/openai-black?style=flat-square&logo=openai&logoColor=white" alt="Three.js">
+
+</div>
+
+#### Team Members
+
+- [Tristan Tan](https://github.com/tristantanjh)
+- [Oscar Qian](https://github.com/oscarqjh)
+- [Joshau Goh](https://github.com/joshuagohez)
+- [Qu Zhetao](https://github.com/quzhetao01)
+- [Chew Zi Xuan](https://github.com/chewbum)
+
+#### Group Details
+
+- Group Name: 2 Waffles
+- Project Name: 2waffles.ai
+
+#### [Video Demo Link]()
+
+_Made for [Tiktok's TechJam 2024](httpshttps://tiktoktechjam2024.devpost.com/) - Track 4._
+
+## Table of Contents
+
+- [Project Details](#project-details)
+- [Architecture](#architecture)
+- [Features](#features)
+- [How We Did It](#how-we-did-it)
+- [Challenges Faced](#challenges-faced)
+- [What We Learnt](#what-we-learnt)
+- [Installation](#installation)
+
+## Project Details
+
+2waffles.ai is an innovative AI-powered CRM assistant designed to enhance the efficiency and effectiveness of customer relationship management operations. By leveraging machine learning (ML) and artificial intelligence (AI) technologies, 2waffles.ai aims to revolutionize CRM operations by providing a dual-powered, intelligent assistant that not only supports sales but also enhances overall customer relationship management through advanced AI capabilities. With 2waffles.ai, organizations can achieve higher efficiency, better customer interactions, and improved business outcomes.
+
+## Architecture
+
+![architecture diagram]()
 
 ## Installation
 
