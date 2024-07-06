@@ -32,7 +32,7 @@ chain_instance = Chains(llm_instance)
 gpt_instance = GPTInstance(llm_instance, chain_instance, debug=True)
 actionsInstance = ActionsList(actions_list)
 dbInstance = DatabaseList(database_list)
-action_agent_instance = ActionAgent(llm_instance, chain_instance, actions_list, database_list)
+action_agent_instance = ActionAgent(llm_instance, chain_instance, actionsInstance, dbInstance)
 
 
 @socketio.on('connect')
