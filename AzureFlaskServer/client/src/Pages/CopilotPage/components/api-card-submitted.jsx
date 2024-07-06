@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/Components/ui/label";
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/Components/ui/accordion";
-import { AccordionContent } from "@radix-ui/react-accordion";
 import { CircleCheck, CircleX } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 import { useCopilot } from "@/hooks/useCopilot";
