@@ -60,8 +60,7 @@ def create_action_item(action_items):
 
     auth = [
         {
-            "user_email": "joshuagohengzhong@gmail.com", 
-            "jira_api_key": os.getenv("JIRA_API_KEY")
+            "joshuagohengzhong@gmail.com": os.getenv("JIRA_API_KEY")
         }
     ]
 
