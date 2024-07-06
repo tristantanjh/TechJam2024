@@ -49,8 +49,10 @@ export default function ApiCard({ data, index }) {
     }
     console.log("Submitted");
     setState("loading");
+    console.log(data);
     socketInstance.emit("api-call", {
       action_name: data?.action_name,
+      api_service: data?.api_service,
       extracted_inputs: inputData,
       index: index,
     });
