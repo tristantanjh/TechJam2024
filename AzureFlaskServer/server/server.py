@@ -165,7 +165,7 @@ def handle_api_call(data):
     api_service = data['api_service']
 
     if api_service.lower() == "jira":
-        jira_action = [action for action in actions_list if action.get("api_service") == "jira"]
+        jira_action = [action for action in actionsInstance.get_list() if action.get("api_service") == "jira"]
         endpoint = jira_action[0].get("api_endpoint")
         auth = jira_action[0].get("api_auth")
         title = data['extracted_inputs']["issue_title"]
@@ -183,7 +183,7 @@ def handle_api_call(data):
         emit('api-response', payload)
         print("JIRA CREATE ISSUE SUCCESSFUL")
     elif api_service.lower() == "custom":
-        custom_action = [action for action in actions_list if action.get("action_name") == data['action_name']][0]
+        custom_action = [action for action in actionsInstance.get_list() if action.get("action_name") == data['action_name']][0]
         endpoint = custom_action.get("api_endpoint")
         response = requests.post(endpoint, json=data['extracted_inputs'])
         payload = {
