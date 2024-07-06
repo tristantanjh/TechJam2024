@@ -44,14 +44,14 @@ export function DataTableToolbar({ table, databases, type }) {
           }
           value={
             type == "Actions"
-              ? table.getColumn("action")?.getFilterValue() ?? ""
+              ? table.getColumn("action_name")?.getFilterValue() ?? ""
               : type == "Databases"
               ? table.getColumn("database_name")?.getFilterValue() ?? ""
               : ""
           }
           onChange={(event) =>
             type == "Actions"
-              ? table.getColumn("action")?.setFilterValue(event.target.value)
+              ? table.getColumn("action_name")?.setFilterValue(event.target.value)
               : type == "Databases"
               ? table
                   .getColumn("database_name")
@@ -60,21 +60,14 @@ export function DataTableToolbar({ table, databases, type }) {
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {type == "Actions" && table.getColumn("actionType") && (
+        {type == "Actions" && table.getColumn("action_type") && (
           <DataTableFacetedFilter
-            column={table.getColumn("actionType")}
+            column={table.getColumn("action_type")}
             title="Status"
             options={[
               { value: "Query", label: "Query" },
               { value: "API", label: "API" },
             ]}
-          />
-        )}
-        {type == "Actions" && table.getColumn("database") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("database")}
-            title="Database"
-            options={db_processed}
           />
         )}
         {isFiltered && (
@@ -88,7 +81,7 @@ export function DataTableToolbar({ table, databases, type }) {
           </Button>
         )}
       </div>
-      <div>
+      {type == "Actions" ? <div>
         <Button
           size="sm"
           className="ml-auto hidden h-8 lg:flex mr-2"
@@ -108,10 +101,10 @@ export function DataTableToolbar({ table, databases, type }) {
             </Typography>
           </DialogTitle>
           <DialogContent>
-            <ActionForm onClose={handleClose} />
+            <ActionForm closeModal={handleClose} />
           </DialogContent>
         </Dialog>
-      </div>{" "}
+      </div> :
       <div>
         <Button
           size="sm"
@@ -140,7 +133,7 @@ export function DataTableToolbar({ table, databases, type }) {
             <DatabaseForm closeModal={() => setdbModalOpen(false)} />
           </DialogContent>
         </Dialog>
-      </div>
+      </div>}
       <DataTableViewOptions table={table} />
     </div>
   );

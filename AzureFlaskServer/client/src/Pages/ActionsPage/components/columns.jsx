@@ -47,111 +47,29 @@ export const columns = [
     enableSorting: true,
   },
   {
-    accessorKey: "description",
+    accessorKey: "action_description",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => (
       <div className="min-w-[300px] truncate">
-        {row.getValue("description")}
+        {row.getValue("action_description")}
       </div>
     ),
     enableSorting: false,
   },
   {
-    accessorKey: "actionType",
+    accessorKey: "action_type",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => {
-      return <Badge variant="outline">{row.getValue("actionType")}</Badge>;
+      return <Badge variant="outline">{row.getValue("action_type")}</Badge>;
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.actionType);
+      return value.includes(row.original.action_type);
     },
   },
 
-  {
-    accessorKey: "database",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Database" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="w-[150px] font-medium">{row.getValue("database")}</div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.original.database);
-    },
-  },
-  {
-    accessorKey: "action_api_name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="API Name" />
-    ),
-    cell: ({ row }) => (
-      <div className="min-w-[150px] truncate">
-        {row.getValue("action_api_name") === ""
-          ? "-"
-          : row.getValue("action_api_name")}
-      </div>
-    ),
-    enableSorting: true,
-  },
-  {
-    accessorKey: "query_inputs",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Query Inputs" />
-    ),
-    cell: ({ row }) => {
-      const queryInputs = row.getValue("query_inputs") || [];
-      return (
-        <div style={{ padding: "10px", minWidth: "200px" }}>
-          {queryInputs.length > 0 ? (
-            queryInputs.map((input, index) => (
-              <div key={index}>
-                <span>{input}</span>
-              </div>
-            ))
-          ) : (
-            <span>-</span>
-          )}
-        </div>
-      );
-    },
-    enableSorting: false,
-  },
-  {
-    accessorKey: "api_key_values",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="API Key Values" />
-    ),
-    cell: ({ row }) => {
-      const apiKeyValues = row.getValue("api_key_values") || [];
-      return (
-        <div style={{ padding: "10px", minWidth: "100px" }}>
-          {apiKeyValues.length > 0 ? (
-            apiKeyValues.map((kv, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "5px",
-                }}
-              >
-                <strong style={{ marginRight: "5px" }}>{kv.key}:</strong>{" "}
-                <span>{kv.value}</span>
-                {index < apiKeyValues.length - 1 && <hr />}
-              </div>
-            ))
-          ) : (
-            <span>-</span>
-          )}
-        </div>
-      );
-    },
-    enableSorting: false,
-  },
+
 ];
