@@ -147,9 +147,12 @@ def handle_copilot_query(data):
     #     query: qns
     # };
 
-    copilot_result = action_agent_instance.run_agent(data["query"])
+    try:
+        copilot_result = action_agent_instance.run_agent(data["query"])
 
-    emit('copilot-output', copilot_result)
+        emit('copilot-output', copilot_result)
+    except Exception as e:
+        emit('copilot-output', "Sorry, there seems to be an error. Please try again or contact the developers!.")
 
 @socketio.on('api-call')
 def handle_api_call(data):
@@ -249,7 +252,7 @@ def save_action():
     actions.append(action)
     # Write the updated list back to the file
     with open(file_path, "w") as f:
-        json.dump(actions, f, indent=2)
+        json.dump(actions, f, indent=4)
     print(jsonify(action))
     return jsonify(action)
 
