@@ -54,12 +54,13 @@ def create_issue(summary, description):
     return json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": "))
 
 
-def create_issue_copilot(endpoint, title, description, type, priority, auth):
+def create_issue_copilot(endpoint, title, description, auth):
 
     url = f"{endpoint}/rest/api/3/issue"
-    authHead = auth[0]
+    authKey = list(auth[0].keys())[0]
+    authValue = list(auth[0].values())[0]
     
-    auth = HTTPBasicAuth("joshuagohengzhong@gmail.com", os.getenv("JIRA_API_KEY"))
+    auth = HTTPBasicAuth(authKey, authValue)
     
     headers = {
         "Accept": "application/json",
@@ -83,7 +84,7 @@ def create_issue_copilot(endpoint, title, description, type, priority, auth):
                 "type": "doc",
                 "version": 1
             },
-            "summary": summary,
+            "summary": title,
             "issuetype": {
                 "id": "10001"
             },
