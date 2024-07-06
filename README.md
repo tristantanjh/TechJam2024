@@ -1,6 +1,6 @@
 # TechJam2024 - 2waffles.ai
 
-## _2waffles.ai: 2 Waffles, 1 Powerful CRM Solution_ <br/>By 2Waffles
+## _2waffles.ai: 2 Waffles, 1 Powerful CRM Solution_ <br/>By 2 waffles
 
 <div>
 
