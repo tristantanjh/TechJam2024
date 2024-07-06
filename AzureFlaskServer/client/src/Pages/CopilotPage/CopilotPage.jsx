@@ -41,6 +41,12 @@ export default function CopilotPage() {
     setResponding(true);
   };
 
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
   return (
     <div className="h-screen w-full p-10">
       <div className="flex flex-col justify-between h-[100%]">
