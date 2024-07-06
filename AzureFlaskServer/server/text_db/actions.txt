@@ -1,60 +1,62 @@
 [
-  {
-    "action_type": "query_database",
-    "action_name": "most_product_sales_for_shop",
-    "action_description": "Search for which product had the most sales from a specific shop.",
-    "input": [
-        "sales", 
-        "shop name"
-      ],
-    "output": [
-        "product name", 
-        "product ID"
-      ]
-  },
-  {
-    "action_type": "query_database",
-    "action_name": "most_customer_sales_for_shop",
-    "action_description": "Search for which customer had the most sales from a specific shop.",
-    "input": [
-      "sales", 
-      "shop name"
-      ],
-    "output": [
-        "customer name", 
-        "customer ID"
-      ]
-  },
-  {
-    "action_type": "query_database",
-    "action_name": "full_description_of_product",
-    "action_description": "Give the full description of a product.",
-    "input": [
-        "product name"
-      ],
-    "output": [
-        "product ID", 
-        "product name", 
-        "product price", 
-        "product category"
-      ]
-  },
-  {
-    "action_type": "api_call",
-    "api_service": "jira",
-    "action_name": "create_jira_issue",
-    "action_description": "Creates a Jira Issue with the given details.",
-    "input": [
-        "issue title", 
-        "issue description", 
-        "issue type", 
-        "issue priority"
-      ],
-    "output": [],
-    "api_endpoint": "https://2waffles.atlasian.net",
-    "api_auth": [
-      "key1": "value1example below",
-      "joshuagohengzhong@gmail.com": "JIRA_API_KEY"
-    ]
-  }
+    {
+        "action_type": "query_database",
+        "action_name": "most_product_sales_for_shop",
+        "action_description": "Search for which product had the most sales from a specific shop.",
+        "input": [
+            "sales",
+            "shop name"
+        ],
+        "output": [
+            "product name",
+            "product ID"
+        ]
+    },
+    {
+        "action_type": "query_database",
+        "action_name": "most_customer_sales_for_shop",
+        "action_description": "Search for which customer had the most sales from a specific shop.",
+        "input": [
+            "sales",
+            "shop name"
+        ],
+        "output": [
+            "customer name",
+            "customer ID"
+        ]
+    },
+    {
+        "action_type": "query_database",
+        "action_name": "full_description_of_product",
+        "action_description": "Give the full description of a product.",
+        "input": [
+            "product name"
+        ],
+        "output": [
+            "product ID",
+            "product name",
+            "product price",
+            "product category"
+        ]
+    },
+    {
+        "action_type": "api_call",
+        "api_service": "jira",
+        "action_name": "create_jira_issue",
+        "action_description": "Creates a Jira Issue with the given details.",
+        "input": [
+            "issue title",
+            "issue description"
+        ],
+        "output": [],
+        "api_endpoint": "https://2waffles.atlasian.net",
+        "api_auth": [
+            {
+                "key1": "value1examplebelow"
+            },
+            {
+                "joshuagohengzhong@gmail.com": "JIRA_API_KEY"
+            }
+        ]
+    }
 ]
