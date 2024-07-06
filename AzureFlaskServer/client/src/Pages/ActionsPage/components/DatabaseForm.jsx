@@ -17,7 +17,7 @@ import axiosInstance from "../../../../axios.config";
 import { useActions } from "@/hooks/useActions";
 
 export function DatabaseForm({ closeModal }) {
-  const { dbInfo, setDBInfo } = useActions();
+  const { setDBInfo } = useActions();
 
   const formSchema = z.object({
     database_name: z

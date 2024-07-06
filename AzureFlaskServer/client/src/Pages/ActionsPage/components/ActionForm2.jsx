@@ -16,9 +16,11 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axiosInstance from "../../../../axios.config";
+import { useActions } from "@/hooks/useActions";
 
-const ActionForm = () => {
+const ActionForm = ({ closeModal }) => {
 
+    const { setActions } = useActions();
     const [page, setPage] = useState(1)
 
     const query_inputs_Schema = z.object({
@@ -44,7 +46,7 @@ const ActionForm = () => {
         query_outputs: z.array(query_outputs_Schema),
         auth: z.array(auth_key_pair_Schema).optional()
       }).refine(data => {
-        if (data.action_type === "API" && !api_endpoint) {
+        if (data.action_type === "API" && !data.api_endpoint) {
             return false;
           }
           return true;
@@ -52,7 +54,7 @@ const ActionForm = () => {
           message: "API endpoint is required when action type is API",
           path: ['api_endpoint']
         }).refine(data => {
-            if (data.action_type === "API" && !api_service) {
+            if (data.action_type === "API" && !data.api_service) {
                 return false;
               }
               return true;
@@ -95,6 +97,11 @@ const ActionForm = () => {
             headers: { "Content-Type": "application/json" },
         }).then(res => {
             console.log(res)
+            const { data, status } = res;
+            if (status === 200) {
+                setActions(data);
+                closeModal();
+            }
         })
     }
 
@@ -202,7 +209,7 @@ const ActionForm = () => {
                         <FormItem>
                         <FormLabel>API Endpoint</FormLabel>
                         <FormControl>
-                            <Input placeholder="API Endpoint" {...field} defaultValue={watch("api_endpoint")}/>
+                            <Input placeholder="API Endpoint" {...field} value={watch("api_endpoint")}/>
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -219,6 +226,7 @@ const ActionForm = () => {
                                 placeholder="Action Description"
                                 className="resize-none"
                                 {...field}
+                                value={watch("description")}
                             />
                         </FormControl>
                         <FormMessage />

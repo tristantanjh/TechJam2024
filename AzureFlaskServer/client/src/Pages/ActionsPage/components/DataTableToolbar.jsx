@@ -88,7 +88,7 @@ export function DataTableToolbar({ table, databases, type }) {
           </Button>
         )}
       </div>
-      <div>
+      {type == "Actions" ? <div>
         <Button
           size="sm"
           className="ml-auto hidden h-8 lg:flex mr-2"
@@ -108,10 +108,10 @@ export function DataTableToolbar({ table, databases, type }) {
             </Typography>
           </DialogTitle>
           <DialogContent>
-            <ActionForm onClose={handleClose} />
+            <ActionForm closeModal={handleClose} />
           </DialogContent>
         </Dialog>
-      </div>{" "}
+      </div> :
       <div>
         <Button
           size="sm"
@@ -140,7 +140,7 @@ export function DataTableToolbar({ table, databases, type }) {
             <DatabaseForm closeModal={() => setdbModalOpen(false)} />
           </DialogContent>
         </Dialog>
-      </div>
+      </div>}
       <DataTableViewOptions table={table} />
     </div>
   );

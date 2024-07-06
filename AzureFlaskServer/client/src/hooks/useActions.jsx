@@ -4,11 +4,14 @@ const ActionsContext = createContext();
 
 export const ActionsProvider = ({children}) => {
     const [dbInfo, setDBInfo] = useState([])
+    const [actions, setActions] = useState([])
 
     const value = useMemo(() => ({
         dbInfo,
-        setDBInfo
-    }), [dbInfo])
+        setDBInfo,
+        actions,
+        setActions
+    }), [dbInfo, actions])
 
     return <ActionsContext.Provider value={value}>{children}</ActionsContext.Provider>
 }

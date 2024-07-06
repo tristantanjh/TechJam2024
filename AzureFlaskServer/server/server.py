@@ -259,7 +259,7 @@ def get_actions():
 @app.route("/api/actions", methods=["POST"])
 def post_action():
     
-    with open("./text_db/actions2.txt", "r") as f:
+    with open("./text_db/actions.txt", "r") as f:
         content = f.read()
         curr = json.loads(content)
     action = request.json
@@ -279,7 +279,7 @@ def post_action():
         curr.append(data)
         data_json = json.dumps(curr, indent=4)
         f.write(data_json)
-    return "wassup"
+    return data_json, 200
 
 @app.route('/api/demo_custom_api', methods=['POST'])
 def demo_custom_api():

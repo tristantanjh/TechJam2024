@@ -1,6 +1,6 @@
 [
     {
-        "action_type": "query_database",
+        "action_type": "Query",
         "action_name": "most_product_sales_for_shop",
         "action_description": "Search for which product had the most sales from a specific shop.",
         "input": [
@@ -13,7 +13,7 @@
         ]
     },
     {
-        "action_type": "query_database",
+        "action_type": "Query",
         "action_name": "most_customer_sales_for_shop",
         "action_description": "Search for which customer had the most sales from a specific shop.",
         "input": [
@@ -26,7 +26,7 @@
         ]
     },
     {
-        "action_type": "query_database",
+        "action_type": "Query",
         "action_name": "full_description_of_product",
         "action_description": "Give the full description of a product.",
         "input": [
@@ -40,7 +40,7 @@
         ]
     },
     {
-        "action_type": "api_call",
+        "action_type": "API",
         "api_service": "jira",
         "action_name": "create_jira_issue",
         "action_description": "Creates a Jira Issue with the given details.",
@@ -49,14 +49,9 @@
             "issue description"
         ],
         "output": [],
-        "api_endpoint": "https://2waffles.atlasian.net",
-        "api_auth": [
-            {
-                "key1": "value1examplebelow"
-            },
-            {
-                "joshuagohengzhong@gmail.com": "JIRA_API_KEY"
-            }
-        ]
+        "api_endpoint": "https://2waffles.atlassian.net",
+        "api_auth": {
+            "joshuagohengzhong@gmail.com": "ATATT3xFfGF0gTg5yGgR2APOoqTjoy3akO8-_rAnwSSx-O8oevj81-vcBlVUJXcI-_GVqFSOLcoEx2ymSfWlkSL9OiDEadKhRbghvyWsivKMYhFumfbiS9zmDNSXycPLGVhOBT1bCt_QngtVZM6IUpjWhYU62IdHr5X-lDXQYHreHFFnpYJKl58=02F7CBB6"
+        }
     }
 ]
