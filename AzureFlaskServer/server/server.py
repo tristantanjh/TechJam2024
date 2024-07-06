@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+import json
 import os
 import requests
 import json
@@ -230,6 +231,29 @@ def post_databases():
         
     return data_json, 200
         
+@app.route("/api/get-actions", methods=["GET"])
+def get_actions():
+    with open("./text_db/actions.txt", "r") as f:
+        content = f.read()
+        return content
+
+@app.route("/api/save-action", methods=["POST"])
+def save_action():
+    action = request.json
+    file_path = "./text_db/actions.txt"
+    with open(file_path, "r") as f:
+        try:
+            actions = json.load(f)
+        except json.JSONDecodeError:
+            actions = []
+    actions.append(action)
+    # Write the updated list back to the file
+    with open(file_path, "w") as f:
+        json.dump(actions, f, indent=2)
+    print(jsonify(action))
+    return jsonify(action)
+
+
 @app.errorhandler(400)
 def bad_request(error):
     return jsonify({

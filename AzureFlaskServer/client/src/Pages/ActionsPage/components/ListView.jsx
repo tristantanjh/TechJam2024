@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -21,7 +21,6 @@ import {
 
 import { DataTablePagination } from "../components/DataTablePagination";
 import { DataTableToolbar } from "../components/DataTableToolbar";
-
 
 export function ListView({ columns, data, type }) {
   const [rowSelection, setRowSelection] = React.useState({});
@@ -54,12 +53,15 @@ export function ListView({ columns, data, type }) {
   const databases = data.reduce((x, curr) => {
     x.add(curr.database);
     return x;
-  }, new Set())
-
+  }, new Set());
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} databases={Array.from(databases)} type={type}/>
+      <DataTableToolbar
+        table={table}
+        databases={Array.from(databases)}
+        type={type}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -72,7 +74,7 @@ export function ListView({ columns, data, type }) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                     </TableHead>
                   );
@@ -91,7 +93,7 @@ export function ListView({ columns, data, type }) {
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
