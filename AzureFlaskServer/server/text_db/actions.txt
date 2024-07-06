@@ -1,122 +1,60 @@
 [
   {
-    "actionType": "Query",
-    "action_api_name": "",
-    "action_name": "Retrieve product",
-    "description": "ddd",
-    "output_products": "ddd",
-    "output_description": "ddddd",
-    "query_inputs": [
-      "dd",
-      "dd",
-      "dd"
-    ]
+    "action_type": "query_database",
+    "action_name": "most_product_sales_for_shop",
+    "action_description": "Search for which product had the most sales from a specific shop.",
+    "input": [
+        "sales", 
+        "shop name"
+      ],
+    "output": [
+        "product name", 
+        "product ID"
+      ]
   },
   {
-    "actionType": "API",
-    "action_api_name": "d",
-    "action_name": "ddd",
-    "description": "ddd",
-    "output_products": "d",
-    "output_description": "ddd",
-    "api_endpoint": "dd",
-    "api_key_values": [
-      {
-        "key": "dd",
-        "value": "dd"
-      }
-    ]
+    "action_type": "query_database",
+    "action_name": "most_customer_sales_for_shop",
+    "action_description": "Search for which customer had the most sales from a specific shop.",
+    "input": [
+      "sales", 
+      "shop name"
+      ],
+    "output": [
+        "customer name", 
+        "customer ID"
+      ]
   },
   {
-    "actionType": "API",
-    "action_api_name": "dddd",
-    "action_name": "dddd",
-    "description": "ddd",
-    "output_products": "dd",
-    "output_description": "dddd",
-    "api_endpoint": "ddd",
-    "api_key_values": [
-      {
-        "key": "dd",
-        "value": "dd"
-      }
-    ]
+    "action_type": "query_database",
+    "action_name": "full_description_of_product",
+    "action_description": "Give the full description of a product.",
+    "input": [
+        "product name"
+      ],
+    "output": [
+        "product ID", 
+        "product name", 
+        "product price", 
+        "product category"
+      ]
   },
   {
-    "actionType": "Query",
-    "action_api_name": "",
-    "action_name": "ddddddddddd",
-    "description": "ddd",
-    "output_products": "ddd",
-    "output_description": "dddd",
-    "query_inputs": [
-      "dddd",
-      "sssas",
-      "ssdsd"
-    ]
-  },
-  {
-    "actionType": "API",
-    "action_api_name": "dddd",
-    "action_name": "dddd",
-    "description": "dddd",
-    "output_products": "d",
-    "output_description": "ddd",
-    "api_endpoint": "dd",
-    "api_key_values": [
-      {
-        "key": "dd",
-        "value": "ddd"
-      },
-      {
-        "key": "d",
-        "value": "d"
-      },
-      {
-        "key": "d",
-        "value": "dd"
-      }
-    ]
-  },
-  {
-    "actionType": "API",
-    "action_api_name": "e",
-    "action_name": "eee",
-    "description": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-    "output_products": "eeeee",
-    "output_description": "eeeeeeeee",
-    "api_endpoint": "eeeeeeeeeeeeeeee",
-    "api_key_values": [
-      {
-        "key": "eeeeee",
-        "value": "eeeeeeeeeeeeeeee"
-      }
-    ]
-  },
-  {
-    "actionType": "Query",
-    "action_api_name": "",
-    "action_name": "ddddd",
-    "description": "aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "output_products": "aaa",
-    "output_description": "aaaa",
-    "query_inputs": [
-      "aaaaaa"
-    ]
-  },
-  {
-    "actionType": "API",
-    "action_api_name": "d",
-    "action_name": "d",
-    "description": "d",
-    "output_products": "d",
-    "output_description": "d",
-    "api_endpoint": "d",
-    "api_key_values": [
-      {
-        "key": "dddd",
-        "value": "dddd"
-      }
+    "action_type": "api_call",
+    "api_service": "jira",
+    "action_name": "create_jira_issue",
+    "action_description": "Creates a Jira Issue with the given details.",
+    "input": [
+        "issue title", 
+        "issue description", 
+        "issue type", 
+        "issue priority"
+      ],
+    "output": [],
+    "api_endpoint": "https://2waffles.atlasian.net",
+    "api_auth": [
+      "key1": "value1example below",
+      "joshuagohengzhong@gmail.com": "JIRA_API_KEY"
     ]
   }
 ]
