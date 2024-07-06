@@ -183,6 +183,16 @@ def handle_api_call(data):
         emit('api-response', payload)
         print("JIRA CREATE ISSUE SUCCESSFUL")
     elif api_service.lower() == "custom":
+        custom_action = [action for action in actions_list if action.get("action_name") == data['action_name']][0]
+        endpoint = custom_action.get("api_endpoint")
+        response = requests.post(endpoint, json=data['extracted_inputs'])
+        payload = {
+            'status': "success",
+            'extracted_inputs': data['extracted_inputs'],
+            'index': data['index'],
+        }
+        emit('api-response', payload)
+        print(response.json())
         print("CUSTOM API CALL")
 
 @app.route("/api/get-messages", methods=["GET"])
