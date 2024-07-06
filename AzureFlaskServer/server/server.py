@@ -10,7 +10,7 @@ import json
 import datetime
 import csv
 
-from utils import MessageStore, GPTInstance, ActionAgent, Chains
+from utils import MessageStore, GPTInstance, ActionAgent, Chains, ActionsList, DatabaseList
 
 from jira_integration.extract import extract_action_item, create_action_item
 from jira_integration.jiraIssue import create_issue
@@ -30,6 +30,8 @@ message_store = MessageStore()
 llm_instance = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 chain_instance = Chains(llm_instance)
 gpt_instance = GPTInstance(llm_instance, chain_instance, debug=True)
+actionsInstance = ActionsList(actions_list)
+dbInstance = DatabaseList(database_list)
 action_agent_instance = ActionAgent(llm_instance, chain_instance, actions_list, database_list)
 
 
@@ -245,6 +247,7 @@ def post_databases():
 
     with open("./text_db/db.txt", "w") as f:
         data_json = json.dumps(data, indent=4)
+        dbInstance.set_list(data)
         f.write(data_json)
     print(data)
         
@@ -264,7 +267,7 @@ def post_action():
         curr = json.loads(content)
     action = request.json
     data = {
-        "action_type": action.get("action_type"),
+        "action_type": "api_call" if action.get("action_type") == "API" else "query_database",
         "action_name": action.get("action_name"),
         "action_description": action.get("description"),
         "api_endpoint": action.get("api_endpoint"),
@@ -279,6 +282,7 @@ def post_action():
         curr.append(data)
         data_json = json.dumps(curr, indent=4)
         f.write(data_json)
+        actionsInstance.set_list(curr)
     return data_json, 200
 
 @app.route('/api/demo_custom_api', methods=['POST'])

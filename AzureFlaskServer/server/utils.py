@@ -20,6 +20,26 @@ import pandas as pd
 
 load_dotenv()
 
+class ActionsList:
+    def __init__(self, actions_list):
+        self.actions_list = actions_list
+    
+    def set_list(self, actions_list):
+        self.actions_list = actions_list
+    
+    def get_list(self):
+        return self.actions_list
+
+class DatabaseList:
+    def __init__(self, database_list):
+        self.database_list = database_list
+    
+    def set_list(self, database_list):
+        self.database_list = database_list
+    
+    def get_list(self):
+        return self.database_list
+
 class MessageStore:
     def __init__(self):
         self.messages = {}
@@ -388,7 +408,7 @@ class Chains:
 
         return chain
     
-    def get_multi_db_router_chain(self, database_list: List[dict]):
+    def get_multi_db_router_chain(self, database_list: DatabaseList):
         example_db_prompt = ChatPromptTemplate.from_messages(
             [
             (
@@ -404,7 +424,7 @@ class Chains:
 
         db_few_shot_prompt = FewShotChatMessagePromptTemplate(
         example_prompt=example_db_prompt,
-        examples=database_list,
+        examples=database_list.get_list(),
         )
 
         multi_db_router_prompt = ChatPromptTemplate.from_messages(
@@ -429,7 +449,7 @@ class Chains:
         multi_db_router_chain = multi_db_router_prompt | self.llm | JsonOutputParser()
         return multi_db_router_chain
     
-    def get_action_router_chain(self, actions_list: List[dict]):
+    def get_action_router_chain(self, actions_list: ActionsList):
         choose_action_prompt = ChatPromptTemplate.from_messages(
             [
                 SystemMessagePromptTemplate.from_template(
@@ -454,7 +474,7 @@ class Chains:
                                 Action input: {action['input']}
                                 Action output: {action['output']}
                                 """
-                                for action in actions_list
+                                for action in actions_list.get_list()
                             ]
                         )
                     ),
@@ -851,7 +871,7 @@ class DBAgentGraphState(TypedDict):
     verbose : bool
 
 class DBAgent():
-    def __init__(self, llm, chains, database_list: List[dict]):
+    def __init__(self, llm, chains, database_list: DatabaseList):
         self.database_list = database_list
         self.llm = llm
         self.chains = chains
@@ -913,7 +933,7 @@ class DBAgent():
         query = state["query"]
         db_paths = []
         for datab in state['database']:
-            selected_db = list(filter(lambda db: db.get('database_name') == datab, self.database_list))[0]
+            selected_db = list(filter(lambda db: db.get('database_name') == datab, self.database_list.get_list()))[0]
             path_to_db = selected_db.get('database_path')
             db_paths.append(path_to_db)
         
@@ -1005,7 +1025,7 @@ class ActionAgentGraphState(TypedDict):
     verbose: bool
 
 class ActionAgent():
-    def __init__(self, llm, chains, actions_list: List[dict], database_list: List[dict]):
+    def __init__(self, llm, chains, actions_list: ActionsList, database_list: DatabaseList):
         self.actions_list = actions_list
         self.database_list = database_list
         self.llm = llm
@@ -1035,7 +1055,7 @@ class ActionAgent():
             if state['verbose']: print("Step: No Actions to Take")
             return {'actions': "NA"}
         else:
-            selected_actions = [action for action in self.actions_list if action['action_name'] in output['name']]
+            selected_actions = [action for action in self.actions_list.get_list() if action['action_name'] in output['name']]
             api_type_actions = [action for action in selected_actions if action['action_type'] == 'api_call']
             if len(api_type_actions) > 0:
                 if state['verbose']: print("Step: Routing Query to API Call Type Actions Stage")
@@ -1058,7 +1078,7 @@ class ActionAgent():
         if state['actions'] == "NA":
             return "general"
         else:
-            selected_actions = [action for action in self.actions_list if action['action_name'] in state['actions']]
+            selected_actions = [action for action in self.actions_list.get_list() if action['action_name'] in state['actions']]
             api_type_actions = [action for action in selected_actions if action['action_type'] == 'api_call']
             if len(api_type_actions) > 0:
                 return "api_type_node"
@@ -1076,7 +1096,7 @@ class ActionAgent():
             state (dict): New key added to state, generation, that contains LLM generation
         """
         if state['verbose']: print("Step: Generating API Call Response")
-        selected_actions = [action for action in self.actions_list if action['action_name'] in state['actions']]
+        selected_actions = [action for action in self.actions_list.get_list() if action['action_name'] in state['actions']]
         response = self.api_extract_input_chain.invoke({
             "query": state["query"],
             "action_name": selected_actions[0]['action_name'],
@@ -1107,7 +1127,7 @@ class ActionAgent():
         print("Actions: " + str(state['actions']))
         action_prompts = []
         for action in state['actions']:
-            selected_action = list(filter(lambda act: act.get('action_name') == action, self.actions_list))[0]
+            selected_action = list(filter(lambda act: act.get('action_name') == action, self.actions_list.get_list()))[0]
             
             response = self.generate_action_prompt_chain.invoke({
                 "action_description": selected_action["action_description"],
@@ -1229,8 +1249,5 @@ class ActionAgent():
         local_agent = self.build_workflow()
         output = local_agent.invoke({"query": query, "verbose": verbose})
         return output
-
-# entities_prompt
-        
 
     

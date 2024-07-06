@@ -73,7 +73,7 @@ const ActionForm = ({ closeModal }) => {
         description: "",
         api_service: "",
         api_endpoint: "",
-        query_inputs: [],
+        query_inputs: [''],
         query_outputs: [],
         auth: [],
     },
@@ -235,7 +235,7 @@ const ActionForm = ({ closeModal }) => {
                 />
                 {/* <hr/> */}
                 <h1 className="font-bold text-lg">Inputs</h1>
-                {watch("query_inputs").map((field, index) => (
+                {query_inputs.map((field, index) => (
                     <FormField
                         control={form.control}
                         key={field.id}
