@@ -20,33 +20,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axiosInstance from "../../../../axios.config";
 import KeyValueFields from "./KeyValueFields";
 
-const schemaStep1 = z
-  .object({
-    actionType: z.string().nonempty("Action Type is required"),
-    copilot_action_name: z.string().optional(),
-    action_api_name: z.string().optional(),
-  })
-  .refine((data) => data.actionType !== "Query" || !!data.copilot_action_name, {
-    message: "Action Name is required when 'Query' is selected.",
-    path: ["action_name"],
-  })
-  .refine((data) => data.actionType !== "API" || !!data.action_api_name, {
-    message: "Action API Name is required when 'API' is selected.",
-    path: ["action_api_name"],
-  })
-  .refine((data) => data.actionType !== "API" || !!data.copilot_action_name, {
-    message: "Action Name is required when 'API' is selected.",
-    path: ["action_name"],
-  });
+// const schemaStep1 = z
+//   .object({
+//     actionType: z.string().nonempty("Action Type is required"),
+//     copilot_action_name: z.string().optional(),
+//     action_api_name: z.string().optional(),
+//   })
+//   .refine((data) => data.actionType !== "Query" || !!data.copilot_action_name, {
+//     message: "Action Name is required when 'Query' is selected.",
+//     path: ["action_name"],
+//   })
+//   .refine((data) => data.actionType !== "API" || !!data.action_api_name, {
+//     message: "Action API Name is required when 'API' is selected.",
+//     path: ["action_api_name"],
+//   })
+//   .refine((data) => data.actionType !== "API" || !!data.copilot_action_name, {
+//     message: "Action Name is required when 'API' is selected.",
+//     path: ["action_name"],
+//   });
 
-const baseSchemaStep2 = z.object({
-  action_name: z.string().nonempty("Action Name is required"),
-  description: z.string().nonempty("Action Description is required"),
-  //input_account_id: z.string().nonempty("Input Account ID is required"),
-  //input_description: z.string().nonempty("Input Description is required"),
-  output_products: z.string().nonempty("Output Products are required"),
-  output_description: z.string().nonempty("Output Description is required"),
-});
+// const baseSchemaStep2 = z.object({
+//   action_name: z.string().nonempty("Action Name is required"),
+//   description: z.string().nonempty("Action Description is required"),
+//   //input_account_id: z.string().nonempty("Input Account ID is required"),
+//   //input_description: z.string().nonempty("Input Description is required"),
+//   output_products: z.string().nonempty("Output Products are required"),
+//   output_description: z.string().nonempty("Output Description is required"),
+// });
 
 const ActionForm = ({ onClose }) => {
   const [formData, setFormData] = useState({});
@@ -68,8 +68,16 @@ const ActionForm = ({ onClose }) => {
           query_inputs: z.array(z.string().nonempty("Query Input is required")),
         });
 
-  formData.actionType === "Query";
-  const schema = currentForm === 1 ? schemaStep1 : schemaStep2;
+  // formData.actionType === "Query";
+  // const schema = currentForm === 1 ? schemaStep1 : schemaStep2;
+  const schema = z.object({
+    action_name: z.string().min(1, {message: "Action Name is required"}),
+    action_type: z.string().min(1, {message: "Action Type is required"}),
+    description: z.string().min(1, {message: "Action Description is required"}),
+    api_endpoint: z.string().min(1, {message: "API endpoint is required"}),
+    query_inputs: z.array(z.string().min(1, { message: "Input Query cannot be empty"})).min(1, { message: "At least one Query Input is required"}),
+    query_outputs: z.array(z.string().min(1, { message: "Output Query cannot be empty"})).min(1, { message: "At least one Query Output is required"}),
+  })
 
   const {
     register,
@@ -80,23 +88,17 @@ const ActionForm = ({ onClose }) => {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      actionType: "",
       action_name: "",
-      action_api_name: "",
-      copilot_action_name: "",
+      action_type: "",
       description: "",
-      //input_account_id: "",
-      //input_description: "",
-      output_products: "",
-      output_description: "",
       api_endpoint: "",
-      api_key_values: keyValues,
-      query_inputs: queryInputs,
+      query_inputs: [],
+      query_outputs: [],
     },
     resolver: zodResolver(schema),
   });
 
-  const actionType = watch("actionType");
+  const actionType = watch("action_type");
 
   const handleCloseForm = () => {
     setCurrentForm(1);
@@ -138,38 +140,26 @@ const ActionForm = ({ onClose }) => {
   }, [formData, setValue]);
 
   const onSubmit = async (data) => {
-    if (currentForm == 1) {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate backend call'
-        console.log(data);
-        setFormData(data);
-        setCurrentForm(2);
-      } catch (error) {
-        setError("root", {
-          message: "An unexpected error occurred",
-        });
-      }
-    } else {
-      try {
-        // Combine form data from both steps and send to backend
-        const completeData = { ...formData, ...data };
-        // Remove copilot_action_name from completeData as it is duplicate
-        delete completeData.copilot_action_name;
-        // Send combined data to the backend
-        console.log("Complete data", completeData);
-        await axiosInstance.post("/api/save-action", completeData);
-        console.log("Data saved successfully");
-        handleCloseForm();
-      } catch (error) {
-        setError("root", {
-          message: "An unexpected error occurred",
-        });
-      }
+
+    try {
+      // Combine form data from both steps and send to backend
+      const completeData = { ...formData, ...data };
+      // Remove copilot_action_name from completeData as it is duplicate
+      delete completeData.copilot_action_name;
+      // Send combined data to the backend
+      console.log("Complete data", completeData);
+      await axiosInstance.post("/api/save-action", completeData);
+      console.log("Data saved successfully");
+      handleCloseForm();
+    } catch (error) {
+      setError("root", {
+        message: "An unexpected error occurred",
+      });
     }
+
   };
 
-  return (
-    <Box
+  return <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       sx={{ mx: "auto", maxWidth: 500 }}
@@ -182,7 +172,7 @@ const ActionForm = ({ onClose }) => {
               labelId="action-type-label"
               label="Action Type"
               value={actionType}
-              {...register("actionType")}
+              {...register("action_type")}
             >
               <MenuItem value="API">API</MenuItem>
               <MenuItem value="Query">Query</MenuItem>
@@ -205,7 +195,7 @@ const ActionForm = ({ onClose }) => {
               helperText={errors.description?.message}
             />
           )} */}
-          {actionType === "API" && (
+          {/* {actionType === "API" && (
             <>
               <TextField
                 {...register("action_api_name")}
@@ -217,10 +207,10 @@ const ActionForm = ({ onClose }) => {
                 helperText={errors.action_api_name?.message}
               />
             </>
-          )}
+          )} */}
 
           <TextField
-            {...register("copilot_action_name")}
+            {...register("action_name")}
             label="Action Name"
             variant="outlined"
             fullWidth
@@ -246,7 +236,7 @@ const ActionForm = ({ onClose }) => {
             variant="outlined"
             fullWidth
             margin="normal"
-            defaultValue={formData.copilot_action_name}
+            defaultValue={watch("action_name")}
             error={!!errors.action_name}
             helperText={errors.action_name?.message}
           />
@@ -264,7 +254,7 @@ const ActionForm = ({ onClose }) => {
             sx={{ mb: 1 }}
           />
 
-          {formData.actionType === "API" && (
+          {watch("action_type") === "API" && (
             <>
               <TextField
                 {...register("api_endpoint")}
@@ -287,63 +277,61 @@ const ActionForm = ({ onClose }) => {
             </>
           )}
 
-          {formData.actionType === "Query" && (
-            <>
-              <Divider sx={{ mb: 2, mt: 1 }} />
-              <Typography
-                variant="h7"
-                fontWeight="medium"
-                sx={{ mt: 2, mb: 2 }}
+          <>
+            <Divider sx={{ mb: 2, mt: 1 }} />
+            <Typography
+              variant="h7"
+              fontWeight="medium"
+              sx={{ mt: 2, mb: 2 }}
+            >
+              Query Inputs
+            </Typography>
+            {watch("query_inputs").map((input, index) => (
+              <Box
+                key={index}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                mb={1}
+                mt={2}
+                width="100%"
               >
-                Query Inputs
-              </Typography>
-              {queryInputs.map((input, index) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                  mb={1}
-                  mt={2}
-                  width="100%"
+                <TextField
+                  {...register(`query_inputs[${index}]`)}
+                  label={`Input ${index + 1}`}
+                  variant="outlined"
+                  size="small"
+                  error={!!errors.query_inputs?.[index]}
+                  helperText={errors.query_inputs?.[index]?.message}
+                  fullWidth
+                  style={{ marginRight: "10px" }}
+                />
+                <IconButton
+                  onClick={() => removeQueryInput(index)}
+                  color="secondary"
                 >
-                  <TextField
-                    {...register(`query_inputs[${index}]`)}
-                    label={`Input ${index + 1}`}
-                    variant="outlined"
-                    size="small"
-                    error={!!errors.query_inputs?.[index]}
-                    helperText={errors.query_inputs?.[index]?.message}
-                    fullWidth
-                    style={{ marginRight: "10px" }}
+                  <DeleteIcon
+                    sx={{
+                      color: "#333",
+                    }}
                   />
-                  <IconButton
-                    onClick={() => removeQueryInput(index)}
-                    color="secondary"
-                  >
-                    <DeleteIcon
-                      sx={{
-                        color: "#333",
-                      }}
-                    />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                onClick={appendQueryInput}
-                startIcon={<AddIcon />}
-                variant="text"
-                sx={{
-                  color: "#333",
-                  fontSize: "0.875rem",
-                  padding: "4px 8px",
-                }}
-                size="small"
-              >
-                Add Description
-              </Button>
-            </>
-          )}
+                </IconButton>
+              </Box>
+            ))}
+            <Button
+              onClick={appendQueryInput}
+              startIcon={<AddIcon />}
+              variant="text"
+              sx={{
+                color: "#333",
+                fontSize: "0.875rem",
+                padding: "4px 8px",
+              }}
+              size="small"
+            >
+              Add Input
+            </Button>
+          </>
 
           <Divider sx={{ mt: 1, mb: 2 }} />
           {/* <Typography
@@ -413,38 +401,44 @@ const ActionForm = ({ onClose }) => {
         </>
       )}
 
-      <Box display="flex" justifyContent="space-between" mt={2}>
-        {currentForm === 2 ? (
-          <Button
-            onClick={handleBack}
-            sx={{ color: "grey", borderColor: "darkgrey" }}
-            size="small"
-            variant="outlined"
-          >
-            Back
-          </Button>
-        ) : (
-          <Button
-            onClick={handleCloseForm}
-            sx={{ color: "grey", borderColor: "darkgrey" }}
-            size="small"
-            variant="outlined"
-          >
-            Cancel
-          </Button>
-        )}
+      {currentForm === 1 ? <Box display="flex" justifyContent="space-between" mt={2}>
         <Button
-          type="submit"
+          onClick={handleCloseForm}
+          sx={{ color: "grey", borderColor: "darkgrey" }}
+          size="small"
+          variant="outlined"
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={() => setCurrentForm(2)}
+          sx={{ color: "black", borderColor: "darkgrey" }}
+          size="small"
+          variant="outlined"
+        >
+          Next
+        </Button>
+      </Box>
+      : <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button
+          onClick={() => setCurrentForm(1)}
+          sx={{ color: "grey", borderColor: "darkgrey" }}
+          size="small"
+          variant="outlined"
+        >
+          Back
+        </Button>
+        <Button
+          onClick={handleSubmit(onSubmit)}
           variant="contained"
           color="primary"
           disabled={isSubmitting}
           size="small"
         >
-          {currentForm == 1 ? "Next" : "Finish"}
+          Finish
         </Button>
-      </Box>
+      </Box>}
     </Box>
-  );
-};
+}
 
 export default ActionForm;

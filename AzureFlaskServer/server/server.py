@@ -252,6 +252,12 @@ def get_actions():
     with open("./text_db/actions.txt", "r") as f:
         content = f.read()
         return content
+    
+@app.route("/api/actions", methods=["POST"])
+def post_action():
+    action = request.form
+    print(action)
+    return "wassup"
 
 @app.route("/api/save-action", methods=["POST"])
 def save_action():
