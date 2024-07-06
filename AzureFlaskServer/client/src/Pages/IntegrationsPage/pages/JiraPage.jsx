@@ -145,7 +145,7 @@ export default function JiraPage() {
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Archive/Unarchive Jira Issue:
         </h3>
-        <p>
+        <p className="mb-[50vh]">
           This service is not supported in the current version of 2waffles.ai.
           We are working on adding this feature in the future.
         </p>
