@@ -5,8 +5,10 @@ import json
 def create_issue(endpoint, title, description, auth):
 
     url = f"{endpoint}/rest/api/3/issue"
+    
     authKey = list(auth[0].keys())[0]
     authValue = list(auth[0].values())[0]
+    # print(authKey, authValue)
     
     auth = HTTPBasicAuth(authKey, authValue)
     
@@ -38,8 +40,8 @@ def create_issue(endpoint, title, description, auth):
             },
             "project": {
                 "id": "10000"
-            },
-        },
+            }
+        }
     })
     
     response = requests.request(
