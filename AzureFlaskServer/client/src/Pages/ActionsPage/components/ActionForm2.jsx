@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import axiosInstance from "../../../../axios.config";
 
 const ActionForm = () => {
 
@@ -90,6 +91,11 @@ const ActionForm = () => {
     const onSubmit = values => {
         console.log("Clicked")
         console.log(values)
+        axiosInstance.post("/api/actions", values, {
+            headers: { "Content-Type": "multipart/form-data" },
+        }).then(res => {
+            console.log(res)
+        })
     }
 
     const { fields: query_inputs, append: append_inputs } = useFieldArray({
