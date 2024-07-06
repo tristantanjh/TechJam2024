@@ -1,15 +1,14 @@
 import requests
 from requests.auth import HTTPBasicAuth
 import json
-import os
-from dotenv import load_dotenv
 
-def create_issue(summary, description):
-    load_dotenv()
+def create_issue(endpoint, title, description, auth):
 
-    url = "https://2waffles.atlassian.net/rest/api/3/issue"
+    url = f"{endpoint}/rest/api/3/issue"
+    authKey = list(auth[0].keys())[0]
+    authValue = list(auth[0].values())[0]
     
-    auth = HTTPBasicAuth("joshuagohengzhong@gmail.com", os.getenv("JIRA_API_KEY"))
+    auth = HTTPBasicAuth(authKey, authValue)
     
     headers = {
         "Accept": "application/json",
@@ -33,7 +32,7 @@ def create_issue(summary, description):
                 "type": "doc",
                 "version": 1
             },
-            "summary": summary,
+            "summary": title,
             "issuetype": {
                 "id": "10001"
             },

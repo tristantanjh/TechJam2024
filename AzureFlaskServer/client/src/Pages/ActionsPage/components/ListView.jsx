@@ -23,7 +23,7 @@ import { DataTablePagination } from "../components/DataTablePagination";
 import { DataTableToolbar } from "../components/DataTableToolbar";
 
 export function ListView({ columns, data, type }) {
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const [columnFilters, setColumnFilters] = useState([]);
   const [sorting, setSorting] = useState([]);
@@ -50,7 +50,7 @@ export function ListView({ columns, data, type }) {
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
-  const databases = data.reduce((x, curr) => {
+  const databases = data?.reduce((x, curr) => {
     x.add(curr.database);
     return x;
   }, new Set());
