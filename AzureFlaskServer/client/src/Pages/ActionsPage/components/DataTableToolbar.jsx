@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./DataTableViewOptions";
-import ActionForm from "./ActionForm";
+import ActionForm from "./ActionForm2";
 import { DatabaseForm } from "./DatabaseForm";
 import {
   Dialog,

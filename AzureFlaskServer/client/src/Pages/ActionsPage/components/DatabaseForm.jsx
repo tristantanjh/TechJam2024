@@ -50,15 +50,16 @@ export function DatabaseForm({ closeModal }) {
       database_description: "",
       database_file: null,
     },
+    mode: 'onChange'
   });
 
-  const {
-    register,
-    watch,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = form;
+  // const {
+  //   register,
+  //   watch,
+  //   handleSubmit,
+  //   setError,
+  //   formState: { errors, isSubmitting },
+  // } = form;
 
   function onSubmit(values) {
     console.log(values);
@@ -129,7 +130,10 @@ export function DatabaseForm({ closeModal }) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <div className="flex justify-end">
+          <Button type="submit">Submit</Button>
+        </div>
+        
       </form>
     </Form>
   );

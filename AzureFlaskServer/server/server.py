@@ -13,6 +13,7 @@ import csv
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
 from jira_integration.extract import extract_action_item, create_action_item
+from jira_integration.jiraIssue import create_issue
 
 load_dotenv()
 app = Flask(__name__)
@@ -159,13 +160,28 @@ def handle_api_call(data):
     print(data)
     # ADD API CALL ACTION HERE#######
 
-    payload = {
-        'status': "success",
-        'extracted_inputs': data['extracted_inputs'],
-        'index': data['index'],
-    }
-    emit('api-response', payload)
-    print("API CALL SUCCESSFUL")
+    api_service = data['api_service']
+
+    if api_service.lower() == "jira":
+        jira_action = [action for action in actions_list if action.get("api_service") == "jira"]
+        endpoint = jira_action[0].get("api_endpoint")
+        auth = jira_action[0].get("api_auth")
+        title = data['extracted_inputs']["issue_title"]
+        description = data['extracted_inputs']["issue_description"]
+        print("Calling jira api")
+        print(endpoint, title, description, auth)
+        response = create_issue(endpoint, title, description, auth)
+        print(response)
+
+        payload = {
+            'status': "success",
+            'extracted_inputs': data['extracted_inputs'],
+            'index': data['index'],
+        }
+        emit('api-response', payload)
+        print("JIRA CREATE ISSUE SUCCESSFUL")
+    elif api_service.lower() == "custom":
+        print("CUSTOM API CALL")
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
@@ -239,6 +255,31 @@ def get_actions():
     with open("./text_db/actions.txt", "r") as f:
         content = f.read()
         return content
+    
+@app.route("/api/actions", methods=["POST"])
+def post_action():
+    
+    with open("./text_db/actions2.txt", "r") as f:
+        content = f.read()
+        curr = json.loads(content)
+    action = request.json
+    data = {
+        "action_type": action.get("action_type"),
+        "action_name": action.get("action_name"),
+        "action_description": action.get("description"),
+        "api_endpoint": action.get("api_endpoint"),
+        "api_service": action.get("api_service"),
+        "input": [input['value'] for input in action.get("query_inputs")],
+        "output": [output['value'] for output in action.get("query_outputs")],
+        "api_auth": {obj['key']: obj['value'] for obj in action.get("auth")}
+    }
+    with open("./text_db/actions.txt", "w") as f:
+        if not curr:
+            curr = []
+        curr.append(data)
+        data_json = json.dumps(curr, indent=4)
+        f.write(data_json)
+    return "wassup"
 
 @app.route("/api/save-action", methods=["POST"])
 def save_action():

@@ -644,7 +644,7 @@ class Chains:
                 Your task is to extract each input parameter for the API call from the user query.
                 The action, its description and the input parameters are provided below.
                 Return the JSON with the input as the keys with no premable or explanation.
-                Do not alter the input parameter names in any way when used as the key.
+                Do not alter the input parameter names in any way and should be seperated with '_' when used as the key.
                 You should leave the value empty if the input parameter is not present in the query.
 
                 Action:
@@ -1087,6 +1087,7 @@ class ActionAgent():
             "action_name": selected_actions[0]['action_name'],
             "action_desc": selected_actions[0]['action_description'],
             "action_type": "api_call",
+            "api_service": selected_actions[0]['api_service'],
             'extracted_inputs': response
         }
         return {"output": payload}
