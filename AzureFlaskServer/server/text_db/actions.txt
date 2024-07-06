@@ -56,6 +56,22 @@
     },
     {
         "action_type": "api_call",
+        "api_service": "gmail",
+        "action_name": "send_gmail",
+        "action_description": "Send a gmail with the given details.",
+        "input": [
+            "email_subject",
+            "email_body",
+            "email_recipient"
+        ],
+        "output": [],
+        "api_endpoint": "smtp.gmail.com",
+        "api_auth": {
+            "aerialguard@gmail.com": "xhoa tezc fatc eavv"
+        }
+    },
+    {
+        "action_type": "api_call",
         "action_name": "demo_custom_api",
         "action_description": "Send data to custom api endpoint",
         "api_endpoint": "http://localhost:9000/api/demo_custom_api",

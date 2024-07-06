@@ -14,6 +14,7 @@ from utils import MessageStore, GPTInstance, ActionAgent, Chains, ActionsList, D
 
 from jira_integration.extract import extract_action_item, create_action_item
 from jira_integration.jiraIssue import create_issue
+from gmail_integration.sendGmail import send_email
 
 load_dotenv()
 app = Flask(__name__)
@@ -172,16 +173,28 @@ def handle_api_call(data):
         description = data['extracted_inputs']["issue_description"]
         print("Calling jira api")
         print(endpoint, title, description, auth)
-        response = create_issue(endpoint, title, description, auth)
-        print(response)
+        try:
+            response = create_issue(endpoint, title, description, auth)
+            print(response)
 
-        payload = {
-            'status': "success",
-            'extracted_inputs': data['extracted_inputs'],
-            'index': data['index'],
-        }
+            payload = {
+                'status': "success",
+                'extracted_inputs': data['extracted_inputs'],
+                'index': data['index'],
+            }
+            
+            print("JIRA CREATE ISSUE SUCCESSFUL")
+        except Exception as e:
+
+            payload = {
+                'status': "error",
+                'extracted_inputs': data['extracted_inputs'],
+                'index': data['index'],
+            }
+            print("JIRA CREATE ISSUE FAILED")
+        
         emit('api-response', payload)
-        print("JIRA CREATE ISSUE SUCCESSFUL")
+        
     elif api_service.lower() == "custom":
         custom_action = [action for action in actionsInstance.get_list() if action.get("action_name") == data['action_name']][0]
         endpoint = custom_action.get("api_endpoint")
@@ -194,6 +207,29 @@ def handle_api_call(data):
         emit('api-response', payload)
         print(response.json())
         print("CUSTOM API CALL")
+    elif api_service.lower() == "gmail":
+        gmail_action = [action for action in actionsInstance.get_list() if action.get("api_service") == "gmail"][0]
+        subject = data['extracted_inputs']['email_subject']
+        body = data['extracted_inputs']['email_body']
+        recipient = data['extracted_inputs']['email_recipient']
+        auth = gmail_action.get("api_auth")
+        try:
+            send_email(subject, body, recipient, auth)
+            payload = {
+                'status': "success",
+                'extracted_inputs': data['extracted_inputs'],
+                'index': data['index'],
+            }
+            print("GMAIL API CALL SUCCESSFUL")
+        except Exception as e:
+            payload = {
+                'status': "error",
+                'extracted_inputs': data['extracted_inputs'],
+                'index': data['index'],
+            }
+            print("GMAIL API CALL FAILED")
+        emit('api-response', payload)
+        
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():

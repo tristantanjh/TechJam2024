@@ -16,6 +16,19 @@ const features = [
     ),
   },
   {
+    name: "Gmail",
+    description: "Integrate with Gmail to send emails from copilot.",
+    href: "gmail",
+    cta: "Learn more",
+    className: "col-span-3 lg:col-span-1",
+    background: (
+      <AnimatedBeamSingleOutput
+        iconName="gmail"
+        className="absolute right-2 top-4 h-[300px] w-[600px] border-none transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105"
+      />
+    ),
+  },
+  {
     name: "Telegram",
     description: "Coming soon...",
     href: "transcriber",

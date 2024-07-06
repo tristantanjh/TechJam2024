@@ -75,7 +75,7 @@ export default function ErrorPage() {
         ></motion.div>
         <Particles
           className="absolute inset-0"
-          quantity={300}
+          quantity={1000}
           ease={80}
           color={color}
           refresh

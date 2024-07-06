@@ -13,6 +13,7 @@ import CopilotPage from "./Pages/CopilotPage/CopilotPage";
 import IntegrationsPage from "./Pages/IntegrationsPage/IntegrationsPage";
 import JiraPage from "./Pages/IntegrationsPage/pages/JiraPage";
 import IndexPage from "./Pages/IntegrationsPage/pages/IndexPage";
+import GmailPage from "./Pages/IntegrationsPage/pages/GmailPage";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
           {
             path: "jira",
             element: <JiraPage />,
+          },
+          {
+            path: "gmail",
+            element: <GmailPage />,
           },
         ],
       },
