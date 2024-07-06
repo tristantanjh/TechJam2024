@@ -166,8 +166,9 @@ def handle_api_call(data):
         title = data['extracted_inputs']["issue_title"]
         description = data['extracted_inputs']["issue_description"]
         print("Calling jira api")
-        print(auth)
-        create_issue(endpoint, title, description, auth)
+        print(endpoint, title, description, auth)
+        response = create_issue(endpoint, title, description, auth)
+        print(response)
 
         payload = {
             'status': "success",
