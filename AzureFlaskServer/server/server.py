@@ -281,6 +281,12 @@ def post_action():
         f.write(data_json)
     return "wassup"
 
+@app.route('/api/demo_custom_api', methods=['POST'])
+def demo_custom_api():
+    data = request.json
+    print(data)
+    return jsonify(data)
+
 @app.route("/api/save-action", methods=["POST"])
 def save_action():
     action = request.json

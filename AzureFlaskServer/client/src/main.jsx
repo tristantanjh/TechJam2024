@@ -16,6 +16,9 @@ import IndexPage from "./Pages/IntegrationsPage/pages/IndexPage";
 
 const router = createBrowserRouter([
   {
+    errorElement: <ErrorPage />,
+  },
+  {
     path: "/websocket",
     element: <WebsocketPage />,
     errorElement: <ErrorPage />,
