@@ -13,6 +13,7 @@ import csv
 from utils import MessageStore, GPTInstance, ActionAgent, Chains
 
 from jira_integration.extract import extract_action_item, create_action_item
+from jira_integration.jiraIssue import create_issue
 
 load_dotenv()
 app = Flask(__name__)
@@ -156,13 +157,27 @@ def handle_api_call(data):
     print(data)
     # ADD API CALL ACTION HERE#######
 
-    payload = {
-        'status': "success",
-        'extracted_inputs': data['extracted_inputs'],
-        'index': data['index'],
-    }
-    emit('api-response', payload)
-    print("API CALL SUCCESSFUL")
+    api_service = data['api_service']
+
+    if api_service.lower() == "jira":
+        jira_action = [action for action in actions_list if action.get("api_service") == "jira"]
+        endpoint = jira_action[0].get("api_endpoint")
+        auth = jira_action[0].get("api_auth")
+        title = data['extracted_inputs']["issue_title"]
+        description = data['extracted_inputs']["issue_description"]
+        print("Calling jira api")
+        print(auth)
+        create_issue(endpoint, title, description, auth)
+
+        payload = {
+            'status': "success",
+            'extracted_inputs': data['extracted_inputs'],
+            'index': data['index'],
+        }
+        emit('api-response', payload)
+        print("JIRA CREATE ISSUE SUCCESSFUL")
+    elif api_service.lower() == "custom":
+        print("CUSTOM API CALL")
 
 @app.route("/api/get-messages", methods=["GET"])
 def get_messages():
