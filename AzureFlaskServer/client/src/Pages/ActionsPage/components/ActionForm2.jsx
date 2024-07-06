@@ -91,8 +91,8 @@ const ActionForm = () => {
     const onSubmit = values => {
         console.log("Clicked")
         console.log(values)
-        axiosInstance.post("/api/actions", values, {
-            headers: { "Content-Type": "multipart/form-data" },
+        axiosInstance.post("/api/actions", JSON.stringify(values), {
+            headers: { "Content-Type": "application/json" },
         }).then(res => {
             console.log(res)
         })
@@ -146,7 +146,7 @@ const ActionForm = () => {
                     <FormItem>
                     <FormLabel>Action Name</FormLabel>
                     <FormControl>
-                        <Input placeholder="Action Name" {...field} defaultValue={watch("action_name")}/>
+                        <Input placeholder="Action Name" {...field} value={watch("action_name")}/>
                     </FormControl>
                     <FormDescription>
                         This action name will be displayed to others in the future
@@ -186,7 +186,7 @@ const ActionForm = () => {
                         <FormItem>
                         <FormLabel>Action Name</FormLabel>
                         <FormControl>
-                            <Input placeholder="Action Name" {...field} defaultValue={watch("action_name")}/>
+                            <Input placeholder="Action Name" {...field} value={watch("action_name")}/>
                         </FormControl>
                         <FormDescription>
                             This action name will be displayed to others in the future

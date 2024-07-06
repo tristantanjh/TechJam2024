@@ -1,0 +1,16 @@
+[
+    {
+        "action_type": "Query",
+        "action_name": "eqwe",
+        "action_description": "aeda",
+        "api_endpoint": "",
+        "api_service": "",
+        "input": [
+            "vsdf"
+        ],
+        "output": [],
+        "api_auth": {
+            "sfasDF": "asds"
+        }
+    }
+]

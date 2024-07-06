@@ -148,9 +148,12 @@ def handle_copilot_query(data):
     #     query: qns
     # };
 
-    copilot_result = action_agent_instance.run_agent(data["query"])
+    try:
+        copilot_result = action_agent_instance.run_agent(data["query"])
 
-    emit('copilot-output', copilot_result)
+        emit('copilot-output', copilot_result)
+    except Exception as e:
+        emit('copilot-output', "Sorry, there seems to be an error. Please try again or contact the developers!.")
 
 @socketio.on('api-call')
 def handle_api_call(data):
@@ -255,8 +258,27 @@ def get_actions():
     
 @app.route("/api/actions", methods=["POST"])
 def post_action():
-    action = request.form
-    print(action)
+    
+    with open("./text_db/actions2.txt", "r") as f:
+        content = f.read()
+        curr = json.loads(content)
+    action = request.json
+    data = {
+        "action_type": action.get("action_type"),
+        "action_name": action.get("action_name"),
+        "action_description": action.get("description"),
+        "api_endpoint": action.get("api_endpoint"),
+        "api_service": action.get("api_service"),
+        "input": [input['value'] for input in action.get("query_inputs")],
+        "output": [output['value'] for output in action.get("query_outputs")],
+        "api_auth": {obj['key']: obj['value'] for obj in action.get("auth")}
+    }
+    with open("./text_db/actions.txt", "w") as f:
+        if not curr:
+            curr = []
+        curr.append(data)
+        data_json = json.dumps(curr, indent=4)
+        f.write(data_json)
     return "wassup"
 
 @app.route('/api/demo_custom_api', methods=['POST'])
@@ -277,7 +299,7 @@ def save_action():
     actions.append(action)
     # Write the updated list back to the file
     with open(file_path, "w") as f:
-        json.dump(actions, f, indent=2)
+        json.dump(actions, f, indent=4)
     print(jsonify(action))
     return jsonify(action)
 
