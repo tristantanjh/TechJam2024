@@ -1,34 +1,61 @@
+import AnimatedGridPattern from "@/Components/magicui/animated-grid-pattern";
+import { cn } from "@/lib/utils";
+import JiraLogo from "@/assets/jira.svg";
+
 export default function JiraPage() {
   return (
     <div className="max-h-screen overflow-y-auto">
+      <AnimatedGridPattern
+        numSquares={60}
+        maxOpacity={0.5}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
+          "inset-x-[20%] inset-y-[0] h-[100%] skew-y-12"
+        )}
+      />
       <div className="flex flex-col justify-start gap-y-5 w-[98%]">
         <h2 className="text-3xl font-semibold text-primary border-b pb-2">
           Jira Integration Setup Guide
         </h2>
-        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-          Overview
-        </h3>
-        <p>
-          Jira is a proprietary issue tracking product developed by Atlassian
-          that allows bug tracking and agile project management. 2waffles allows
-          users to seamlessly interact with their Jira projects through a
-          chatbot interface. By integrating Jira with our service, users can
-          perform various actions such as creating, retrieving, and editing Jira
-          issues dynamically. This page documents the the resources available
-          for Jira on our platform, as well as a guideline for setting up the
-          Jira resources on our 'Actions' page.
-          <br />
-          <br />
-          Before integrating Jira with 2waffles, you need a valid Atlassian
-          account as well as a valid Jira API token. &nbsp;
-          <a
-            href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
-            target="_blank"
-            className="text-sky-600 hover:text-sky-800 underline underline-offset-1"
-          >
-            See here for more details.
-          </a>
-        </p>
+        <div className="flex h-fit">
+          <div className="w-[50%]">
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              Overview
+            </h3>
+            <p className="text-justify">
+              Jira is a proprietary issue tracking product developed by
+              Atlassian that allows bug tracking and agile project management.
+              2waffles allows users to seamlessly interact with their Jira
+              projects through a chatbot interface. By integrating Jira with our
+              service, users can perform various actions such as creating,
+              retrieving, and editing Jira issues dynamically. This page
+              documents the the resources available for Jira on our platform, as
+              well as a guideline for setting up the Jira resources on our
+              'Actions' page.
+              <br />
+              <br />
+              Before integrating Jira with 2waffles, you need a valid Atlassian
+              account as well as a valid Jira API token. &nbsp;
+              <a
+                href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
+                target="_blank"
+                className="text-sky-600 hover:text-sky-800 underline underline-offset-1"
+              >
+                See here for more details.
+              </a>
+            </p>
+          </div>
+          <div className="w-[50%] h-full flex justify-center items-center">
+            <img
+              src={JiraLogo}
+              alt="Jira Logo"
+              className="w-[30%] h-[30%] ml-10"
+            />
+          </div>
+        </div>
+
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Selecting the desired Jira Service:
         </h3>
@@ -46,7 +73,7 @@ export default function JiraPage() {
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Create Jira Issue:
         </h3>
-        <p>
+        <div>
           To create an action for enabling the creation of Jira issues using our
           service, follow these detailed steps to fill in the required fields:
           <ol className="list-decimal list-inside mt-5">
@@ -120,7 +147,7 @@ export default function JiraPage() {
               output section empty as it is not required.
             </li>
           </ol>
-        </p>
+        </div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Edit Jira Issue:
         </h3>
