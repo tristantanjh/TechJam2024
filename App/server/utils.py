@@ -460,6 +460,7 @@ class Chains:
                 You should identify which actions can be taken based on the inputs mentioned in the user's query and return those actions in JSON format.
                 You should return the JSON with a single key 'name' with no premable or explanation. The value should be a list of action names. This JSON should be wrapped in curly braces.
                 Return the JSON output with a single key 'name' and the value being 'NA' if and only if the query is not related to any of the actions. Do not return it in a list format.
+                If there are no actions given below, return the JSON output with a single key 'name' and the value being 'NA'.
                 
                 Choices:
                 """
@@ -933,6 +934,7 @@ class DBAgent():
         query = state["query"]
         db_paths = []
         for datab in state['database']:
+            if state['verbose']: print(datab)
             selected_db = list(filter(lambda db: db.get('database_name') == datab, self.database_list.get_list()))[0]
             path_to_db = selected_db.get('database_path')
             db_paths.append(path_to_db)
@@ -1075,6 +1077,8 @@ class ActionAgent():
         Returns:
             str: Next node to call
         """
+        if not self.actions_list.get_list():
+            return "general"
         if state['actions'] == "NA":
             return "general"
         else:
