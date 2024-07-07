@@ -127,14 +127,11 @@ const ActionForm = ({ closeModal }) => {
   } = form;
 
   const onSubmit = (values) => {
-    console.log("Clicked");
-    console.log(values);
     axiosInstance
       .post("/api/actions", JSON.stringify(values), {
         headers: { "Content-Type": "application/json" },
       })
       .then((res) => {
-        console.log(res);
         const { data, status } = res;
         if (status === 200) {
           setActions(data);
@@ -359,7 +356,6 @@ const ActionForm = ({ closeModal }) => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              console.log(index);
                               remove_outputs(index);
                             }}
                           >
@@ -426,7 +422,6 @@ const ActionForm = ({ closeModal }) => {
                     size="sm"
                     className="mb-1"
                     onClick={() => {
-                      console.log(index);
                       remove_keypair(index);
                     }}
                   >
@@ -448,9 +443,7 @@ const ActionForm = ({ closeModal }) => {
               <Button type="button" onClick={() => setPage(1)}>
                 Back
               </Button>
-              <Button type="submit" onClick={() => console.log(errors)}>
-                Submit
-              </Button>
+              <Button type="submit">Submit</Button>
             </div>
           </div>
         )}
