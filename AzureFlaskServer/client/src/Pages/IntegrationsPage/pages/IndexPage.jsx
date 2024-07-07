@@ -110,7 +110,7 @@ const features = [
 
 export default function IndexPage() {
   return (
-    <div className="flex flex-col pt-[100px] items-center overflow-scroll [mask-image:linear-gradient(to_bottom,transparent_5%,#000_10%)]">
+    <div className="flex flex-col pt-[70px] items-center overflow-scroll [mask-image:linear-gradient(to_bottom,transparent_5%,#000_10%)]">
       <BentoGrid>
         {features.map((feature, idx) => (
           <BentoCard key={idx} {...feature} />

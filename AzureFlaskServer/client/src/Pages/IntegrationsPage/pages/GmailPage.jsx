@@ -1,32 +1,59 @@
+import AnimatedGridPattern from "@/Components/magicui/animated-grid-pattern";
+import { LinkPreview } from "@/Components/ui/link-preview";
+import GmailLogo from "@/assets/gmail.svg";
+import { cn } from "@/lib/utils";
+
 export default function GmailPage() {
   return (
     <div className="max-h-screen overflow-y-auto">
+      <AnimatedGridPattern
+        numSquares={40}
+        maxOpacity={0.5}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
+          "inset-x-[20%] h-screen skew-y-12"
+        )}
+      />
       <div className="flex flex-col justify-start gap-y-5 w-[98%]">
         <h2 className="text-3xl font-semibold text-primary border-b pb-2">
           Gmail Integration Setup Guide
         </h2>
-        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-          Overview
-        </h3>
-        <p>
-          Gmail is a free email service provider. 2waffles allows users to
-          seamlessly interact with their gmail through a chatbot interface. By
-          integrating Gmail with our service, users can perform various actions
-          such as sending Gmails. This page documents the the resources
-          available for Gmail on our platform, as well as a guideline for
-          setting up the Gmail resources on our 'Actions' page.
-          <br />
-          <br />
-          Before integrating Gmail with 2waffles, you need a valid Google
-          account as well as a valid Google application password. &nbsp;
-          <a
-            href="https://support.google.com/accounts/answer/185833?hl=en"
-            target="_blank"
-            className="text-sky-600 hover:text-sky-800 underline underline-offset-1"
-          >
-            See here for more details.
-          </a>
-        </p>
+        <div className="flex h-fit">
+          <div className="w-[50%]">
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              Overview
+            </h3>
+            <div className="text-justify">
+              Gmail is a free email service provider. 2waffles allows users to
+              seamlessly interact with their gmail through a chatbot interface.
+              By integrating Gmail with our service, users can perform various
+              actions such as sending Gmails. This page documents the the
+              resources available for Gmail on our platform, as well as a
+              guideline for setting up the Gmail resources on our 'Actions'
+              page.
+              <br />
+              <br />
+              Before integrating Gmail with 2waffles, you need a valid Google
+              account as well as a valid Google application password. &nbsp;
+              <LinkPreview
+                className="text-blue-600 font-semibold hover:opacity-80 transition-opacity"
+                url="https://support.google.com/accounts/answer/185833?hl=en"
+              >
+                See here for more details.
+              </LinkPreview>
+            </div>
+          </div>
+          <div className="w-[50%] h-full flex justify-center items-center">
+            <img
+              src={GmailLogo}
+              alt="Gmail Logo"
+              className="w-[30%] h-[30%] ml-10"
+            />
+          </div>
+        </div>
+
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Selecting the desired Gmail Service:
         </h3>
@@ -43,7 +70,7 @@ export default function GmailPage() {
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Sending Gmail:
         </h3>
-        <p>
+        <div>
           To create an action for enabling the sending of Gmail using our
           service, follow these detailed steps to fill in the required fields:
           <ol className="list-decimal list-inside mt-5">
@@ -110,7 +137,7 @@ export default function GmailPage() {
               output section empty as it is not required.
             </li>
           </ol>
-        </p>
+        </div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Read Gmail:
         </h3>

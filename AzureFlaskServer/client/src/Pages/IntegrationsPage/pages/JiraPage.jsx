@@ -1,18 +1,19 @@
 import AnimatedGridPattern from "@/Components/magicui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import JiraLogo from "@/assets/jira.svg";
+import { LinkPreview } from "@/Components/ui/link-preview";
 
 export default function JiraPage() {
   return (
-    <div className="max-h-screen overflow-y-auto">
+    <div className="max-h-screen overflow-y-scroll">
       <AnimatedGridPattern
-        numSquares={60}
+        numSquares={40}
         maxOpacity={0.5}
         duration={3}
         repeatDelay={1}
         className={cn(
           "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
-          "inset-x-[20%] inset-y-[0] h-[100%] skew-y-12"
+          "inset-x-[20%] h-screen skew-y-12"
         )}
       />
       <div className="flex flex-col justify-start gap-y-5 w-[98%]">
@@ -24,7 +25,7 @@ export default function JiraPage() {
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
               Overview
             </h3>
-            <p className="text-justify">
+            <div className="text-justify">
               Jira is a proprietary issue tracking product developed by
               Atlassian that allows bug tracking and agile project management.
               2waffles allows users to seamlessly interact with their Jira
@@ -38,14 +39,14 @@ export default function JiraPage() {
               <br />
               Before integrating Jira with 2waffles, you need a valid Atlassian
               account as well as a valid Jira API token. &nbsp;
-              <a
-                href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
-                target="_blank"
-                className="text-sky-600 hover:text-sky-800 underline underline-offset-1"
+              <br />
+              <LinkPreview
+                className="text-blue-600 font-semibold hover:opacity-80 transition-opacity"
+                url="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
               >
                 See here for more details.
-              </a>
-            </p>
+              </LinkPreview>
+            </div>
           </div>
           <div className="w-[50%] h-full flex justify-center items-center">
             <img

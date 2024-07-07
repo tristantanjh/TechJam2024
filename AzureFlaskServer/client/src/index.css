@@ -141,6 +141,10 @@
   animation: bounce-custom-3 2.1s ease-in-out 0.3s infinite;
 }
 
+html {
+  overflow: hidden;
+}
+
 @keyframes bounce-custom-2 {
   50% {
     transform: translateY(-18px);
