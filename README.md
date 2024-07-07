@@ -1,4 +1,4 @@
-<img src="/assets/2waffleslogo.png" alt="2Waffles logo" title="2Waffles Logo" align="right" height="60" />
+<img src="/assets/2waffleslogo.png" alt="2Waffles logo" title="2Waffles Logo" align="right" height="100" />
 
 # TechJam2024 - 2Waffles.AI
 
