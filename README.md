@@ -1,3 +1,5 @@
+<img src="/assets/2waffleslogo.png" alt="2Waffles logo" title="2Waffles Logo" align="right" height="60" />
+
 # TechJam2024 - 2Waffles.AI
 
 ## _2Waffles.AI: 2 Waffles • 1 Powerful CRM Solution_ <br/>By 2 waffles
@@ -200,3 +202,5 @@ npm run dev
 ```
 
 Visit `http://localhost:5173/app` to explore the application!
+
+---
