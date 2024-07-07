@@ -135,7 +135,7 @@ Finding the Proper Technologies: Selecting the right technologies and tools for 
 
 ## Installation
 
-Before running the application, make sure that you have all prior dependencies installed (python, panel, pymupdf, langchain, openai, etc)
+Before running the application, make sure that you have all prior dependencies installed (python, panel, pymupdf, langchain, openai, etc). Also make sure that you have setup a prepopulated Neo4J database and setup Azure Speech Service, as well as having an OpenAI and Jira API Key.
 
 1. Clone the repository to your local machine.
 
@@ -151,14 +151,28 @@ git clone https://github.com/tristantanjh/TechJam2024.git
 pip install -r /path/to/requirements.txt
 ```
 
-4. To start up the flask server run
+4. Create a `.env` in `App`.
+
+```bash
+NEO4J_URI=<YOUR_NEO4J_URI>
+NEO4J_USERNAME=<YOUR_NEO4J_USERNAME>
+NEO4J_PASSWORD=<YOUR_NEO4J_PASSWORD>
+AURA_INSTANCEID=<YOUR_NEO4J_AURA_INSTANCE_ID>
+AURA_INSTANCENAME=<YOUR_NEO4J_AURA_INSTANCE_NAME>
+OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+SPEECH_KEY=<YOUR_AZURE_SPEECH_KEY>
+SPEECH_REGION=<YOUR_AZURE_SPEECH_REGION>
+JIRA_API_KEY=<YOUR_JIRA_API_KEY>
+```
+
+6. To start up the flask server run
 
 ```bash
 cd App/server
 python .\server.py
 ```
 
-5. To start up the react frontend, open a separate shell and run
+6. To start up the react frontend, open a separate shell and run
 
 ```bash
 cd App/client (Ensure you are at the project root directory)
