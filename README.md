@@ -159,16 +159,16 @@ pip install -r /path/to/requirements.txt
 4. To start up the flask server run
 
 ```bash
-cd flask-server
+cd App/server
 python .\server.py
 ```
 
 5. To start up the react frontend, open a separate shell and run
 
 ```bash
-cd client (Ensure you are at the project root directory)
+cd App/client (Ensure you are at the project root directory)
 npm i (To install the node dependencies)
-npm run start
+npm run dev
 ```
 
-Visit `http://localhost:3000` to explore the application!
+Visit `http://localhost:5173/app` to explore the application!
