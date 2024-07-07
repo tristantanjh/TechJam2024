@@ -1,5 +1,9 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  redirect,
+  RouterProvider,
+} from "react-router-dom";
 import ReactDOM from "react-dom/client";
 import ErrorPage from "./Pages/ErrorPage/ErrorPage";
 import WebsocketPage from "./Pages/websocketPage/websocketPage";
@@ -18,6 +22,12 @@ import GmailPage from "./Pages/IntegrationsPage/pages/GmailPage";
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
+  },
+  {
+    path: "/",
+    loader: () => {
+      return redirect("/app");
+    },
   },
   {
     path: "/websocket",

@@ -149,7 +149,8 @@ class Chains:
             [
                 SystemMessagePromptTemplate.from_template(
                     """
-                    You can only answer questions with a yes or no
+                    You can only answer questions with a yes or no.
+                    Any message ONLY related to greetings, or goodbye will be answered as no.
                     """
                 ),
                 HumanMessagePromptTemplate.from_template(
@@ -157,6 +158,7 @@ class Chains:
                     Is the following text a business-related question?
 
                     Text: {text}
+                    
                     """
                 )
             ]
@@ -178,8 +180,10 @@ class Chains:
                 ),
                 HumanMessagePromptTemplate.from_template(
                     """
-                    You are given a chat history of questions asked by a customer towards a customer service assistant and the latest user question which might be repeated from before. 
-                    Answer yes only if the current question has been repeated in meaning compared to previous questions. Do not answer yes just because they mention the same nouns. If there are no previous questions, answer "no"
+                    You are given a chat history of questions asked by a customer towards a customer service assistant and the 
+                    latest user question which might be repeated from before. 
+                    Answer yes only if the current question has been repeated in meaning compared to previous questions. 
+                    Do not answer yes just because they mention the same nouns. If there are no previous questions, answer "no"
 
                     Previous questions: {history}
                     Latest question: {text}
@@ -762,15 +766,17 @@ class GPTInstance:
         chat_history = message_store.get_messages(sessionId)
         initial_check_result = initial_check_chain.invoke({"text": message})
         
+        print(initial_check_result)
+        
         if initial_check_result:
-            return True
-        
-        history_check_result = history_check_chain.invoke({"text": message, "history": chat_history})
-        
-        if history_check_result:
-            return False
-        
-        return history_check_result
+            history_check_result = history_check_chain.invoke({"text": message, "history": chat_history})
+            print(history_check_result)
+            if history_check_result:
+                return False
+            else:
+                return True
+            
+        return False
     
     def elaborate_on_chosen_point(self, message: str) -> str:
         """

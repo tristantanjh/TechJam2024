@@ -1,6 +1,6 @@
-# TechJam2024 - 2waffles.ai
+# TechJam2024 - 2Waffles.Ai
 
-## _2waffles.ai: 2 Waffles • 1 Powerful CRM Solution_ <br/>By 2 waffles
+## _2Waffles.Ai: 2 Waffles • 1 Powerful CRM Solution_ <br/>By 2 waffles
 
 <div>
 
@@ -9,6 +9,8 @@
 <img src="https://img.shields.io/badge/openai-black?style=flat-square&logo=openai&logoColor=white" alt="Three.js">
 
 </div>
+
+![image](https://github.com/tristantanjh/TechJam2024/assets/99729861/1732369f-dfd6-4aba-b474-9787da95ef7f)
 
 #### Team Members
 
@@ -21,20 +23,13 @@
 #### Group Details
 
 - Group Name: 2 Waffles
-- Project Name: 2waffles.ai
+- Project Name: 2Waffles.Ai
 
 #### [Video Demo Link]()
 
 _Made for [Tiktok's TechJam 2024](httpshttps://tiktoktechjam2024.devpost.com/) - Track 4._
 
 ## Table of Contents
-
-- [TechJam2024 - 2waffles.ai](#techjam2024---2wafflesai)
-  - [_2waffles.ai: 2 Waffles • 1 Powerful CRM Solution_ By 2 waffles](#2wafflesai-2-waffles--1-powerful-crm-solution-by-2-waffles)
-      - [Team Members](#team-members)
-      - [Group Details](#group-details)
-      - [Video Demo Link](#video-demo-link)
-  - [Table of Contents](#table-of-contents)
   - [Inspiration](#inspiration)
   - [What it does](#what-it-does)
   - [How we built it](#how-we-built-it)
