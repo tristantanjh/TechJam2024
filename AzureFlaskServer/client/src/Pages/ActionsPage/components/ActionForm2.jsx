@@ -62,7 +62,7 @@ const ActionForm = ({ closeModal }) => {
     })
     .refine(
       (data) => {
-        if (data.action_type === "API" && !api_endpoint) {
+        if (data.action_type === "API" && !data.api_endpoint) {
           return false;
         }
         return true;
@@ -74,7 +74,7 @@ const ActionForm = ({ closeModal }) => {
     )
     .refine(
       (data) => {
-        if (data.action_type === "API" && !api_service) {
+        if (data.action_type === "API" && !data.api_service) {
           return false;
         }
         return true;
