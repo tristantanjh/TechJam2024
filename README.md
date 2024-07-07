@@ -135,7 +135,7 @@ Finding the Proper Technologies: Selecting the right technologies and tools for 
 
 ## Installation
 
-Before running the application, make sure that you have all prior dependencies installed (python, panel, pymupdf, langchain, openai, etc). Also make sure that you have setup a prepopulated Neo4J database and setup Azure Speech Service, as well as having an OpenAI and Jira API Key.
+Before running the application, make sure that you have all prior dependencies installed (python, panel, pymupdf, langchain, openai, etc). Also make sure that you have setup a prepopulated Neo4J database, Azure Speech Service, and Jira API, as well as having an OpenAI API Key.
 
 1. Clone the repository to your local machine.
 
@@ -162,6 +162,8 @@ AURA_INSTANCENAME=<YOUR_NEO4J_AURA_INSTANCE_NAME>
 OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
 SPEECH_KEY=<YOUR_AZURE_SPEECH_KEY>
 SPEECH_REGION=<YOUR_AZURE_SPEECH_REGION>
+JIRA_DOMAIN=<YOUR_JIRA_DOMAIN>
+JIRA_EMAIL=<YOUR_JIRA_EMAIL>
 JIRA_API_KEY=<YOUR_JIRA_API_KEY>
 ```
 
