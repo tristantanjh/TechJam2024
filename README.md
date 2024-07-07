@@ -1,6 +1,6 @@
-# TechJam2024 - 2waffles.ai
+# TechJam2024 - 2Waffles.Ai
 
-## _2waffles.ai: 2 Waffles • 1 Powerful CRM Solution_ <br/>By 2 waffles
+## _2Waffles.Ai: 2 Waffles • 1 Powerful CRM Solution_ <br/>By 2 waffles
 
 <div>
 
@@ -21,7 +21,7 @@
 #### Group Details
 
 - Group Name: 2 Waffles
-- Project Name: 2waffles.ai
+- Project Name: 2Waffles.Ai
 
 #### [Video Demo Link]()
 
