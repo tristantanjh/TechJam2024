@@ -28,13 +28,6 @@
 _Made for [Tiktok's TechJam 2024](httpshttps://tiktoktechjam2024.devpost.com/) - Track 4._
 
 ## Table of Contents
-
-- [TechJam2024 - 2waffles.ai](#techjam2024---2wafflesai)
-  - [_2waffles.ai: 2 Waffles • 1 Powerful CRM Solution_ By 2 waffles](#2wafflesai-2-waffles--1-powerful-crm-solution-by-2-waffles)
-      - [Team Members](#team-members)
-      - [Group Details](#group-details)
-      - [Video Demo Link](#video-demo-link)
-  - [Table of Contents](#table-of-contents)
   - [Inspiration](#inspiration)
   - [What it does](#what-it-does)
   - [How we built it](#how-we-built-it)
