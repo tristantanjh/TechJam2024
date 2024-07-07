@@ -10,6 +10,8 @@
 
 </div>
 
+![image](https://github.com/tristantanjh/TechJam2024/assets/99729861/1732369f-dfd6-4aba-b474-9787da95ef7f)
+
 #### Team Members
 
 - [Tristan Tan](https://github.com/tristantanjh)
