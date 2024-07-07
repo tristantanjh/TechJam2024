@@ -65,7 +65,7 @@ This assistant alleviates the workload of customer relations personnel in their 
 
 Raw data can be uploaded through the web interface currently (limited to CSVs currently), where the assistant can then draw insights from the raw data after it is uploaded based on the user query.
 
-Actions can also be created and defined dynamically for both database queries or API services purposes, allowing our end-users to create helpful actions as they seem fit for their business activities. External API Services such as Jira or Gmail often have their own specification, therefore instructions to configure such actions are specified under our "Integrations" page of our web interface to guide our end-users.
+Actions can also be created and defined dynamically for both database queries or API services purposes, allowing our end-users to create helpful actions as they seem fit for their business activities. External API Services such as **Jira or Gmail** often have their own specification, therefore instructions to configure such actions are specified under our "Integrations" page of our web interface to guide our end-users.
 
 ## How we built it
 
@@ -123,8 +123,12 @@ Finding the Proper Technologies: Selecting the right technologies and tools for 
   - Gained insights into how different techniques affect the model's performance and response quality.
   - Strengthened our collaborative skills, leveraging each team member’s unique strengths.
 
-## What's next for 2waffles.
+## What's next for 2Waffles.
 
+- Connect External Databases:
+  - Extend upon current csv file upload functionality to allow direct connection to external databases to be utilised by our Copilot.
+- Traceable LLM Agent:
+  - Expose the though process of LLM at every decision step to improve exaplainability of our LLM chatbot.
 - Expand Third-Party Integrations:
   - Identify potential third-party services and APIs to integrate with our platform.
   - Develop and implement integration strategies to enhance platform capabilities.
@@ -148,7 +152,7 @@ Finding the Proper Technologies: Selecting the right technologies and tools for 
 
 ## Installation
 
-Before running the application, make sure that you have all prior dependencies installed (python, panel, pymupdf, langchain, openai, etc). Also make sure that you have setup a prepopulated Neo4J database, Azure Speech Service, and Jira API, as well as having an OpenAI API Key.
+Before running the application, make sure that you have all prior dependencies installed (python, langchain, openai, node.js etc). Also make sure that you have setup a prepopulated Neo4J database, Azure Speech Service, and Jira API, as well as having an OpenAI API Key.
 
 1. Clone the repository to your local machine.
 
