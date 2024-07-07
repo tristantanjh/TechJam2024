@@ -200,7 +200,7 @@ export default function DashboardPage() {
     <div className="h-full overflow-scroll">
       <div className="flex flex-col justify-start m-10">
         <WordFadeIn
-          words="Welcome, Alicia Koch 👋"
+          words="Welcome, Tristan Tan 👋"
           className="text-4xl md:text-4xl font-bold text-primary mb-10 text-left"
         />
         <BentoGrid>
