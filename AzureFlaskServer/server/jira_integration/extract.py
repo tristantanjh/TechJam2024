@@ -58,14 +58,18 @@ def extract_action_item(conversation):
 def create_action_item(action_items):
     load_dotenv()
 
+    jira_email = os.getenv("JIRA_EMAIL")
+    jira_api = os.getenv("JIRA_API_KEY")
+    jira_domain = os.getenv("JIRA_DOMAIN")
+
     auth = [
         {
-            "joshuagohengzhong@gmail.com": os.getenv("JIRA_API_KEY")
+            jira_email: jira_api
         }
     ]
 
     for item in action_items:
-        output = create_issue("https://2waffles.atlassian.net", item['summary'], item['description'], auth)
+        output = create_issue(jira_domain, item['summary'], item['description'], auth)
         print(output)
 
 
