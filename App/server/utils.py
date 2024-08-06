@@ -28,7 +28,13 @@ class ActionsList:
         self.actions_list = actions_list
     
     def get_list(self):
-        return self.actions_list
+        file_path = "./text_db/actions.txt"
+        with open(file_path, "r") as f:
+            try:
+                actions = json.load(f)
+            except json.JSONDecodeError:
+                actions = []
+            return actions
 
 class DatabaseList:
     def __init__(self, database_list):
@@ -38,7 +44,12 @@ class DatabaseList:
         self.database_list = database_list
     
     def get_list(self):
-        return self.database_list
+        with open("./text_db/db.txt", "r") as f:
+            try:
+                db = json.load(f)
+            except json.JSONDecodeError:
+                db = []
+            return db
 
 class MessageStore:
     def __init__(self):
@@ -437,8 +448,10 @@ class Chains:
                 """
                 You are a expert at routing a user query to the database provided below. 
                 You can select more than one database if the query requires information from multiple databases.
-                Your choices should be the database's name. 
-                If there is a match to any database, you should return the JSON with a single key 'choice' with no premable or explanation. The value should be a list of the matched database names. This JSON should be wrapped in curly braces.
+                Your choices should be the full name of the given database name. Do not modify the given database name in any way.
+                If there is a match to any database, you should return the JSON with a single key 'choice' with no premable or explanation. The value should be an array of the matched database names. This JSON should be wrapped in curly braces.
+                For example, if the matched database name is Sales_database, the value should be "Sales_database". If the matched database name is Product_database, the value should be "Product_database".
+                If the matched database name is Outlet_database, the value should be "Outlet_database". If the matched database name is Customer_database, the value should be "Customer_database".
                 Return the JSON output with a single key 'choice' and the value being 'NA' if and only if the query is not related to any of the databases. Do not return it in a list format.
 
                 Choices:
@@ -599,7 +612,7 @@ class Chains:
                 You are an intelligent assistant. 
                 Your task is to answer the user's query using the context provided below. 
                 If you don't know the answer, just say that you don't know.
-                Use natural language and elaborate meaningfully and provide suggestions for improvement when appropriate.
+                Use natural language and elaborate meaningfully and provide suggestions for improvement when appropriate. 
 
                 Context:
                 """
@@ -901,8 +914,10 @@ class DBAgent():
         """
         if state['verbose']: print("Step: Routing Query")
         query = state['query']
-        
+        self.multi_db_router_chain = self.chains.get_multi_db_router_chain(self.database_list)
         output = self.multi_db_router_chain.invoke({"query": query})
+        if state['verbose']: print("DB list: " + str(self.database_list.get_list()))
+        if state['verbose']: print("DB Choices: " + str(output))
         if output['choice'] == "NA":
             if state['verbose']: print("Step: Routing Query to General")
             return {'database': "NA"}
@@ -920,6 +935,9 @@ class DBAgent():
         Returns:
             str: Next node to call
         """
+        if not self.database_list.get_list():
+            return "general"
+        
         if state['database'] == "NA":
             return "general"
         else:
@@ -1055,8 +1073,9 @@ class ActionAgent():
         """
         if state['verbose']: print("Step: Choosing Actions")
         query = state['query']
+        self.action_router_chain = self.chains.get_action_router_chain(self.actions_list)
         output = self.action_router_chain.invoke({"query": query})
-        
+        print("Actions List: " + str(self.actions_list.get_list()))
         print(output)
         
         if output['name'] == "NA":

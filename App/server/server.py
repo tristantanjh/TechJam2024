@@ -28,7 +28,7 @@ with open("./text_db/actions.txt", 'r') as actions_txt:
     actions_list = json.loads(actions_txt.read())
 
 message_store = MessageStore()
-llm_instance = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
+llm_instance = ChatOpenAI(model="gpt-4-turbo", temperature=0)
 chain_instance = Chains(llm_instance)
 gpt_instance = GPTInstance(llm_instance, chain_instance, debug=True)
 actionsInstance = ActionsList(actions_list)
@@ -166,7 +166,7 @@ def handle_api_call(data):
     api_service = data['api_service']
 
     if api_service.lower() == "jira":
-        jira_action = [action for action in actionsInstance.get_list() if action.get("api_service") == "jira"]
+        jira_action = [action for action in actionsInstance.get_list() if action.get("api_service").lower() == "jira"]
         endpoint = jira_action[0].get("api_endpoint")
         auth = jira_action[0].get("api_auth")
         title = data['extracted_inputs']["issue_title"]
@@ -208,7 +208,8 @@ def handle_api_call(data):
         print(response.json())
         print("CUSTOM API CALL")
     elif api_service.lower() == "gmail":
-        gmail_action = [action for action in actionsInstance.get_list() if action.get("api_service") == "gmail"][0]
+        print(actionsInstance.get_list())
+        gmail_action = [action for action in actionsInstance.get_list() if action.get("api_service").lower() == "gmail"][0]
         subject = data['extracted_inputs']['email_subject']
         body = data['extracted_inputs']['email_body']
         recipient = data['extracted_inputs']['email_recipient']

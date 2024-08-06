@@ -228,6 +228,7 @@ const ActionForm = ({ closeModal }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="z-[999999]">
+                        <SelectItem value="Gmail">Gmail</SelectItem>
                         <SelectItem value="Jira">Jira</SelectItem>
                         <SelectItem value="Custom">Custom</SelectItem>
                       </SelectContent>
