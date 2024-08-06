@@ -108,6 +108,7 @@ export default function TranscriberPage() {
       });
 
       socket.on("ai-response", (data) => {
+        console.log(data["aiMessage"])
         if (data["aiMessage"]) {
           setAiMessages((prevList) => [...prevList, data["aiMessage"]]);
         }

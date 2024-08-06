@@ -380,7 +380,11 @@ class Chains:
         {context}
 
         Question: {question}
-        Use natural language and answer it concisely in point form
+        Use natural language and answer it concisely in point form. The format for a point form should be ~
+
+        For example:
+        ~ Point 1
+        ~ Point 2
         Answer:"""
 
         prompt = ChatPromptTemplate.from_template(template)
@@ -763,6 +767,7 @@ class GPTInstance:
         chat_history = message_store.get_messages(sessionId)
         response_chain = self.chains.get_response_chain()
         response = response_chain.invoke({"question": message})
+        print("RESPONSE: " + response)
         
         follow_up_questions = self.get_follow_up_questions(chat_history, response)
         tangential_questions = self.get_tangential_questions(chat_history, response)

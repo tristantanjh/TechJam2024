@@ -22,7 +22,7 @@ export default function LLMOutput({ aiMessages }) {
         ) : (
           <>
             {aiMessages?.map((item, idx) => (
-              <AiMessage key={idx} points={item.split("-").slice(1)} />
+              <AiMessage key={idx} points={item.split("~").slice(1)} />
             ))}
             {newQueryReceived && <LoadingMessage />}
           </>

@@ -28,7 +28,7 @@ with open("./text_db/actions.txt", 'r') as actions_txt:
     actions_list = json.loads(actions_txt.read())
 
 message_store = MessageStore()
-llm_instance = ChatOpenAI(model="gpt-4-turbo", temperature=0)
+llm_instance = ChatOpenAI(model="gpt-4o", temperature=0)
 chain_instance = Chains(llm_instance)
 gpt_instance = GPTInstance(llm_instance, chain_instance, debug=True)
 actionsInstance = ActionsList(actions_list)
