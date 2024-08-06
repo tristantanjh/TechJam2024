@@ -89,6 +89,7 @@ def handle_message(data):
                 print("tangential questions: ", tangential_questions)
                 emit ('tangential-questions', {
                     'sessionId': sessionId,
+                    'headerText': new_message['text'],
                     'tangentialQuestions': tangential_questions
                 })
 

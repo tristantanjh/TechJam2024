@@ -21,6 +21,7 @@ export default function TangentialInfo({
   const [llmOutput, setLlmOutput] = useState([]);
   const [openItems, setOpenItems] = useState([]);
   const [tangentialData, setTangentialData] = useState({
+    headerText: [],
     questions: [],
     answers: [],
   });
@@ -64,6 +65,7 @@ export default function TangentialInfo({
       setTangentialData({
         questions: [],
         answers: [],
+        headerText: [],
       });
       setPage(0);
       setOpenItems([]);
@@ -78,11 +80,19 @@ export default function TangentialInfo({
           const parsedTangentialQuestions = JSON.parse(
             data["tangentialQuestions"]
           );
-
-          setTangentialData((prevData) => ({
-            questions: [...prevData.questions, parsedTangentialQuestions],
-            answers: [...prevData.answers, ["", "", ""]],
-          }));
+          
+          setTangentialData((prevData) => {
+            console.log(prevData)
+            console.log(prevData.headerText)
+            console.log(data["headerText"])
+            console.log(Array.isArray(prevData.headerText))
+            return {
+              headerText: [...prevData.headerText, data["headerText"]],
+              questions: [...prevData.questions, parsedTangentialQuestions],
+              answers: [...prevData.answers, ["", "", ""]],
+            }
+          }
+            );
         }
       });
 
@@ -92,6 +102,7 @@ export default function TangentialInfo({
         ({ response, idx, page }) => {
           if (response) {
             console.log("Changing response FE");
+            console.log(response)
 
             setTangentialData((prevData) => {
               const tmp = prevData.answers;
@@ -167,7 +178,10 @@ export default function TangentialInfo({
             <h4 className="mt-40 flex justify-center items-center text-xl font-semibold tracking-tight">
               No related information...
             </h4>
-          ) : (
+          ) : <>
+            <p className="p-2 font-bold text-blue-950 ml-4 mt-2 mb-3">
+                {tangentialData.headerText[page]}
+            </p>
             <Accordion
               type="multiple"
               collapsible="true"
@@ -200,7 +214,8 @@ export default function TangentialInfo({
                 </AccordionItem>
               ))}
             </Accordion>
-          )}
+            </>
+          }
         </div>
       </div>
     </div>

@@ -139,7 +139,7 @@ class Chains:
         The input ai_message is expected to be a string in JSON format.
         """
         # Assuming the text content is directly accessible as a string, adjust according to your AIMessage structure
-        print(ai_message)
+        print("TANGENTIAL CHECK: ", ai_message)
         try:
             # Extracting text content from AIMessage, adjust the attribute access as necessary
             message_text = ai_message.content
@@ -245,7 +245,7 @@ class Chains:
         3. Discuss their proposed follow-up questions collectively and decide on the 3 most effective and relevant questions that will help the customer service assistant engage more effectively with the customer.
         These questions should reflect a thorough understanding of the entire conversation and focus on moving towards a resolution.
         The final 3 questions should be specific, actionable, and tailored to the customer's unique situation and goals.
-        You always return the list of 3 questions in a JSON array. Each question should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
+        You always return the list of 3 questions in a Python list. Do not include ``` in the response. Each question should be a complete question, concise and clearly formulated for immediate use by the customer service assistant.
         Example format:
         ["What steps have you already taken to resolve the issue, and what were the outcomes of those actions?", "Could you provide any screenshots or error logs that occurred when the problem happened? This information can help us diagnose the issue more accurately.",
         "Have you tried any troubleshooting steps, such as restarting your device or clearing your browser cache?"]
@@ -271,7 +271,7 @@ class Chains:
         template = """
         Review the chat history and the customer's latest inquiry to determine if there are complex terms or processes that need explaining.
         If relevant, generate three tangential questions that clarify these terms or outline basic procedures. 
-        If the inquiry is straightforward with no such complexities, return an empty JSON array.
+        If the inquiry is straightforward with no such complexities, return an empty Python list.
 
         Chat History:
         {chat_history}
@@ -287,7 +287,7 @@ class Chains:
             2. Describe basic procedural steps.
             3. Explain initial setups or usage of services or technologies.
         
-        You always return the list of 3 questions in a JSON array if complex terms or detailed processes are identified.
+        You always return the list of 3 questions in a Python List if complex terms or detailed processes are identified. Do not give ``` in the answer.
         Expected Output:
         - If actionable topics are identified: ["Question 1", "Question 2", "Question 3"]
         - If not: []
@@ -380,7 +380,7 @@ class Chains:
         {context}
 
         Question: {question}
-        Use natural language and answer it concisely in point form. The format for a point form should be ~
+        Use natural language and answer it concisely in point form. The format for a point form should be ~. There should not be nested point forms.
 
         For example:
         ~ Point 1
